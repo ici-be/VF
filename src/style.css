@@ -539,3 +539,11 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 }
 /* « Mots » à droite : les deux choix côte à côte */
 .mots-bloc .reglages { grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); gap: 10px 32px; }
+
+/* la description de l'exercice choisi, dans le bloc « Commencer » */
+.reprendre .description-exercice { margin: 4px 0 0; font-size: .9rem; color: var(--muted); max-width: 60ch; }
+@media (min-width: 1000px) {
+  /* de l'air entre exercice, chapitres et mots */
+  .col-exercice { gap: 30px; }
+  .col-exercice .description-exercice { margin-bottom: 0; }
+}

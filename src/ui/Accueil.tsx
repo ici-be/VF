@@ -232,6 +232,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           <p class="detail">{resume(voc, r)}</p>
+          <p class="description-exercice">{ex.description}</p>
         </div>
         <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
@@ -282,8 +283,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             )
           })}
         </div>
-        {/* la description de l'exercice choisi, une seule fois (les tuiles restent compactes) */}
-        <p class="description-exercice"><b>{ex.nom}</b> · {ex.description}</p>
       </section>
       {large ? <>{blocChapitres}{blocMots}</> : blocReglages}
         </div>
