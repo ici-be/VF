@@ -9,6 +9,7 @@ import { confettis } from '../lib/confettis'
 import { apparence } from '../lib/apparence'
 import { nombre } from '../lib/texte'
 import { simplifier } from '../lib/correction'
+import { IconeExercice } from './icones'
 
 // Mots croisés : les mots néerlandais du choix, la traduction française en
 // définition. Un mot trouvé s'allume en vert (et il est lu à voix haute).
@@ -182,7 +183,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
       <div class="haut-jeu">
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter le jeu" title="Quitter">✕</button>
-        <span class="quoi">Mots croisés (bêta) · {matieres.map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        <span class="quoi"><IconeExercice id="motscroises" taille={16} />Mots croisés (bêta) · {matieres.map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
         <span class="compte" title="Mots trouvés">{trouves.length} / {grille.mots.length}</span>
       </div>
       {/* la définition du mot en cours reste visible, même avec le clavier du téléphone ouvert */}

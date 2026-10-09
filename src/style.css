@@ -394,3 +394,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .col-exercice .reglages { gap: 12px 20px; }
   .col-exercice .segment button { padding: 6px 11px; }
 }
+
+/* ---------- icônes des exercices ---------- */
+.icone-ex { flex: none; color: var(--blue); }
+.tuile { flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left; }
+.tuile[aria-pressed="true"] .icone-ex { color: var(--accent); }
+.tuile:disabled .icone-ex { color: var(--muted); }
+.reprendre .titre { display: flex; align-items: center; gap: 8px; }
+.reprendre .titre .icone-ex { color: var(--accent); }
+.barre .quoi .icone-ex { vertical-align: -3px; margin-right: 6px; color: var(--muted); }

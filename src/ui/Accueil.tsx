@@ -10,6 +10,7 @@ import type { Vue } from './Liste'
 import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
+import { IconeExercice } from './icones'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -100,7 +101,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
 
       <section class="reprendre" aria-label="Exercice choisi">
         <div class="resume">
-          <p class="titre">{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
+          <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           <p class="detail">{resume(voc, r)}</p>
         </div>
         <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
@@ -167,6 +168,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
                 title={n === 0 ? `${e.description} (rien à réviser avec ce choix de matière et de chapitres)` : e.description}>
+                <IconeExercice id={e.id} />
                 <b>{e.nom}{e.beta && <span class="beta">bêta</span>}</b>
               </button>
             )
