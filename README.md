@@ -49,6 +49,20 @@ npm test         # tests (correction des réponses, lecture du tableau)
 npm run build    # version finale dans dist/
 ```
 
+## Le chapitre Conjugaison
+
+Il ne vient pas du tableau : `outils/conjugaisons.ts` contient les 50 verbes les plus
+courants (traduction, formes irrégulières) et les règles des verbes réguliers, et écrit
+`src/data/conjugaisons.json` (4 temps : présent, imparfait, passé composé, futur ; forme
+interrogative). L'appli l'ajoute comme chapitre « Conjugaison » à la matière Nederlands.
+Pour ajouter ou corriger un verbe : modifier `outils/conjugaisons.ts`, puis
+
+```sh
+node --experimental-strip-types outils/conjugaisons.ts
+npm test                 # tests/conjugaisons.test.ts vérifie des formes connues
+python3 outils/voix.py   # voix des nouvelles formes (sinon GitHub le fait dans l'heure)
+```
+
 ## Les voix
 
 Les mots sont lus par des voix belges (edge-tts : `nl-BE-DenaNeural`, `fr-BE-CharlineNeural`),

@@ -1,3 +1,4 @@
+import { useEffect } from 'preact/hooks'
 import type { Mot } from '../../lib/mots'
 import type { Correction } from '../../lib/correction'
 import { parler } from '../../lib/voix'
@@ -35,4 +36,15 @@ export function Verdict({ c, attendu }: { c: Correction; attendu: string }) {
       {c.resultat !== 'juste' && <span class="attendu">Réponse : <strong>{attendu}</strong></span>}
     </div>
   )
+}
+
+/** Entrée = « Suivant » une fois la réponse corrigée (écoute ajoutée au tour suivant, pour ne pas capter l'Entrée qui vient de valider). */
+export function EntreeSuivant({ onEntree, pause }: { onEntree: () => void; pause: boolean }) {
+  useEffect(() => {
+    const t = (e: KeyboardEvent) => { if (e.key === 'Enter' && !pause) { e.preventDefault(); onEntree() } }
+    // ajouté au tour suivant, pour ne pas capter l'Entrée qui vient de valider
+    const id = setTimeout(() => addEventListener('keydown', t))
+    return () => { clearTimeout(id); removeEventListener('keydown', t) }
+  })
+  return null
 }

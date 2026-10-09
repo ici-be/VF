@@ -2,6 +2,7 @@
 // nom (peu importe leur ordre), chaque onglet est une matière.
 import { lireXlsx, type Onglet } from './xlsx'
 import { lire, ecrire } from './stockage'
+import { avecConjugaison } from './conjugaison'
 
 export const SHEET_ID = '11jHRMPgM1A3N8eBCXocn-eqs52uqaJCVtbFNq2U0K8Y'
 export const SANS_CHAPITRE = 'Sans chapitre'
@@ -16,6 +17,8 @@ export interface Mot {
   definition: string
   exemple: string      // la partie à trouver est entre [crochets]
   remarque: string
+  /** pour le chapitre Conjugaison : l'infinitif du verbe (voir conjugaison.ts) */
+  verbe?: string
 }
 
 export interface Matiere {
@@ -85,7 +88,8 @@ const CLE = 'vocabulaire'
 
 /** Dernière copie téléchargée (pour démarrer tout de suite, et hors ligne). */
 export function vocabulaireEnCache(): Vocabulaire | null {
-  return lire<Vocabulaire | null>(CLE, null)
+  const v = lire<Vocabulaire | null>(CLE, null)
+  return v && avecConjugaison(v)
 }
 
 /** Télécharge le tableau ; en cas d'échec, l'appelant garde la copie en cache. */
@@ -97,5 +101,5 @@ export async function telechargerVocabulaire(): Promise<Vocabulaire> {
   if (!rep.ok) throw new Error(`Le tableau n’a pas pu être lu (erreur ${rep.status}).`)
   const voc = vocabulaireDepuisXlsx(new Uint8Array(await rep.arrayBuffer()))
   ecrire(CLE, voc)
-  return voc
+  return avecConjugaison(voc)
 }

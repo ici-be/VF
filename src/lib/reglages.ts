@@ -3,10 +3,11 @@ import { lire, ecrire } from './stockage'
 import type { Mot, Vocabulaire } from './mots'
 import { aDesTrous } from './trous'
 import { lettresDe } from './grille'
+import type { Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'motscroises'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'interrogatif' | 'motscroises'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -19,6 +20,8 @@ export interface Exercice {
   avecVitesse: boolean
   /** répondre en choisissant parmi 4 ou en écrivant ? */
   avecRepondre?: boolean
+  /** le réglage du temps (présent, imparfait…) a-t-il un effet ? */
+  avecTemps?: boolean
   /** un jeu (écran à part) plutôt qu'une série de questions */
   jeu?: boolean
   /** encore en rodage : affiché « bêta » */
@@ -35,6 +38,8 @@ export const EXERCICES: Exercice[] = [
   { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, accepte: () => true },
   { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot néerlandais.', avecSens: false, avecVitesse: false, avecRepondre: true, accepte: m => m.definition !== '' },
   { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, accepte: aDesTrous },
+  { id: 'conjugaison', nom: 'Conjugaison', description: 'Le verbe à conjuguer à toutes les personnes (ik, jij, hij…), puis valider.', avecSens: false, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
+  { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, beta: true, jeu: true, accepte: m => lettresDe(m.nl) !== null },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
 ]
@@ -56,6 +61,8 @@ export interface Reglages {
   ordre: Ordre
   /** définitions : choisir parmi 4 ou écrire le mot */
   repondre: Repondre
+  /** conjugaison : le temps, ou « mix » pour les mélanger */
+  temps: Temps | 'mix'
 }
 
 export const SEP = '␟'
@@ -63,7 +70,7 @@ export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP 
 
 const DEFAUT: Reglages = {
   matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
-  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix',
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present',
 }
 
 /** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */

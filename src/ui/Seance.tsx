@@ -7,6 +7,7 @@ import type { Resultat } from '../lib/correction'
 import { noter } from '../lib/progression'
 import { precharger, taire } from '../lib/voix'
 import { confettis } from '../lib/confettis'
+import { verbe, TEMPS } from '../lib/conjugaison'
 import { Defilement } from './exercices/Defilement'
 import { Ecrit } from './exercices/Ecrit'
 import { Qcm } from './exercices/Qcm'
@@ -15,6 +16,8 @@ import { Definitions } from './exercices/Definitions'
 import { Trous } from './exercices/Trous'
 import { Oral } from './exercices/Oral'
 import { Dictee } from './exercices/Dictee'
+import { Conjugaison } from './exercices/Conjugaison'
+import { Interrogatif } from './exercices/Interrogatif'
 import { nombre } from '../lib/texte'
 
 export interface Bilan {
@@ -90,6 +93,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   useEffect(() => { if (reglages.voix || ex.id === 'oral' || ex.id === 'dictee') precharger(serie.flatMap(c => [
     question(c), reponse(c),
     ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: 'nl' as const })),
+    // conjugaison : la lecture du temps choisi et ses questions
+    ...(c.mot.verbe ? vocalesConjugaison(c.mot.verbe, reglages.temps) : []),
   ])) }, [])
 
   if (!file.length) {
@@ -147,6 +152,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'trous' && <Trous key={i} {...props} />}
         {ex.id === 'oral' && <Oral key={i} {...props} />}
         {ex.id === 'dictee' && <Dictee key={i} {...props} />}
+        {ex.id === 'conjugaison' && <Conjugaison key={i} {...props} />}
+        {ex.id === 'interrogatif' && <Interrogatif key={i} {...props} />}
       </main>
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
@@ -158,4 +165,11 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       )}
     </>
   )
+}
+
+function vocalesConjugaison(inf: string, temps: Reglages['temps']) {
+  const v = verbe(inf)
+  if (!v) return []
+  const ts = temps === 'mix' ? TEMPS.map(t => t.id) : [temps]
+  return ts.flatMap(t => [v.lecture[t], ...v.questionsTexte[t]]).map(texte => ({ texte, langue: 'nl' as const }))
 }

@@ -9,6 +9,7 @@ import { motsARevoir, noteSur20, suivi } from '../lib/progression'
 import type { Vue } from './Liste'
 import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
+import { TEMPS } from '../lib/conjugaison'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -104,7 +105,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple' }[ex.id as string] ?? 'des mots'}).</p>}
+      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
 
       <section class="bloc">
         <h2>Matière</h2>
@@ -176,6 +177,15 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
               <span class="lbl">Sens</span>
               <div class="segment">
                 {SENS.map(s => <button aria-pressed={r.sens === s.id} onClick={() => maj({ sens: s.id })}>{s.nom}</button>)}
+              </div>
+            </div>
+          )}
+          {ex.avecTemps && (
+            <div class="reglage">
+              <span class="lbl">Temps</span>
+              <div class="segment">
+                {TEMPS.map(t => <button aria-pressed={r.temps === t.id} onClick={() => maj({ temps: t.id })} title={t.aide}>{t.nom}</button>)}
+                <button aria-pressed={r.temps === 'mix'} onClick={() => maj({ temps: 'mix' })}>Mélangés</button>
               </div>
             </div>
           )}

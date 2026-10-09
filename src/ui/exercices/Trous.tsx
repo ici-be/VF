@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { corriger, type Correction } from '../../lib/correction'
 import { decouper } from '../../lib/trous'
 import type { PropsExercice } from '../Seance'
-import { dire, Infos, Verdict } from './commun'
+import { dire, EntreeSuivant, Infos, Verdict } from './commun'
 import { Actions } from './Reponses'
 import { nombre } from '../../lib/texte'
 
@@ -69,12 +69,3 @@ export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExerci
   )
 }
 
-function EntreeSuivant({ onEntree, pause }: { onEntree: () => void; pause: boolean }) {
-  useEffect(() => {
-    const t = (e: KeyboardEvent) => { if (e.key === 'Enter' && !pause) { e.preventDefault(); onEntree() } }
-    // ajouté au tour suivant, pour ne pas capter l'Entrée qui vient de valider
-    const id = setTimeout(() => addEventListener('keydown', t))
-    return () => { clearTimeout(id); removeEventListener('keydown', t) }
-  })
-  return null
-}

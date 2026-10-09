@@ -331,3 +331,15 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .ecouter { display: none !important; }
   canvas.confettis { display: none; }
 }
+
+/* ---------- conjugaison ---------- */
+.conjugaison { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 6px; }
+.ligne-conj { display: grid; grid-template-columns: 9.5rem 1fr; gap: 10px; align-items: center; }
+.ligne-conj label { font-weight: 700; color: var(--muted); text-align: right; }
+.ligne-conj input { font-size: 1.15rem; padding: 8px 12px; border-radius: 8px; border: 2px solid var(--line); background: var(--panel); width: 100%; min-width: 0; }
+.ligne-conj input:focus { border-color: var(--blue); outline: none; }
+.ligne-conj .corrige { font-size: 1.15rem; padding: 8px 12px; border-radius: 8px; border: 2px solid transparent; }
+.ligne-conj.juste .corrige { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
+.ligne-conj.faux .corrige { background: var(--ko-bg); border-color: var(--ko); }
+.ligne-conj.faux .corrige b { color: var(--fg); }
+@media (max-width: 480px) { .ligne-conj { grid-template-columns: 6.5rem 1fr; } .ligne-conj label { font-size: .85rem; } }
