@@ -1,5 +1,6 @@
 // Les surprises des mascottes (easter eggs validés dans la démo) : de temps en temps, une mascotte
-// à l'écran joue une petite animation. Jamais moins d'une minute entre deux, souvent bien plus.
+// à l'écran joue une petite animation. Jamais moins de 30 secondes entre deux, souvent bien plus.
+// Raccourci : S pour une surprise au hasard, Maj+S pour les passer toutes en revue.
 // Six surprises communes, et une propre à chaque mascotte.
 import type { Mascotte } from './mascottes'
 
@@ -224,9 +225,9 @@ export function choisirSurprise(m: Mascotte, hasard = Math.random): Surprise {
   return s
 }
 
-// --- le calendrier : au moins une minute entre deux surprises, en moyenne trois et demie ---
+// --- le calendrier : au moins 30 secondes entre deux surprises, au plus six minutes ---
 let calme = 0
-const delai = () => (1 + Math.random() * 5) * MINUTE
+const delai = () => (0.5 + Math.random() * 5.5) * MINUTE
 const visible = (svg: SVGSVGElement) => {
   if (svg.dataset.saute || svg.dataset.surprise || svg.closest('.en-course')) return false
   const r = svg.getBoundingClientRect()
@@ -243,6 +244,31 @@ function essayer() {
   setTimeout(essayer, delai())
 }
 
+// --- le raccourci clavier : S = une surprise au hasard, Maj+S = la suivante dans l'ordre ---
+let revue = -1
+function declencher(dansLOrdre: boolean) {
+  const candidates = [...document.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')]
+    .filter(svg => { const r = svg.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight && !svg.closest('.en-course') })
+  if (!candidates.length) return
+  const svg = candidates[0]
+  const m = svg.dataset.mascotte as Mascotte
+  interrompre(svg)
+  if (svg.dataset.saute) return
+  let s: Surprise
+  if (dansLOrdre) {
+    // les surprises possibles pour cette mascotte : les communes, puis la sienne
+    const possibles = SURPRISES.filter(x => !x.pour || x.pour === m)
+    revue = (revue + 1) % possibles.length
+    s = possibles[revue]
+  } else {
+    s = choisirSurprise(m)
+  }
+  surprendre(svg, s)
+}
+
+const dansUnChamp = (el: EventTarget | null) =>
+  el instanceof HTMLElement && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
+
 let lance = false
 /** Démarre le calendrier des surprises (une seule fois, au lancement de l'app). */
 export function lancerSurprises() {
@@ -251,5 +277,9 @@ export function lancerSurprises() {
   const agit = () => { calme = Date.now() }
   addEventListener('pointerdown', agit, { passive: true, capture: true })
   addEventListener('keydown', agit, { capture: true })
+  addEventListener('keydown', e => {
+    if (e.key.toLowerCase() !== 's' || e.ctrlKey || e.altKey || e.metaKey || e.repeat || dansUnChamp(e.target)) return
+    declencher(e.shiftKey)
+  })
   setTimeout(essayer, delai())
 }
