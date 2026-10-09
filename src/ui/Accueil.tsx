@@ -4,6 +4,7 @@ import {
   type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
+import { apparence } from '../lib/apparence'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -23,7 +24,8 @@ const ORDRES: { id: Ordre; nom: string }[] = [
 export function choixMatieres(r: Reglages): string {
   return r.matieres.map(m => {
     const ch = r.chapitres.filter(c => c.startsWith(m + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
-    return ch.length ? `${m} (${ch.join(', ')})` : m
+    const a = apparence(m)
+    return `${a.icone} ${a.titre}` + (ch.length ? ` (${ch.join(', ')})` : '')
   }).join(' + ')
 }
 
@@ -56,14 +58,10 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const choisis = motsChoisis(voc, r)
   const dispo = choisis.filter(ex.accepte).length
 
-  const basculerMatiere = (nom: string) => {
-    const deja = r.matieres.includes(nom)
-    if (deja && r.matieres.length === 1) return              // il en faut au moins une
-    maj({
-      matieres: deja ? r.matieres.filter(m => m !== nom) : [...r.matieres, nom],
-      chapitres: deja ? r.chapitres.filter(c => !c.startsWith(nom + SEP)) : r.chapitres,
-    })
-  }
+  // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
+  const choisirMatiere = (nom: string) => maj({ matieres: [nom] })
+  const ajouterMatiere = (nom: string) => maj({ matieres: [...r.matieres, nom] })
+  const retirerMatiere = (nom: string) => { if (r.matieres.length > 1) maj({ matieres: r.matieres.filter(m => m !== nom) }) }
   const basculerChapitre = (cle: string) =>
     maj({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
   const tousChapitres = (matiere: string) => maj({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
@@ -94,13 +92,25 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
 
       <section class="bloc">
         <h2>Matière</h2>
-        <div class="puces">
-          {voc.matieres.map(m => (
-            <button class="puce" aria-pressed={r.matieres.includes(m.nom)} onClick={() => basculerMatiere(m.nom)}>
-              {m.nom} <span class="n">{m.mots.length}</span>
-            </button>
-          ))}
+        <div class="matieres">
+          {voc.matieres.map(m => {
+            const a = apparence(m.nom)
+            const choisie = r.matieres.includes(m.nom)
+            return (
+              <div class={`matiere ${choisie ? 'choisie' : ''}`}>
+                <button class="matiere-choix" aria-pressed={choisie} onClick={() => choisirMatiere(m.nom)}>
+                  <span class="ico" aria-hidden="true">{a.icone}</span>
+                  <span class="noms"><b>{a.titre}</b>{a.fr && <span>{a.fr}</span>}</span>
+                  <span class="n">{m.mots.length}</span>
+                </button>
+                {!choisie
+                  ? <button class="ajout" onClick={() => ajouterMatiere(m.nom)} title="Ajouter aux matières choisies" aria-label={`Ajouter ${a.titre} aux matières choisies`}>+</button>
+                  : r.matieres.length > 1 && <button class="ajout" onClick={() => retirerMatiere(m.nom)} title="Retirer" aria-label={`Retirer ${a.titre}`}>−</button>}
+              </div>
+            )
+          })}
         </div>
+        <p class="astuce gauche">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
       </section>
 
       <section class="bloc">
@@ -109,7 +119,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
           return (
             <div>
-              {r.matieres.length > 1 && <p class="sous">{m.nom}</p>}
+              {r.matieres.length > 1 && <p class="sous">{apparence(m.nom).icone} {apparence(m.nom).titre}</p>}
               <div class="puces">
                 <button class="puce" aria-pressed={coches.length === 0} onClick={() => tousChapitres(m.nom)}>Tous</button>
                 {m.chapitres.map(c => {

@@ -35,7 +35,7 @@ export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? 
 
 export interface Reglages {
   matieres: string[]
-  /** `${matière}␟${chapitre}` ; liste vide = tous les chapitres */
+  /** `${matière}␟${chapitre}` de toutes les matières, même non choisies (mémoire) ; aucun pour une matière = tous ses chapitres */
   chapitres: string[]
   exercice: ExerciceId
   sens: Sens
@@ -67,7 +67,8 @@ export function chargerReglages(voc: Vocabulaire | null): Reglages {
     r.matieres = r.matieres.filter(n => noms.includes(n))
     if (!r.matieres.length) r.matieres = noms.slice(0, 1)
     const existants = new Set(voc.matieres.flatMap(m => m.chapitres.map(c => cleChapitre(m.nom, c))))
-    r.chapitres = r.chapitres.filter(c => existants.has(c) && r.matieres.includes(c.split(SEP)[0]))
+    // les chapitres des autres matières restent mémorisés, pour quand on y revient
+    r.chapitres = r.chapitres.filter(c => existants.has(c))
   }
   return r
 }

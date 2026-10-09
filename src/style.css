@@ -193,3 +193,29 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .trou-corrige.presque { background: var(--mid-bg); color: var(--mid); }
 .trou-corrige.faux { background: var(--ko-bg); color: var(--ko); }
 .tape { color: var(--ko); margin-right: 6px; font-weight: 400; text-decoration-thickness: 2px; }
+
+/* ---------- matières ---------- */
+.matieres { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.matiere { position: relative; display: flex; }
+.matiere-choix { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; border: 1.5px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 10px 44px 10px 12px; }
+.matiere-choix .ico { font-size: 1.9rem; line-height: 1; width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border-radius: 10px; background: var(--panel-2); flex: none; }
+.matiere-choix .noms { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.matiere-choix .noms b { font: 700 1.02rem var(--display); }
+.matiere-choix .noms span { font-size: .82rem; color: var(--muted); }
+.matiere-choix .n { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.matiere.choisie .matiere-choix { border-color: var(--blue); background: var(--blue-bg); box-shadow: inset 0 0 0 1px var(--blue); }
+.matiere.choisie .matiere-choix .ico { background: var(--panel); }
+.ajout { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--panel); color: var(--blue); font-weight: 700; font-size: 1.1rem; line-height: 1; display: grid; place-items: center; padding: 0; }
+.ajout:hover { border-color: var(--blue); }
+.astuce.gauche { text-align: left; margin: 0; }
+@media (max-width: 560px) {
+  .matieres { grid-template-columns: 1fr 1fr; gap: 8px; }
+  /* icône au-dessus du nom : toute la largeur pour les longs mots néerlandais */
+  .matiere-choix { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; }
+  .matiere-choix .ico { font-size: 1.4rem; width: 2rem; height: 2rem; border-radius: 8px; }
+  .matiere-choix .noms { width: 100%; }
+  .matiere-choix .noms b { font-size: .92rem; hyphens: auto; }
+  .matiere-choix .noms span { font-size: .75rem; }
+  .matiere-choix .n { display: none; }
+  .ajout { width: 28px; height: 28px; top: 10px; right: 10px; transform: none; }
+}

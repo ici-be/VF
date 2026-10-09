@@ -4,6 +4,7 @@ import { motsChoisis, type Reglages } from '../lib/reglages'
 import { sansAccents } from '../lib/correction'
 import { parler } from '../lib/voix'
 import { choixMatieres, nomChapitre } from './Accueil'
+import { apparence } from '../lib/apparence'
 
 interface Props {
   voc: Vocabulaire
@@ -32,7 +33,7 @@ export function Liste({ voc, reglages, retour }: Props) {
   const lignes: (Mot | string)[] = []
   let groupe = ''
   for (const m of mots) {
-    const g = `${m.matiere} · ${nomChapitre(m.chapitre)}`
+    const g = `${apparence(m.matiere).icone} ${apparence(m.matiere).titre} · ${nomChapitre(m.chapitre)}`
     if (tri === 'chapitre' && g !== groupe) { lignes.push(g); groupe = g }
     lignes.push(m)
   }

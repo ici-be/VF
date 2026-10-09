@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
+import { apparence } from '../lib/apparence'
 import { question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
 import { noter } from '../lib/progression'
@@ -103,7 +104,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     <>
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
-        <span class="quoi">{ex.nom} · {[...new Set(serie.map(c => c.mot.matiere))].join(' + ')}</span>
+        <span class="quoi">{ex.nom} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
         <button class="icone" onClick={() => setPause(true)} aria-label="Pause" title="Pause (Échap)">⏸</button>

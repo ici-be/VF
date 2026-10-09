@@ -19,6 +19,9 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Chapitre | le chapitre (vide = « Sans chapitre ») |
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
+Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
+📐 Wiskunde…, 📚 sinon) ; pour en imposer une, commencer le nom de l'onglet par un
+emoji, par exemple « 🦖 NW Biologie ».
 Les changements du tableau apparaissent au prochain lancement de l'appli.
 
 ## Installer
