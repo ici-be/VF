@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'preact/hooks'
 import type { Vocabulaire } from '../lib/mots'
 import {
   EXERCICES, cleChapitre, exercice, motsChoisis, SEP,
@@ -12,7 +13,7 @@ import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
 import { Scene } from './Scene'
-import { sauter } from '../lib/mascottes'
+import { sauter, svgBuste } from '../lib/mascottes'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -75,6 +76,17 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const dispo = choisis.filter(ex.accepte).length
   const nbARevoir = motsARevoir(choisis).length
 
+  // la mascotte d'une matière qu'on vient de choisir reçoit le flambeau : petit saut dans son médaillon
+  const avant = useRef(r.matieres)
+  useEffect(() => {
+    const nouvelles = r.matieres.filter(n => !avant.current.includes(n))
+    avant.current = r.matieres
+    for (const n of nouvelles) {
+      const el = [...document.querySelectorAll<HTMLElement>('.matiere')].find(t => t.dataset.matiere === n)?.querySelector('.medaillon')
+      if (el) sauter(el, 1, false)
+    }
+  }, [r.matieres.join('|')])
+
   // « Commencer » : la mascotte saute de joie, puis la série démarre (pendant la réception)
   const commencer = () => {
     const visibles = [...document.querySelectorAll<HTMLElement>('.reprendre .acteur')].filter(el => el.offsetParent !== null)
@@ -130,9 +142,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             const a = apparence(m.nom)
             const choisie = r.matieres.includes(m.nom)
             return (
-              <div class={`matiere ${choisie ? 'choisie' : ''}`}>
+              <div class={`matiere ${choisie ? 'choisie' : ''} ${a.mascotte ? `teinte-${a.mascotte}` : ''}`} data-matiere={m.nom}>
                 <button class="matiere-choix" aria-pressed={choisie} onClick={() => choisirMatiere(m.nom)}>
-                  <span class="ico" aria-hidden="true">{a.icone}</span>
+                  {a.mascotte
+                    ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
+                    : <span class="ico" aria-hidden="true">{a.icone}</span>}
                   <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} /></span></span>
                   <span class="n">{m.mots.length}</span>
                 </button>

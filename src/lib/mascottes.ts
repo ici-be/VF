@@ -191,6 +191,10 @@ const DESSINS: Record<Mascotte, string> = {
     </g>`,
 }
 
+/** Le buste, pour le médaillon du menu des matières : la tête et, à côté, le flambeau tenu à hauteur d'épaule. */
+export const svgBuste = (nom: Mascotte) =>
+  `<svg class="mascotte buste" viewBox="30 8 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
+
 export const svgMascotte = (nom: Mascotte, classe = '') =>
   `<svg class="mascotte ${classe}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">${ombre.replace('<ellipse', '<ellipse class="ombre-sol"')}<g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
 
@@ -213,16 +217,16 @@ const OMBRE: Keyframe[] = [
   { transform: 'scale(1)', opacity: .12, offset: 1 },
 ]
 /** Fait sauter de joie la mascotte contenue dans `el` (ou `el` lui-même s'il s'agit du dessin). */
-export async function sauter(el: Element, fois = 1): Promise<void> {
+export async function sauter(el: Element, fois = 1, leverLeBras = true): Promise<void> {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const svgEl = (el.matches('svg') ? el : el.querySelector('svg')) as SVGSVGElement | null
   if (!svgEl || svgEl.dataset.saute) return
   svgEl.dataset.saute = '1'
-  const perso = svgEl.querySelector('.perso')!, sol = svgEl.querySelector('.ombre-sol')!
+  const perso = svgEl.querySelector('.perso')!, sol = svgEl.querySelector('.ombre-sol')   // pas d'ombre dans un médaillon
   for (let i = 0; i < fois; i++) {
-    const envol = setTimeout(() => svgEl.classList.add('en-l-air'), 160)
+    const envol = setTimeout(() => leverLeBras && svgEl.classList.add('en-l-air'), 160)
     const atterrit = setTimeout(() => svgEl.classList.remove('en-l-air'), 470)
-    sol.animate(OMBRE, { duration: 720 })
+    sol?.animate(OMBRE, { duration: 720 })
     await perso.animate(SAUT, { duration: 720 }).finished
     clearTimeout(envol); clearTimeout(atterrit); svgEl.classList.remove('en-l-air')
   }

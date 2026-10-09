@@ -469,3 +469,28 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* la mascotte du 20/20 */
 .mascotte-fin { width: 90px; height: 112px; }
 .mascotte-fin svg { width: 100%; height: 100%; overflow: visible; }
+
+/* ---------- menu des matières : médaillons et teinte par matière ---------- */
+:root { --c-renard: #d9efe8; --c-chevalier: #f4e6c6; --c-colomb: #d7e7f6; --c-detective: #e7e0f6; --c-grenouille: #fbe2e6;
+        --b-renard: #3d8f78; --b-chevalier: #a7802c; --b-colomb: #2f6db0; --b-detective: #6d55b0; --b-grenouille: #c0506a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229;
+  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; } }
+:root[data-theme="dark"] {
+  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229;
+  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; }
+.teinte-renard { --teinte: var(--c-renard); --bord: var(--b-renard); }
+.teinte-chevalier { --teinte: var(--c-chevalier); --bord: var(--b-chevalier); }
+.teinte-colomb { --teinte: var(--c-colomb); --bord: var(--b-colomb); }
+.teinte-detective { --teinte: var(--c-detective); --bord: var(--b-detective); }
+.teinte-grenouille { --teinte: var(--c-grenouille); --bord: var(--b-grenouille); }
+
+.medaillon { flex: none; width: 3rem; height: 3rem; border-radius: 12px; overflow: hidden; position: relative; background: var(--teinte, var(--panel-2)); }
+.medaillon svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.medaillon .flambeau { visibility: hidden; }
+.matiere.choisie .medaillon .flambeau { visibility: visible; }
+.matiere[class*="teinte-"] .ajout { color: var(--bord); }
+.matiere[class*="teinte-"] .matiere-choix:hover { border-color: var(--bord); }
+.matiere.choisie[class*="teinte-"] .matiere-choix { background: var(--teinte); border-color: var(--bord); box-shadow: inset 0 0 0 1px var(--bord); }
+.matiere.choisie .medaillon { background: var(--panel); box-shadow: inset 0 0 0 2px var(--bord, var(--blue)); }
+@media (max-width: 560px) { .medaillon { width: 2.4rem; height: 2.4rem; border-radius: 10px; } }
