@@ -171,12 +171,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
               </div>
             </div>
           )}
-          <div class="reglage">
-            <span class="lbl">Nombre de mots</span>
-            <div class="segment">
-              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })}>{n || 'Tous'}</button>)}
-            </div>
-          </div>
           {ex.avecVitesse && (
             <div class="reglage">
               <label for="delai">Temps pour réfléchir <span class="valeur">{r.delai} s</span></label>
@@ -184,12 +178,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                 onInput={e => maj({ delai: Number((e.target as HTMLInputElement).value) })} />
             </div>
           )}
-          <div class="reglage">
-            <span class="lbl">Quels mots ?</span>
-            <div class="segment">
-              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
-            </div>
-          </div>
           <div class="reglage">
             <label class="case"><input id="voix" type="checkbox" checked={r.voix} onChange={e => maj({ voix: (e.target as HTMLInputElement).checked })} /> Lire les mots à voix haute</label>
             {(r.exercice === 'ecrit' || r.exercice === 'dictee' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
@@ -199,6 +187,28 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
       </section>
   )
+
+  // « Mots » : combien de mots, et lesquels (avec les chapitres, c'est le choix des mots à réviser)
+  const blocMots = (
+      <section class="bloc reglages-bloc mots-bloc">
+        <h2>Mots</h2>
+        <div class="reglages">
+          <div class="reglage">
+            <span class="lbl">Combien ?</span>
+            <div class="segment">
+              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })}>{n || 'Tous'}</button>)}
+            </div>
+          </div>
+          <div class="reglage">
+            <span class="lbl">Quels mots ?</span>
+            <div class="segment">
+              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+
 
   return (
     <main class="page accueil">
@@ -229,8 +239,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       </section>
       {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
 
-      {/* grand écran : matière et réglages à gauche, exercice et chapitres à droite ;
-          téléphone : dans l'ordre de lecture (matière, chapitres, exercice, réglages) */}
+      {/* grand écran : matière et réglages à gauche, exercice, chapitres et mots à droite ;
+          téléphone : dans l'ordre de lecture (matière, chapitres, mots, exercice, réglages) */}
       <div class="accueil-corps">
         <div class="col-choix">
       <section class="bloc">
@@ -257,7 +267,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <p class="astuce gauche astuce-matiere">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
       </section>
-      {large ? blocReglages : blocChapitres}
+      {large ? blocReglages : <>{blocChapitres}{blocMots}</>}
         </div>
         <div class="col-exercice">
       <section class="bloc">
@@ -277,7 +287,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         {/* la description de l'exercice choisi, une seule fois (les tuiles restent compactes) */}
         <p class="description-exercice"><b>{ex.nom}</b> · {ex.description}</p>
       </section>
-      {large ? blocChapitres : blocReglages}
+      {large ? <>{blocChapitres}{blocMots}</> : blocReglages}
         </div>
       </div>
     </main>

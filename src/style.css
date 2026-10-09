@@ -537,3 +537,5 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .col-choix .reglages-bloc .segment button { padding: 3px 7px; font-size: .8rem; }
   .col-choix .reglages-bloc .reglage .lbl, .col-choix .reglages-bloc .reglage > label:not(.case) { width: 6.2rem; }
 }
+/* « Mots » à droite : les deux choix côte à côte */
+.mots-bloc .reglages { grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); gap: 10px 32px; }
