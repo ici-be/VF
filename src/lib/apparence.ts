@@ -5,7 +5,7 @@ interface Apparence {
   icone: string
   /** le nom sans l'emoji ni le préfixe « HW » / « NW » */
   titre: string
-  /** traduction française, si on la connaît */
+  /** nom français, si on le connaît (même identique : Biologie) */
   fr?: string
 }
 
@@ -36,6 +36,5 @@ export function apparence(nom: string): Apparence {
   const sansEmoji = emoji ? nom.slice(emoji[0].length) : nom
   const titre = sansEmoji.replace(/^(HW|NW|MW|AV)\s+/, '').trim() || sansEmoji
   const connue = CONNUES.find(([re]) => re.test(sansEmoji))
-  const fr = connue && connue[2].toLowerCase() !== titre.toLowerCase() ? connue[2] : undefined
-  return { icone: emoji ? emoji[1] : connue?.[1] ?? '📚', titre, fr }
+  return { icone: emoji ? emoji[1] : connue?.[1] ?? '📚', titre, fr: connue?.[2] }
 }

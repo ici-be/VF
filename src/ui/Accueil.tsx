@@ -68,6 +68,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
 
   return (
     <main class="page">
+      <div class="haut">
       <header class="entete">
         <h1>Vocabulaire <span class="nl">NL</span></h1>
         <button class="second" onClick={liste}>Liste des mots</button>
@@ -80,10 +81,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <button class="lien" onClick={actualiser}>Réessayer</button>
         </>}
       </p>
+      </div>
 
       <section class="reprendre" aria-label="Exercice choisi">
         <div class="resume">
-          <p class="titre">{ex.nom}</p>
+          <p class="titre">{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           <p class="detail">{resume(voc, r)}</p>
         </div>
         <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
@@ -143,7 +145,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             const n = choisis.filter(e.accepte).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}>
-                <b>{e.nom}</b>
+                <b>{e.nom}{e.beta && <span class="beta">bêta</span>}</b>
                 <span>{e.description}</span>
               </button>
             )

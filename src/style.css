@@ -52,7 +52,8 @@ button { cursor: pointer; }
 .entete { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .entete h1 { font: 800 1.7rem/1.1 var(--display); margin: 0; flex: 1; letter-spacing: -0.01em; }
 .entete h1 .nl { color: var(--accent); }
-.etat { font-size: .85rem; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.haut { display: flex; flex-direction: column; gap: 4px; }
+.etat { font-size: .85rem; color: var(--muted); display: flex; gap: 8px; align-items: center; margin: 0; }
 .etat.erreur { color: var(--ko); }
 .lien { background: none; border: 0; color: var(--blue); text-decoration: underline; padding: 0; }
 
@@ -233,3 +234,5 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .micro.actif { animation: ecoute 1.4s ease-in-out infinite; }
 @keyframes ecoute { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 50% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent) 0%, transparent); } }
 .entendu { margin: 0; color: var(--muted); font-style: italic; }
+
+.beta { display: inline-block; vertical-align: middle; margin-left: 8px; font: 700 .65rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mid); background: var(--mid-bg); padding: 3px 6px; border-radius: 4px; }

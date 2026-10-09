@@ -18,13 +18,15 @@ export interface Exercice {
   avecVitesse: boolean
   /** répondre en choisissant parmi 4 ou en écrivant ? */
   avecRepondre?: boolean
+  /** encore en rodage : affiché « bêta » */
+  beta?: boolean
   /** mots utilisables par cet exercice */
   accepte: (m: Mot) => boolean
 }
 
 export const EXERCICES: Exercice[] = [
   { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, accepte: () => true },
-  { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, accepte: () => true },
+  { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro. Le micro comprend encore mal certains mots.', avecSens: true, avecVitesse: false, beta: true, accepte: () => true },
   { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, accepte: () => true },

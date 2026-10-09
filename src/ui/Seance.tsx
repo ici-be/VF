@@ -106,7 +106,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     <>
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
-        <span class="quoi">{ex.nom} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        <span class="quoi">{ex.nom}{ex.beta ? ' (bêta)' : ''} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
         <button class="icone" onClick={() => setPause(true)} aria-label="Pause" title="Pause (Échap)">⏸</button>
