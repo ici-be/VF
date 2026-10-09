@@ -502,3 +502,38 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .matiere.choisie[class*="teinte-"] .matiere-choix { background: var(--teinte); border-color: var(--bord); box-shadow: inset 0 0 0 1px var(--bord); }
 .matiere.choisie .medaillon { background: var(--panel); box-shadow: inset 0 0 0 2px var(--bord, var(--blue)); }
 @media (max-width: 560px) { .medaillon { width: 2.4rem; height: 2.4rem; border-radius: 10px; } }
+
+/* ---------- réglages discrets ---------- */
+.reglages-bloc .reglages { gap: 10px 18px; }
+.reglages-bloc .reglage { gap: 4px; }
+.reglages-bloc .reglage .lbl, .reglages-bloc .reglage > label:not(.case) { font-size: .78rem; font-weight: 700; color: var(--muted); }
+.reglages-bloc .segment { gap: 4px; }
+.reglages-bloc .segment button { padding: 4px 9px; font-size: .86rem; border-width: 1px; border-radius: 7px; color: var(--muted); }
+.reglages-bloc .segment button[aria-pressed="true"] { background: var(--panel-2); border-color: var(--muted); color: var(--fg); font-weight: 700; }
+.reglages-bloc .case { font-size: .86rem; color: var(--muted); gap: 8px; }
+.reglages-bloc .case input { width: 16px; height: 16px; }
+.reglages-bloc input[type="range"] { height: 18px; }
+.reglages-bloc .valeur { font-size: .8rem; }
+@media (min-width: 1000px) {
+  .col-choix .reglages-bloc .reglages { grid-template-columns: 1fr; }
+  .col-exercice .segment button { padding: 6px 11px; }
+}
+
+.indice-titre { display: none; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .8rem; }
+@media (min-width: 1000px) {
+  /* colonne de gauche compacte : tuiles moins hautes, astuce dans le titre, un réglage par ligne */
+  .indice-titre { display: inline; }
+  .astuce-matiere { display: none; }
+  .col-choix .matiere-choix { padding-block: 5px; }
+  .col-choix .medaillon { width: 2.7rem; height: 2.7rem; }
+  .col-choix .reglages-bloc .reglage { flex-direction: row; align-items: center; gap: 10px; }
+  .col-choix .reglages-bloc .reglage .lbl, .col-choix .reglages-bloc .reglage > label:not(.case) { flex: none; width: 6.8rem; white-space: nowrap; }
+  .col-choix .reglages-bloc .reglage:has(input[type="range"]) > label { width: auto; }
+  .col-choix .reglages-bloc .segment { flex-wrap: wrap; }
+  .col-choix .reglages-bloc .reglage:has(.case) { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .col-choix .reglages-bloc .reglages { gap: 8px; }
+}
+@media (min-width: 1000px) {
+  .col-choix .reglages-bloc .segment button { padding: 3px 7px; font-size: .8rem; }
+  .col-choix .reglages-bloc .reglage .lbl, .col-choix .reglages-bloc .reglage > label:not(.case) { width: 6.2rem; }
+}

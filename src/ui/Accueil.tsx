@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Vocabulaire } from '../lib/mots'
 import {
   EXERCICES, cleChapitre, exercice, motsChoisis, SEP,
@@ -23,10 +23,10 @@ export const SENS: { id: Sens; nom: string }[] = [
   { id: 'mix', nom: 'Mélangé' },
 ]
 const NOMBRES = [10, 20, 30, 0]
-const ORDRES: { id: Ordre; nom: string }[] = [
-  { id: 'fragiles', nom: 'À revoir d’abord' },
-  { id: 'hasard', nom: 'Au hasard' },
-  { id: 'tableau', nom: 'Ordre du tableau' },
+const ORDRES: { id: Ordre; nom: string; aide: string }[] = [
+  { id: 'fragiles', nom: 'À revoir', aide: 'Les mots ratés ou pas encore sus d’abord' },
+  { id: 'hasard', nom: 'Au hasard', aide: 'Des mots tirés au hasard' },
+  { id: 'tableau', nom: 'Dans l’ordre', aide: 'Dans l’ordre du tableau' },
 ]
 
 /** La note de maîtrise d'un groupe de mots, s'il a déjà été travaillé. */
@@ -69,7 +69,20 @@ interface Props {
   liste: (vue: Vue) => void
 }
 
+function useLarge(): boolean {
+  const requete = '(min-width: 1000px)'
+  const [large, setLarge] = useState(() => matchMedia(requete).matches)
+  useEffect(() => {
+    const m = matchMedia(requete)
+    const f = () => setLarge(m.matches)
+    m.addEventListener('change', f)
+    return () => m.removeEventListener('change', f)
+  }, [])
+  return large
+}
+
 export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages, lancer, liste }: Props) {
+  const large = useLarge()
   const maj = (p: Partial<Reglages>) => setReglages({ ...r, ...p })
   const ex = exercice(r.exercice)
   const choisis = motsChoisis(voc, r)
@@ -103,63 +116,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
     maj({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
   const tousChapitres = (matiere: string) => maj({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
 
-  return (
-    <main class="page accueil">
-      <div class="haut">
-      <header class="entete">
-        <h1>Vocabulaire <span class="nl">NL</span></h1>
-        {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
-        <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
-      </header>
-      <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
-        {chargement.etat === 'chargement' && 'Mise à jour des mots…'}
-        {chargement.etat === 'ok' && `Mots à jour (${dateCourte(voc.misAJour)})`}
-        {chargement.etat === 'hors-ligne' && <>
-          {chargement.message} Copie du {dateCourte(voc.misAJour)} utilisée.
-          <button class="lien" onClick={actualiser}>Réessayer</button>
-        </>}
-      </p>
-      </div>
-
-      <section class="reprendre" aria-label="Exercice choisi">
-        <Scene matieres={r.matieres} />
-        <Scene matieres={r.matieres} petit />
-        <div class="resume">
-          <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
-          <p class="detail">{resume(voc, r)}</p>
-        </div>
-        <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
-      </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
-
-      {/* grand écran : matière et chapitres à gauche, exercice et réglages à droite */}
-      <div class="accueil-corps">
-        <div class="col-choix">
-      <section class="bloc">
-        <h2>Matière</h2>
-        <div class="matieres">
-          {voc.matieres.map(m => {
-            const a = apparence(m.nom)
-            const choisie = r.matieres.includes(m.nom)
-            return (
-              <div class={`matiere ${choisie ? 'choisie' : ''} ${a.mascotte ? `teinte-${a.mascotte}` : ''}`} data-matiere={m.nom}>
-                <button class="matiere-choix" aria-pressed={choisie} onClick={() => choisirMatiere(m.nom)}>
-                  {a.mascotte
-                    ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
-                    : <span class="ico" aria-hidden="true">{a.icone}</span>}
-                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} /></span></span>
-                  <span class="n">{m.mots.length}</span>
-                </button>
-                {!choisie
-                  ? <button class="ajout" onClick={() => ajouterMatiere(m.nom)} title="Ajouter aux matières choisies" aria-label={`Ajouter ${a.titre} aux matières choisies`}>+</button>
-                  : r.matieres.length > 1 && <button class="ajout" onClick={() => retirerMatiere(m.nom)} title="Retirer" aria-label={`Retirer ${a.titre}`}>−</button>}
-              </div>
-            )
-          })}
-        </div>
-        <p class="astuce gauche">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
-      </section>
-
+  const blocChapitres = (
       <section class="bloc">
         <h2>Chapitres</h2>
         {voc.matieres.filter(m => r.matieres.includes(m.nom)).map(m => {
@@ -183,28 +140,9 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           )
         })}
       </section>
-        </div>
-
-        <div class="col-exercice">
-      <section class="bloc">
-        <h2>Exercice</h2>
-        <div class="tuiles">
-          {EXERCICES.map(e => {
-            const n = choisis.filter(e.accepte).length
-            return (
-              <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
-                title={n === 0 ? `${e.description} (rien à réviser avec ce choix de matière et de chapitres)` : e.description}>
-                <IconeExercice id={e.id} />
-                <b>{e.nom}{e.beta && <span class="beta">bêta</span>}</b>
-              </button>
-            )
-          })}
-        </div>
-        {/* la description de l'exercice choisi, une seule fois (les tuiles restent compactes) */}
-        <p class="description-exercice"><b>{ex.nom}</b> · {ex.description}</p>
-      </section>
-
-      <section class="bloc">
+  )
+  const blocReglages = (
+      <section class="bloc reglages-bloc">
         <h2>Réglages</h2>
         <div class="reglages">
           {ex.avecSens && (
@@ -249,7 +187,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <div class="reglage">
             <span class="lbl">Quels mots ?</span>
             <div class="segment">
-              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })}>{o.nom}</button>)}
+              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
             </div>
           </div>
           <div class="reglage">
@@ -260,6 +198,86 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           </div>
         </div>
       </section>
+  )
+
+  return (
+    <main class="page accueil">
+      <div class="haut">
+      <header class="entete">
+        <h1>Vocabulaire <span class="nl">NL</span></h1>
+        {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
+        <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
+      </header>
+      <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
+        {chargement.etat === 'chargement' && 'Mise à jour des mots…'}
+        {chargement.etat === 'ok' && `Mots à jour (${dateCourte(voc.misAJour)})`}
+        {chargement.etat === 'hors-ligne' && <>
+          {chargement.message} Copie du {dateCourte(voc.misAJour)} utilisée.
+          <button class="lien" onClick={actualiser}>Réessayer</button>
+        </>}
+      </p>
+      </div>
+
+      <section class="reprendre" aria-label="Exercice choisi">
+        <Scene matieres={r.matieres} />
+        <Scene matieres={r.matieres} petit />
+        <div class="resume">
+          <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
+          <p class="detail">{resume(voc, r)}</p>
+        </div>
+        <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
+      </section>
+      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
+
+      {/* grand écran : matière et réglages à gauche, exercice et chapitres à droite ;
+          téléphone : dans l'ordre de lecture (matière, chapitres, exercice, réglages) */}
+      <div class="accueil-corps">
+        <div class="col-choix">
+      <section class="bloc">
+        <h2>Matière <span class="indice-titre">+ pour en réviser plusieurs</span></h2>
+        <div class="matieres">
+          {voc.matieres.map(m => {
+            const a = apparence(m.nom)
+            const choisie = r.matieres.includes(m.nom)
+            return (
+              <div class={`matiere ${choisie ? 'choisie' : ''} ${a.mascotte ? `teinte-${a.mascotte}` : ''}`} data-matiere={m.nom}>
+                <button class="matiere-choix" aria-pressed={choisie} onClick={() => choisirMatiere(m.nom)}>
+                  {a.mascotte
+                    ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
+                    : <span class="ico" aria-hidden="true">{a.icone}</span>}
+                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} /></span></span>
+                  <span class="n">{m.mots.length}</span>
+                </button>
+                {!choisie
+                  ? <button class="ajout" onClick={() => ajouterMatiere(m.nom)} title="Ajouter aux matières choisies" aria-label={`Ajouter ${a.titre} aux matières choisies`}>+</button>
+                  : r.matieres.length > 1 && <button class="ajout" onClick={() => retirerMatiere(m.nom)} title="Retirer" aria-label={`Retirer ${a.titre}`}>−</button>}
+              </div>
+            )
+          })}
+        </div>
+        <p class="astuce gauche astuce-matiere">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
+      </section>
+      {large ? blocReglages : blocChapitres}
+        </div>
+        <div class="col-exercice">
+      <section class="bloc">
+        <h2>Exercice</h2>
+        <div class="tuiles">
+          {EXERCICES.map(e => {
+            const n = choisis.filter(e.accepte).length
+            return (
+              <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
+                title={n === 0 ? `${e.description} (rien à réviser avec ce choix de matière et de chapitres)` : e.description}>
+                <IconeExercice id={e.id} />
+                <b>{e.nom}{e.beta && <span class="beta">bêta</span>}</b>
+              </button>
+            )
+          })}
+        </div>
+        {/* la description de l'exercice choisi, une seule fois (les tuiles restent compactes) */}
+        <p class="description-exercice"><b>{ex.nom}</b> · {ex.description}</p>
+      </section>
+      {large ? blocChapitres : blocReglages}
         </div>
       </div>
     </main>
