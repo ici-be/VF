@@ -66,6 +66,7 @@ describe('conjugaisons générées', () => {
     expect(V.slapen.questionsTexte.present[1]).toBe('Slaap jij?')
   })
   it('lecture à voix haute', () => {
-    expect(V.slapen.lecture.present).toBe('ik slaap, jij slaapt, u slaapt, hij slaapt, wij slapen, jullie slapen, zij slapen')
+    expect(V.slapen.lecture.present).toBe('ik slaap, jij slaapt, hij slaapt, wij slapen, jullie slapen, zij slapen')
+    expect(V.zijn.rang).toBe(1)
   })
 })

@@ -18,6 +18,7 @@ import { Oral } from './exercices/Oral'
 import { Dictee } from './exercices/Dictee'
 import { Conjugaison } from './exercices/Conjugaison'
 import { Interrogatif } from './exercices/Interrogatif'
+import { Primitifs } from './exercices/Primitifs'
 import { nombre } from '../lib/texte'
 
 export interface Bilan {
@@ -154,6 +155,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'dictee' && <Dictee key={i} {...props} />}
         {ex.id === 'conjugaison' && <Conjugaison key={i} {...props} />}
         {ex.id === 'interrogatif' && <Interrogatif key={i} {...props} />}
+        {ex.id === 'primitifs' && <Primitifs key={i} {...props} />}
       </main>
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
@@ -171,5 +173,5 @@ function vocalesConjugaison(inf: string, temps: Reglages['temps']) {
   const v = verbe(inf)
   if (!v) return []
   const ts = temps === 'mix' ? TEMPS.map(t => t.id) : [temps]
-  return ts.flatMap(t => [v.lecture[t], ...v.questionsTexte[t]]).map(texte => ({ texte, langue: 'nl' as const }))
+  return [v.lecturePrimitifs, ...ts.flatMap(t => [v.lecture[t], ...v.questionsTexte[t]])].map(texte => ({ texte, langue: 'nl' as const }))
 }

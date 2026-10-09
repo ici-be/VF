@@ -343,3 +343,13 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .ligne-conj.faux .corrige { background: var(--ko-bg); border-color: var(--ko); }
 .ligne-conj.faux .corrige b { color: var(--fg); }
 @media (max-width: 480px) { .ligne-conj { grid-template-columns: 6.5rem 1fr; } .ligne-conj label { font-size: .85rem; } }
+.ligne-conj .pourquoi { display: block; font-size: .82rem; color: var(--ko); margin-top: 2px; }
+
+/* ---------- tableau des temps primitifs ---------- */
+.tableau.primitifs td.forme { font-weight: 600; }
+.tableau.primitifs td.nl { white-space: nowrap; }
+@media print {
+  .tableau.primitifs table { table-layout: auto; font-size: 10pt; }
+  .tableau.primitifs th, .tableau.primitifs td { width: auto !important; padding: 1mm 2mm; }
+  .tableau.primitifs tr:nth-child(5n) td { border-bottom: .8pt solid #888; }   /* un repère tous les 5 verbes */
+}

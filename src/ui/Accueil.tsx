@@ -105,7 +105,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
+      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
 
       <section class="bloc">
         <h2>Matière</h2>

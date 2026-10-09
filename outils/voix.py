@@ -119,6 +119,8 @@ def textes_conjugaison() -> set[tuple[str, str]]:
     for v in json.loads(chemin.read_text())['verbes']:
         res |= {('nl', v['inf']), ('fr', v['fr'])}
         res |= {('nl', t) for t in v['lecture'].values()}
+        if v['rang'] <= 30:
+            res.add(('nl', v['lecturePrimitifs']))
         res |= {('nl', q) for qs in v['questionsTexte'].values() for q in qs}
     return res
 

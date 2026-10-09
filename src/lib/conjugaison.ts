@@ -14,8 +14,18 @@ export const TEMPS: { id: Temps; nom: string; aide: string }[] = [
 ]
 export const nomTemps = (t: Temps) => TEMPS.find(x => x.id === t)!.nom
 
-/** les personnes telles qu'on les affiche dans un tableau de conjugaison */
-export const PERSONNES = ['ik', 'jij / je', 'u', 'hij / zij / het', 'wij / we', 'jullie', 'zij / ze']
+/** les lignes d'un tableau de conjugaison : u partage la ligne de jij (même forme, sauf rares variantes acceptées) */
+export const LIGNES: { nom: string; personnes: number[] }[] = [
+  { nom: 'ik', personnes: [0] },
+  { nom: 'jij / je / u', personnes: [1, 2] },
+  { nom: 'hij / zij / het', personnes: [3] },
+  { nom: 'wij / we', personnes: [4] },
+  { nom: 'jullie', personnes: [5] },
+  { nom: 'zij / ze', personnes: [6] },
+]
+/** les formes acceptées sur une ligne du tableau (la première est celle qu'on affiche) */
+export const formesLigne = (v: Verbe, t: Temps, ligne: number) =>
+  [...new Set(LIGNES[ligne].personnes.flatMap(p => v.formes[t][p]))]
 /** le pronom en début de phrase : « Jij slaapt. » */
 const SUJETS = ['Ik', 'Jij', 'U', 'Hij', 'Wij', 'Jullie', 'Zij']
 
@@ -48,11 +58,38 @@ function nettoyer(texte: string, pronoms: string[]): string {
   return t
 }
 
-/** Une case du tableau de conjugaison : orthographe exacte (c'est tout l'enjeu). */
-export function corrigerForme(texte: string, v: Verbe, t: Temps, personne: number): Correction {
-  const t2 = nettoyer(texte, donnees.pronoms[personne])
+/** Une ligne du tableau de conjugaison : orthographe exacte (c'est tout l'enjeu). */
+export function corrigerForme(texte: string, v: Verbe, t: Temps, ligne: number): Correction {
+  const t2 = nettoyer(texte, LIGNES[ligne].personnes.flatMap(p => donnees.pronoms[p]))
   if (!t2) return { resultat: 'faux', message: '' }
-  return v.formes[t][personne].includes(t2) ? { resultat: 'juste', message: '' } : { resultat: 'faux', message: '' }
+  return formesLigne(v, t, ligne).includes(t2) ? { resultat: 'juste', message: '' } : { resultat: 'faux', message: '' }
+}
+
+// ------------------------------------------------------------ temps primitifs
+export const NB_PRIMITIFS = 30
+export const estPrimitif = (inf: string | undefined) => !!inf && (verbe(inf)?.rang ?? 99) <= NB_PRIMITIFS
+
+/** slapen → imparfait singulier, imparfait pluriel, participe avec son auxiliaire (« heeft geslapen ») */
+export const PRIMITIFS = [
+  { nom: 'Imparfait (ik, hij)', formes: (v: Verbe) => v.formes.ovt[0] },
+  { nom: 'Imparfait (wij, zij)', formes: (v: Verbe) => v.formes.ovt[4] },
+  { nom: 'Participe passé (hij)', formes: (v: Verbe) => v.formes.vtt[3] },
+]
+
+export function corrigerPrimitif(texte: string, v: Verbe, i: number): Correction {
+  const t = nettoyer(texte, ['ik', 'hij', 'zij', 'ze', 'wij', 'we', 'het'])
+  if (!t) return { resultat: 'faux', message: '' }
+  const formes = PRIMITIFS[i].formes(v)
+  if (formes.includes(t)) return { resultat: 'juste', message: '' }
+  // le participe sans son auxiliaire, ou avec le mauvais : on le dit
+  if (i === 2) {
+    const participes = formes.map(f => f.split(' ').at(-1)!)
+    const mots = t.split(' ')
+    if (participes.includes(mots.at(-1)!)) {
+      return { resultat: 'faux', message: mots.length === 1 ? 'Il manque l’auxiliaire : heeft ou is ?' : `C’est « ${formes[0]} » (auxiliaire ${formes[0].split(' ')[0] === 'is' ? 'zijn' : 'hebben'}).` }
+    }
+  }
+  return { resultat: 'faux', message: '' }
 }
 
 /** La phrase affirmative : « Jij slaapt. », « Hij heeft geslapen. » */

@@ -46,6 +46,7 @@
  },
  "verbes": [
   {
+   "rang": 1,
    "inf": "zijn",
    "fr": "être",
    "primitifs": "zijn – was (waren) – is geweest",
@@ -267,10 +268,10 @@
     ]
    },
    "lecture": {
-    "present": "ik ben, jij bent, u bent, hij is, wij zijn, jullie zijn, zij zijn",
-    "ovt": "ik was, jij was, u was, hij was, wij waren, jullie waren, zij waren",
-    "vtt": "ik ben geweest, jij bent geweest, u bent geweest, hij is geweest, wij zijn geweest, jullie zijn geweest, zij zijn geweest",
-    "futur": "ik zal zijn, jij zult zijn, u zult zijn, hij zal zijn, wij zullen zijn, jullie zullen zijn, zij zullen zijn"
+    "present": "ik ben, jij bent, hij is, wij zijn, jullie zijn, zij zijn",
+    "ovt": "ik was, jij was, hij was, wij waren, jullie waren, zij waren",
+    "vtt": "ik ben geweest, jij bent geweest, hij is geweest, wij zijn geweest, jullie zijn geweest, zij zijn geweest",
+    "futur": "ik zal zijn, jij zult zijn, hij zal zijn, wij zullen zijn, jullie zullen zijn, zij zullen zijn"
    },
    "questionsTexte": {
     "present": [
@@ -309,9 +310,11 @@
      "Zullen jullie zijn?",
      "Zullen zij zijn?"
     ]
-   }
+   },
+   "lecturePrimitifs": "zijn, was, waren, is geweest"
   },
   {
+   "rang": 2,
    "inf": "hebben",
    "fr": "avoir",
    "primitifs": "hebben – had (hadden) – heeft gehad",
@@ -537,10 +540,10 @@
     ]
    },
    "lecture": {
-    "present": "ik heb, jij hebt, u hebt, hij heeft, wij hebben, jullie hebben, zij hebben",
-    "ovt": "ik had, jij had, u had, hij had, wij hadden, jullie hadden, zij hadden",
-    "vtt": "ik heb gehad, jij hebt gehad, u hebt gehad, hij heeft gehad, wij hebben gehad, jullie hebben gehad, zij hebben gehad",
-    "futur": "ik zal hebben, jij zult hebben, u zult hebben, hij zal hebben, wij zullen hebben, jullie zullen hebben, zij zullen hebben"
+    "present": "ik heb, jij hebt, hij heeft, wij hebben, jullie hebben, zij hebben",
+    "ovt": "ik had, jij had, hij had, wij hadden, jullie hadden, zij hadden",
+    "vtt": "ik heb gehad, jij hebt gehad, hij heeft gehad, wij hebben gehad, jullie hebben gehad, zij hebben gehad",
+    "futur": "ik zal hebben, jij zult hebben, hij zal hebben, wij zullen hebben, jullie zullen hebben, zij zullen hebben"
    },
    "questionsTexte": {
     "present": [
@@ -579,9 +582,11 @@
      "Zullen jullie hebben?",
      "Zullen zij hebben?"
     ]
-   }
+   },
+   "lecturePrimitifs": "hebben, had, hadden, heeft gehad"
   },
   {
+   "rang": 3,
    "inf": "worden",
    "fr": "devenir",
    "primitifs": "worden – werd (werden) – is geworden",
@@ -803,10 +808,10 @@
     ]
    },
    "lecture": {
-    "present": "ik word, jij wordt, u wordt, hij wordt, wij worden, jullie worden, zij worden",
-    "ovt": "ik werd, jij werd, u werd, hij werd, wij werden, jullie werden, zij werden",
-    "vtt": "ik ben geworden, jij bent geworden, u bent geworden, hij is geworden, wij zijn geworden, jullie zijn geworden, zij zijn geworden",
-    "futur": "ik zal worden, jij zult worden, u zult worden, hij zal worden, wij zullen worden, jullie zullen worden, zij zullen worden"
+    "present": "ik word, jij wordt, hij wordt, wij worden, jullie worden, zij worden",
+    "ovt": "ik werd, jij werd, hij werd, wij werden, jullie werden, zij werden",
+    "vtt": "ik ben geworden, jij bent geworden, hij is geworden, wij zijn geworden, jullie zijn geworden, zij zijn geworden",
+    "futur": "ik zal worden, jij zult worden, hij zal worden, wij zullen worden, jullie zullen worden, zij zullen worden"
    },
    "questionsTexte": {
     "present": [
@@ -845,9 +850,11 @@
      "Zullen jullie worden?",
      "Zullen zij worden?"
     ]
-   }
+   },
+   "lecturePrimitifs": "worden, werd, werden, is geworden"
   },
   {
+   "rang": 4,
    "inf": "kunnen",
    "fr": "pouvoir",
    "primitifs": "kunnen – kon (konden) – heeft gekund",
@@ -1076,10 +1083,10 @@
     ]
    },
    "lecture": {
-    "present": "ik kan, jij kunt, u kunt, hij kan, wij kunnen, jullie kunnen, zij kunnen",
-    "ovt": "ik kon, jij kon, u kon, hij kon, wij konden, jullie konden, zij konden",
-    "vtt": "ik heb gekund, jij hebt gekund, u hebt gekund, hij heeft gekund, wij hebben gekund, jullie hebben gekund, zij hebben gekund",
-    "futur": "ik zal kunnen, jij zult kunnen, u zult kunnen, hij zal kunnen, wij zullen kunnen, jullie zullen kunnen, zij zullen kunnen"
+    "present": "ik kan, jij kunt, hij kan, wij kunnen, jullie kunnen, zij kunnen",
+    "ovt": "ik kon, jij kon, hij kon, wij konden, jullie konden, zij konden",
+    "vtt": "ik heb gekund, jij hebt gekund, hij heeft gekund, wij hebben gekund, jullie hebben gekund, zij hebben gekund",
+    "futur": "ik zal kunnen, jij zult kunnen, hij zal kunnen, wij zullen kunnen, jullie zullen kunnen, zij zullen kunnen"
    },
    "questionsTexte": {
     "present": [
@@ -1118,9 +1125,11 @@
      "Zullen jullie kunnen?",
      "Zullen zij kunnen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "kunnen, kon, konden, heeft gekund"
   },
   {
+   "rang": 5,
    "inf": "moeten",
    "fr": "devoir",
    "primitifs": "moeten – moest (moesten) – heeft gemoeten",
@@ -1344,10 +1353,10 @@
     ]
    },
    "lecture": {
-    "present": "ik moet, jij moet, u moet, hij moet, wij moeten, jullie moeten, zij moeten",
-    "ovt": "ik moest, jij moest, u moest, hij moest, wij moesten, jullie moesten, zij moesten",
-    "vtt": "ik heb gemoeten, jij hebt gemoeten, u hebt gemoeten, hij heeft gemoeten, wij hebben gemoeten, jullie hebben gemoeten, zij hebben gemoeten",
-    "futur": "ik zal moeten, jij zult moeten, u zult moeten, hij zal moeten, wij zullen moeten, jullie zullen moeten, zij zullen moeten"
+    "present": "ik moet, jij moet, hij moet, wij moeten, jullie moeten, zij moeten",
+    "ovt": "ik moest, jij moest, hij moest, wij moesten, jullie moesten, zij moesten",
+    "vtt": "ik heb gemoeten, jij hebt gemoeten, hij heeft gemoeten, wij hebben gemoeten, jullie hebben gemoeten, zij hebben gemoeten",
+    "futur": "ik zal moeten, jij zult moeten, hij zal moeten, wij zullen moeten, jullie zullen moeten, zij zullen moeten"
    },
    "questionsTexte": {
     "present": [
@@ -1386,9 +1395,11 @@
      "Zullen jullie moeten?",
      "Zullen zij moeten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "moeten, moest, moesten, heeft gemoeten"
   },
   {
+   "rang": 6,
    "inf": "willen",
    "fr": "vouloir",
    "primitifs": "willen – wilde (wilden) – heeft gewild",
@@ -1627,10 +1638,10 @@
     ]
    },
    "lecture": {
-    "present": "ik wil, jij wilt, u wilt, hij wil, wij willen, jullie willen, zij willen",
-    "ovt": "ik wilde, jij wilde, u wilde, hij wilde, wij wilden, jullie wilden, zij wilden",
-    "vtt": "ik heb gewild, jij hebt gewild, u hebt gewild, hij heeft gewild, wij hebben gewild, jullie hebben gewild, zij hebben gewild",
-    "futur": "ik zal willen, jij zult willen, u zult willen, hij zal willen, wij zullen willen, jullie zullen willen, zij zullen willen"
+    "present": "ik wil, jij wilt, hij wil, wij willen, jullie willen, zij willen",
+    "ovt": "ik wilde, jij wilde, hij wilde, wij wilden, jullie wilden, zij wilden",
+    "vtt": "ik heb gewild, jij hebt gewild, hij heeft gewild, wij hebben gewild, jullie hebben gewild, zij hebben gewild",
+    "futur": "ik zal willen, jij zult willen, hij zal willen, wij zullen willen, jullie zullen willen, zij zullen willen"
    },
    "questionsTexte": {
     "present": [
@@ -1669,9 +1680,11 @@
      "Zullen jullie willen?",
      "Zullen zij willen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "willen, wilde, wilden, heeft gewild"
   },
   {
+   "rang": 7,
    "inf": "mogen",
    "fr": "avoir le droit de",
    "primitifs": "mogen – mocht (mochten) – heeft gemogen",
@@ -1917,10 +1930,10 @@
     ]
    },
    "lecture": {
-    "present": "ik mag, jij mag, u mag, hij mag, wij mogen, jullie mogen, zij mogen",
-    "ovt": "ik mocht, jij mocht, u mocht, hij mocht, wij mochten, jullie mochten, zij mochten",
-    "vtt": "ik heb gemogen, jij hebt gemogen, u hebt gemogen, hij heeft gemogen, wij hebben gemogen, jullie hebben gemogen, zij hebben gemogen",
-    "futur": "ik zal mogen, jij zult mogen, u zult mogen, hij zal mogen, wij zullen mogen, jullie zullen mogen, zij zullen mogen"
+    "present": "ik mag, jij mag, hij mag, wij mogen, jullie mogen, zij mogen",
+    "ovt": "ik mocht, jij mocht, hij mocht, wij mochten, jullie mochten, zij mochten",
+    "vtt": "ik heb gemogen, jij hebt gemogen, hij heeft gemogen, wij hebben gemogen, jullie hebben gemogen, zij hebben gemogen",
+    "futur": "ik zal mogen, jij zult mogen, hij zal mogen, wij zullen mogen, jullie zullen mogen, zij zullen mogen"
    },
    "questionsTexte": {
     "present": [
@@ -1959,9 +1972,11 @@
      "Zullen jullie mogen?",
      "Zullen zij mogen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "mogen, mocht, mochten, heeft gemogen"
   },
   {
+   "rang": 8,
    "inf": "gaan",
    "fr": "aller",
    "primitifs": "gaan – ging (gingen) – is gegaan",
@@ -2183,10 +2198,10 @@
     ]
    },
    "lecture": {
-    "present": "ik ga, jij gaat, u gaat, hij gaat, wij gaan, jullie gaan, zij gaan",
-    "ovt": "ik ging, jij ging, u ging, hij ging, wij gingen, jullie gingen, zij gingen",
-    "vtt": "ik ben gegaan, jij bent gegaan, u bent gegaan, hij is gegaan, wij zijn gegaan, jullie zijn gegaan, zij zijn gegaan",
-    "futur": "ik zal gaan, jij zult gaan, u zult gaan, hij zal gaan, wij zullen gaan, jullie zullen gaan, zij zullen gaan"
+    "present": "ik ga, jij gaat, hij gaat, wij gaan, jullie gaan, zij gaan",
+    "ovt": "ik ging, jij ging, hij ging, wij gingen, jullie gingen, zij gingen",
+    "vtt": "ik ben gegaan, jij bent gegaan, hij is gegaan, wij zijn gegaan, jullie zijn gegaan, zij zijn gegaan",
+    "futur": "ik zal gaan, jij zult gaan, hij zal gaan, wij zullen gaan, jullie zullen gaan, zij zullen gaan"
    },
    "questionsTexte": {
     "present": [
@@ -2225,9 +2240,11 @@
      "Zullen jullie gaan?",
      "Zullen zij gaan?"
     ]
-   }
+   },
+   "lecturePrimitifs": "gaan, ging, gingen, is gegaan"
   },
   {
+   "rang": 9,
    "inf": "komen",
    "fr": "venir",
    "primitifs": "komen – kwam (kwamen) – is gekomen",
@@ -2449,10 +2466,10 @@
     ]
    },
    "lecture": {
-    "present": "ik kom, jij komt, u komt, hij komt, wij komen, jullie komen, zij komen",
-    "ovt": "ik kwam, jij kwam, u kwam, hij kwam, wij kwamen, jullie kwamen, zij kwamen",
-    "vtt": "ik ben gekomen, jij bent gekomen, u bent gekomen, hij is gekomen, wij zijn gekomen, jullie zijn gekomen, zij zijn gekomen",
-    "futur": "ik zal komen, jij zult komen, u zult komen, hij zal komen, wij zullen komen, jullie zullen komen, zij zullen komen"
+    "present": "ik kom, jij komt, hij komt, wij komen, jullie komen, zij komen",
+    "ovt": "ik kwam, jij kwam, hij kwam, wij kwamen, jullie kwamen, zij kwamen",
+    "vtt": "ik ben gekomen, jij bent gekomen, hij is gekomen, wij zijn gekomen, jullie zijn gekomen, zij zijn gekomen",
+    "futur": "ik zal komen, jij zult komen, hij zal komen, wij zullen komen, jullie zullen komen, zij zullen komen"
    },
    "questionsTexte": {
     "present": [
@@ -2491,9 +2508,11 @@
      "Zullen jullie komen?",
      "Zullen zij komen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "komen, kwam, kwamen, is gekomen"
   },
   {
+   "rang": 10,
    "inf": "zien",
    "fr": "voir",
    "primitifs": "zien – zag (zagen) – heeft gezien",
@@ -2717,10 +2736,10 @@
     ]
    },
    "lecture": {
-    "present": "ik zie, jij ziet, u ziet, hij ziet, wij zien, jullie zien, zij zien",
-    "ovt": "ik zag, jij zag, u zag, hij zag, wij zagen, jullie zagen, zij zagen",
-    "vtt": "ik heb gezien, jij hebt gezien, u hebt gezien, hij heeft gezien, wij hebben gezien, jullie hebben gezien, zij hebben gezien",
-    "futur": "ik zal zien, jij zult zien, u zult zien, hij zal zien, wij zullen zien, jullie zullen zien, zij zullen zien"
+    "present": "ik zie, jij ziet, hij ziet, wij zien, jullie zien, zij zien",
+    "ovt": "ik zag, jij zag, hij zag, wij zagen, jullie zagen, zij zagen",
+    "vtt": "ik heb gezien, jij hebt gezien, hij heeft gezien, wij hebben gezien, jullie hebben gezien, zij hebben gezien",
+    "futur": "ik zal zien, jij zult zien, hij zal zien, wij zullen zien, jullie zullen zien, zij zullen zien"
    },
    "questionsTexte": {
     "present": [
@@ -2759,9 +2778,11 @@
      "Zullen jullie zien?",
      "Zullen zij zien?"
     ]
-   }
+   },
+   "lecturePrimitifs": "zien, zag, zagen, heeft gezien"
   },
   {
+   "rang": 11,
    "inf": "zeggen",
    "fr": "dire",
    "primitifs": "zeggen – zei (zeiden) – heeft gezegd",
@@ -2985,10 +3006,10 @@
     ]
    },
    "lecture": {
-    "present": "ik zeg, jij zegt, u zegt, hij zegt, wij zeggen, jullie zeggen, zij zeggen",
-    "ovt": "ik zei, jij zei, u zei, hij zei, wij zeiden, jullie zeiden, zij zeiden",
-    "vtt": "ik heb gezegd, jij hebt gezegd, u hebt gezegd, hij heeft gezegd, wij hebben gezegd, jullie hebben gezegd, zij hebben gezegd",
-    "futur": "ik zal zeggen, jij zult zeggen, u zult zeggen, hij zal zeggen, wij zullen zeggen, jullie zullen zeggen, zij zullen zeggen"
+    "present": "ik zeg, jij zegt, hij zegt, wij zeggen, jullie zeggen, zij zeggen",
+    "ovt": "ik zei, jij zei, hij zei, wij zeiden, jullie zeiden, zij zeiden",
+    "vtt": "ik heb gezegd, jij hebt gezegd, hij heeft gezegd, wij hebben gezegd, jullie hebben gezegd, zij hebben gezegd",
+    "futur": "ik zal zeggen, jij zult zeggen, hij zal zeggen, wij zullen zeggen, jullie zullen zeggen, zij zullen zeggen"
    },
    "questionsTexte": {
     "present": [
@@ -3027,9 +3048,11 @@
      "Zullen jullie zeggen?",
      "Zullen zij zeggen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "zeggen, zei, zeiden, heeft gezegd"
   },
   {
+   "rang": 12,
    "inf": "doen",
    "fr": "faire",
    "primitifs": "doen – deed (deden) – heeft gedaan",
@@ -3253,10 +3276,10 @@
     ]
    },
    "lecture": {
-    "present": "ik doe, jij doet, u doet, hij doet, wij doen, jullie doen, zij doen",
-    "ovt": "ik deed, jij deed, u deed, hij deed, wij deden, jullie deden, zij deden",
-    "vtt": "ik heb gedaan, jij hebt gedaan, u hebt gedaan, hij heeft gedaan, wij hebben gedaan, jullie hebben gedaan, zij hebben gedaan",
-    "futur": "ik zal doen, jij zult doen, u zult doen, hij zal doen, wij zullen doen, jullie zullen doen, zij zullen doen"
+    "present": "ik doe, jij doet, hij doet, wij doen, jullie doen, zij doen",
+    "ovt": "ik deed, jij deed, hij deed, wij deden, jullie deden, zij deden",
+    "vtt": "ik heb gedaan, jij hebt gedaan, hij heeft gedaan, wij hebben gedaan, jullie hebben gedaan, zij hebben gedaan",
+    "futur": "ik zal doen, jij zult doen, hij zal doen, wij zullen doen, jullie zullen doen, zij zullen doen"
    },
    "questionsTexte": {
     "present": [
@@ -3295,9 +3318,11 @@
      "Zullen jullie doen?",
      "Zullen zij doen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "doen, deed, deden, heeft gedaan"
   },
   {
+   "rang": 13,
    "inf": "maken",
    "fr": "faire, fabriquer",
    "primitifs": "maken – maakte (maakten) – heeft gemaakt",
@@ -3521,10 +3546,10 @@
     ]
    },
    "lecture": {
-    "present": "ik maak, jij maakt, u maakt, hij maakt, wij maken, jullie maken, zij maken",
-    "ovt": "ik maakte, jij maakte, u maakte, hij maakte, wij maakten, jullie maakten, zij maakten",
-    "vtt": "ik heb gemaakt, jij hebt gemaakt, u hebt gemaakt, hij heeft gemaakt, wij hebben gemaakt, jullie hebben gemaakt, zij hebben gemaakt",
-    "futur": "ik zal maken, jij zult maken, u zult maken, hij zal maken, wij zullen maken, jullie zullen maken, zij zullen maken"
+    "present": "ik maak, jij maakt, hij maakt, wij maken, jullie maken, zij maken",
+    "ovt": "ik maakte, jij maakte, hij maakte, wij maakten, jullie maakten, zij maakten",
+    "vtt": "ik heb gemaakt, jij hebt gemaakt, hij heeft gemaakt, wij hebben gemaakt, jullie hebben gemaakt, zij hebben gemaakt",
+    "futur": "ik zal maken, jij zult maken, hij zal maken, wij zullen maken, jullie zullen maken, zij zullen maken"
    },
    "questionsTexte": {
     "present": [
@@ -3563,9 +3588,11 @@
      "Zullen jullie maken?",
      "Zullen zij maken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "maken, maakte, maakten, heeft gemaakt"
   },
   {
+   "rang": 14,
    "inf": "krijgen",
    "fr": "recevoir",
    "primitifs": "krijgen – kreeg (kregen) – heeft gekregen",
@@ -3789,10 +3816,10 @@
     ]
    },
    "lecture": {
-    "present": "ik krijg, jij krijgt, u krijgt, hij krijgt, wij krijgen, jullie krijgen, zij krijgen",
-    "ovt": "ik kreeg, jij kreeg, u kreeg, hij kreeg, wij kregen, jullie kregen, zij kregen",
-    "vtt": "ik heb gekregen, jij hebt gekregen, u hebt gekregen, hij heeft gekregen, wij hebben gekregen, jullie hebben gekregen, zij hebben gekregen",
-    "futur": "ik zal krijgen, jij zult krijgen, u zult krijgen, hij zal krijgen, wij zullen krijgen, jullie zullen krijgen, zij zullen krijgen"
+    "present": "ik krijg, jij krijgt, hij krijgt, wij krijgen, jullie krijgen, zij krijgen",
+    "ovt": "ik kreeg, jij kreeg, hij kreeg, wij kregen, jullie kregen, zij kregen",
+    "vtt": "ik heb gekregen, jij hebt gekregen, hij heeft gekregen, wij hebben gekregen, jullie hebben gekregen, zij hebben gekregen",
+    "futur": "ik zal krijgen, jij zult krijgen, hij zal krijgen, wij zullen krijgen, jullie zullen krijgen, zij zullen krijgen"
    },
    "questionsTexte": {
     "present": [
@@ -3831,9 +3858,11 @@
      "Zullen jullie krijgen?",
      "Zullen zij krijgen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "krijgen, kreeg, kregen, heeft gekregen"
   },
   {
+   "rang": 15,
    "inf": "laten",
    "fr": "laisser",
    "primitifs": "laten – liet (lieten) – heeft gelaten",
@@ -4057,10 +4086,10 @@
     ]
    },
    "lecture": {
-    "present": "ik laat, jij laat, u laat, hij laat, wij laten, jullie laten, zij laten",
-    "ovt": "ik liet, jij liet, u liet, hij liet, wij lieten, jullie lieten, zij lieten",
-    "vtt": "ik heb gelaten, jij hebt gelaten, u hebt gelaten, hij heeft gelaten, wij hebben gelaten, jullie hebben gelaten, zij hebben gelaten",
-    "futur": "ik zal laten, jij zult laten, u zult laten, hij zal laten, wij zullen laten, jullie zullen laten, zij zullen laten"
+    "present": "ik laat, jij laat, hij laat, wij laten, jullie laten, zij laten",
+    "ovt": "ik liet, jij liet, hij liet, wij lieten, jullie lieten, zij lieten",
+    "vtt": "ik heb gelaten, jij hebt gelaten, hij heeft gelaten, wij hebben gelaten, jullie hebben gelaten, zij hebben gelaten",
+    "futur": "ik zal laten, jij zult laten, hij zal laten, wij zullen laten, jullie zullen laten, zij zullen laten"
    },
    "questionsTexte": {
     "present": [
@@ -4099,9 +4128,11 @@
      "Zullen jullie laten?",
      "Zullen zij laten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "laten, liet, lieten, heeft gelaten"
   },
   {
+   "rang": 16,
    "inf": "staan",
    "fr": "être debout",
    "primitifs": "staan – stond (stonden) – heeft gestaan",
@@ -4325,10 +4356,10 @@
     ]
    },
    "lecture": {
-    "present": "ik sta, jij staat, u staat, hij staat, wij staan, jullie staan, zij staan",
-    "ovt": "ik stond, jij stond, u stond, hij stond, wij stonden, jullie stonden, zij stonden",
-    "vtt": "ik heb gestaan, jij hebt gestaan, u hebt gestaan, hij heeft gestaan, wij hebben gestaan, jullie hebben gestaan, zij hebben gestaan",
-    "futur": "ik zal staan, jij zult staan, u zult staan, hij zal staan, wij zullen staan, jullie zullen staan, zij zullen staan"
+    "present": "ik sta, jij staat, hij staat, wij staan, jullie staan, zij staan",
+    "ovt": "ik stond, jij stond, hij stond, wij stonden, jullie stonden, zij stonden",
+    "vtt": "ik heb gestaan, jij hebt gestaan, hij heeft gestaan, wij hebben gestaan, jullie hebben gestaan, zij hebben gestaan",
+    "futur": "ik zal staan, jij zult staan, hij zal staan, wij zullen staan, jullie zullen staan, zij zullen staan"
    },
    "questionsTexte": {
     "present": [
@@ -4367,9 +4398,11 @@
      "Zullen jullie staan?",
      "Zullen zij staan?"
     ]
-   }
+   },
+   "lecturePrimitifs": "staan, stond, stonden, heeft gestaan"
   },
   {
+   "rang": 17,
    "inf": "weten",
    "fr": "savoir",
    "primitifs": "weten – wist (wisten) – heeft geweten",
@@ -4593,10 +4626,10 @@
     ]
    },
    "lecture": {
-    "present": "ik weet, jij weet, u weet, hij weet, wij weten, jullie weten, zij weten",
-    "ovt": "ik wist, jij wist, u wist, hij wist, wij wisten, jullie wisten, zij wisten",
-    "vtt": "ik heb geweten, jij hebt geweten, u hebt geweten, hij heeft geweten, wij hebben geweten, jullie hebben geweten, zij hebben geweten",
-    "futur": "ik zal weten, jij zult weten, u zult weten, hij zal weten, wij zullen weten, jullie zullen weten, zij zullen weten"
+    "present": "ik weet, jij weet, hij weet, wij weten, jullie weten, zij weten",
+    "ovt": "ik wist, jij wist, hij wist, wij wisten, jullie wisten, zij wisten",
+    "vtt": "ik heb geweten, jij hebt geweten, hij heeft geweten, wij hebben geweten, jullie hebben geweten, zij hebben geweten",
+    "futur": "ik zal weten, jij zult weten, hij zal weten, wij zullen weten, jullie zullen weten, zij zullen weten"
    },
    "questionsTexte": {
     "present": [
@@ -4635,9 +4668,11 @@
      "Zullen jullie weten?",
      "Zullen zij weten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "weten, wist, wisten, heeft geweten"
   },
   {
+   "rang": 18,
    "inf": "geven",
    "fr": "donner",
    "primitifs": "geven – gaf (gaven) – heeft gegeven",
@@ -4861,10 +4896,10 @@
     ]
    },
    "lecture": {
-    "present": "ik geef, jij geeft, u geeft, hij geeft, wij geven, jullie geven, zij geven",
-    "ovt": "ik gaf, jij gaf, u gaf, hij gaf, wij gaven, jullie gaven, zij gaven",
-    "vtt": "ik heb gegeven, jij hebt gegeven, u hebt gegeven, hij heeft gegeven, wij hebben gegeven, jullie hebben gegeven, zij hebben gegeven",
-    "futur": "ik zal geven, jij zult geven, u zult geven, hij zal geven, wij zullen geven, jullie zullen geven, zij zullen geven"
+    "present": "ik geef, jij geeft, hij geeft, wij geven, jullie geven, zij geven",
+    "ovt": "ik gaf, jij gaf, hij gaf, wij gaven, jullie gaven, zij gaven",
+    "vtt": "ik heb gegeven, jij hebt gegeven, hij heeft gegeven, wij hebben gegeven, jullie hebben gegeven, zij hebben gegeven",
+    "futur": "ik zal geven, jij zult geven, hij zal geven, wij zullen geven, jullie zullen geven, zij zullen geven"
    },
    "questionsTexte": {
     "present": [
@@ -4903,9 +4938,11 @@
      "Zullen jullie geven?",
      "Zullen zij geven?"
     ]
-   }
+   },
+   "lecturePrimitifs": "geven, gaf, gaven, heeft gegeven"
   },
   {
+   "rang": 19,
    "inf": "vinden",
    "fr": "trouver",
    "primitifs": "vinden – vond (vonden) – heeft gevonden",
@@ -5129,10 +5166,10 @@
     ]
    },
    "lecture": {
-    "present": "ik vind, jij vindt, u vindt, hij vindt, wij vinden, jullie vinden, zij vinden",
-    "ovt": "ik vond, jij vond, u vond, hij vond, wij vonden, jullie vonden, zij vonden",
-    "vtt": "ik heb gevonden, jij hebt gevonden, u hebt gevonden, hij heeft gevonden, wij hebben gevonden, jullie hebben gevonden, zij hebben gevonden",
-    "futur": "ik zal vinden, jij zult vinden, u zult vinden, hij zal vinden, wij zullen vinden, jullie zullen vinden, zij zullen vinden"
+    "present": "ik vind, jij vindt, hij vindt, wij vinden, jullie vinden, zij vinden",
+    "ovt": "ik vond, jij vond, hij vond, wij vonden, jullie vonden, zij vonden",
+    "vtt": "ik heb gevonden, jij hebt gevonden, hij heeft gevonden, wij hebben gevonden, jullie hebben gevonden, zij hebben gevonden",
+    "futur": "ik zal vinden, jij zult vinden, hij zal vinden, wij zullen vinden, jullie zullen vinden, zij zullen vinden"
    },
    "questionsTexte": {
     "present": [
@@ -5171,9 +5208,11 @@
      "Zullen jullie vinden?",
      "Zullen zij vinden?"
     ]
-   }
+   },
+   "lecturePrimitifs": "vinden, vond, vonden, heeft gevonden"
   },
   {
+   "rang": 20,
    "inf": "nemen",
    "fr": "prendre",
    "primitifs": "nemen – nam (namen) – heeft genomen",
@@ -5397,10 +5436,10 @@
     ]
    },
    "lecture": {
-    "present": "ik neem, jij neemt, u neemt, hij neemt, wij nemen, jullie nemen, zij nemen",
-    "ovt": "ik nam, jij nam, u nam, hij nam, wij namen, jullie namen, zij namen",
-    "vtt": "ik heb genomen, jij hebt genomen, u hebt genomen, hij heeft genomen, wij hebben genomen, jullie hebben genomen, zij hebben genomen",
-    "futur": "ik zal nemen, jij zult nemen, u zult nemen, hij zal nemen, wij zullen nemen, jullie zullen nemen, zij zullen nemen"
+    "present": "ik neem, jij neemt, hij neemt, wij nemen, jullie nemen, zij nemen",
+    "ovt": "ik nam, jij nam, hij nam, wij namen, jullie namen, zij namen",
+    "vtt": "ik heb genomen, jij hebt genomen, hij heeft genomen, wij hebben genomen, jullie hebben genomen, zij hebben genomen",
+    "futur": "ik zal nemen, jij zult nemen, hij zal nemen, wij zullen nemen, jullie zullen nemen, zij zullen nemen"
    },
    "questionsTexte": {
     "present": [
@@ -5439,9 +5478,11 @@
      "Zullen jullie nemen?",
      "Zullen zij nemen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "nemen, nam, namen, heeft genomen"
   },
   {
+   "rang": 21,
    "inf": "denken",
    "fr": "penser",
    "primitifs": "denken – dacht (dachten) – heeft gedacht",
@@ -5665,10 +5706,10 @@
     ]
    },
    "lecture": {
-    "present": "ik denk, jij denkt, u denkt, hij denkt, wij denken, jullie denken, zij denken",
-    "ovt": "ik dacht, jij dacht, u dacht, hij dacht, wij dachten, jullie dachten, zij dachten",
-    "vtt": "ik heb gedacht, jij hebt gedacht, u hebt gedacht, hij heeft gedacht, wij hebben gedacht, jullie hebben gedacht, zij hebben gedacht",
-    "futur": "ik zal denken, jij zult denken, u zult denken, hij zal denken, wij zullen denken, jullie zullen denken, zij zullen denken"
+    "present": "ik denk, jij denkt, hij denkt, wij denken, jullie denken, zij denken",
+    "ovt": "ik dacht, jij dacht, hij dacht, wij dachten, jullie dachten, zij dachten",
+    "vtt": "ik heb gedacht, jij hebt gedacht, hij heeft gedacht, wij hebben gedacht, jullie hebben gedacht, zij hebben gedacht",
+    "futur": "ik zal denken, jij zult denken, hij zal denken, wij zullen denken, jullie zullen denken, zij zullen denken"
    },
    "questionsTexte": {
     "present": [
@@ -5707,9 +5748,11 @@
      "Zullen jullie denken?",
      "Zullen zij denken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "denken, dacht, dachten, heeft gedacht"
   },
   {
+   "rang": 22,
    "inf": "liggen",
    "fr": "être couché",
    "primitifs": "liggen – lag (lagen) – heeft gelegen",
@@ -5933,10 +5976,10 @@
     ]
    },
    "lecture": {
-    "present": "ik lig, jij ligt, u ligt, hij ligt, wij liggen, jullie liggen, zij liggen",
-    "ovt": "ik lag, jij lag, u lag, hij lag, wij lagen, jullie lagen, zij lagen",
-    "vtt": "ik heb gelegen, jij hebt gelegen, u hebt gelegen, hij heeft gelegen, wij hebben gelegen, jullie hebben gelegen, zij hebben gelegen",
-    "futur": "ik zal liggen, jij zult liggen, u zult liggen, hij zal liggen, wij zullen liggen, jullie zullen liggen, zij zullen liggen"
+    "present": "ik lig, jij ligt, hij ligt, wij liggen, jullie liggen, zij liggen",
+    "ovt": "ik lag, jij lag, hij lag, wij lagen, jullie lagen, zij lagen",
+    "vtt": "ik heb gelegen, jij hebt gelegen, hij heeft gelegen, wij hebben gelegen, jullie hebben gelegen, zij hebben gelegen",
+    "futur": "ik zal liggen, jij zult liggen, hij zal liggen, wij zullen liggen, jullie zullen liggen, zij zullen liggen"
    },
    "questionsTexte": {
     "present": [
@@ -5975,9 +6018,11 @@
      "Zullen jullie liggen?",
      "Zullen zij liggen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "liggen, lag, lagen, heeft gelegen"
   },
   {
+   "rang": 23,
    "inf": "zitten",
    "fr": "être assis",
    "primitifs": "zitten – zat (zaten) – heeft gezeten",
@@ -6201,10 +6246,10 @@
     ]
    },
    "lecture": {
-    "present": "ik zit, jij zit, u zit, hij zit, wij zitten, jullie zitten, zij zitten",
-    "ovt": "ik zat, jij zat, u zat, hij zat, wij zaten, jullie zaten, zij zaten",
-    "vtt": "ik heb gezeten, jij hebt gezeten, u hebt gezeten, hij heeft gezeten, wij hebben gezeten, jullie hebben gezeten, zij hebben gezeten",
-    "futur": "ik zal zitten, jij zult zitten, u zult zitten, hij zal zitten, wij zullen zitten, jullie zullen zitten, zij zullen zitten"
+    "present": "ik zit, jij zit, hij zit, wij zitten, jullie zitten, zij zitten",
+    "ovt": "ik zat, jij zat, hij zat, wij zaten, jullie zaten, zij zaten",
+    "vtt": "ik heb gezeten, jij hebt gezeten, hij heeft gezeten, wij hebben gezeten, jullie hebben gezeten, zij hebben gezeten",
+    "futur": "ik zal zitten, jij zult zitten, hij zal zitten, wij zullen zitten, jullie zullen zitten, zij zullen zitten"
    },
    "questionsTexte": {
     "present": [
@@ -6243,9 +6288,11 @@
      "Zullen jullie zitten?",
      "Zullen zij zitten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "zitten, zat, zaten, heeft gezeten"
   },
   {
+   "rang": 24,
    "inf": "houden",
    "fr": "tenir",
    "primitifs": "houden – hield (hielden) – heeft gehouden",
@@ -6469,10 +6516,10 @@
     ]
    },
    "lecture": {
-    "present": "ik houd, jij houdt, u houdt, hij houdt, wij houden, jullie houden, zij houden",
-    "ovt": "ik hield, jij hield, u hield, hij hield, wij hielden, jullie hielden, zij hielden",
-    "vtt": "ik heb gehouden, jij hebt gehouden, u hebt gehouden, hij heeft gehouden, wij hebben gehouden, jullie hebben gehouden, zij hebben gehouden",
-    "futur": "ik zal houden, jij zult houden, u zult houden, hij zal houden, wij zullen houden, jullie zullen houden, zij zullen houden"
+    "present": "ik houd, jij houdt, hij houdt, wij houden, jullie houden, zij houden",
+    "ovt": "ik hield, jij hield, hij hield, wij hielden, jullie hielden, zij hielden",
+    "vtt": "ik heb gehouden, jij hebt gehouden, hij heeft gehouden, wij hebben gehouden, jullie hebben gehouden, zij hebben gehouden",
+    "futur": "ik zal houden, jij zult houden, hij zal houden, wij zullen houden, jullie zullen houden, zij zullen houden"
    },
    "questionsTexte": {
     "present": [
@@ -6511,9 +6558,11 @@
      "Zullen jullie houden?",
      "Zullen zij houden?"
     ]
-   }
+   },
+   "lecturePrimitifs": "houden, hield, hielden, heeft gehouden"
   },
   {
+   "rang": 25,
    "inf": "blijven",
    "fr": "rester",
    "primitifs": "blijven – bleef (bleven) – is gebleven",
@@ -6735,10 +6784,10 @@
     ]
    },
    "lecture": {
-    "present": "ik blijf, jij blijft, u blijft, hij blijft, wij blijven, jullie blijven, zij blijven",
-    "ovt": "ik bleef, jij bleef, u bleef, hij bleef, wij bleven, jullie bleven, zij bleven",
-    "vtt": "ik ben gebleven, jij bent gebleven, u bent gebleven, hij is gebleven, wij zijn gebleven, jullie zijn gebleven, zij zijn gebleven",
-    "futur": "ik zal blijven, jij zult blijven, u zult blijven, hij zal blijven, wij zullen blijven, jullie zullen blijven, zij zullen blijven"
+    "present": "ik blijf, jij blijft, hij blijft, wij blijven, jullie blijven, zij blijven",
+    "ovt": "ik bleef, jij bleef, hij bleef, wij bleven, jullie bleven, zij bleven",
+    "vtt": "ik ben gebleven, jij bent gebleven, hij is gebleven, wij zijn gebleven, jullie zijn gebleven, zij zijn gebleven",
+    "futur": "ik zal blijven, jij zult blijven, hij zal blijven, wij zullen blijven, jullie zullen blijven, zij zullen blijven"
    },
    "questionsTexte": {
     "present": [
@@ -6777,9 +6826,11 @@
      "Zullen jullie blijven?",
      "Zullen zij blijven?"
     ]
-   }
+   },
+   "lecturePrimitifs": "blijven, bleef, bleven, is gebleven"
   },
   {
+   "rang": 26,
    "inf": "brengen",
    "fr": "apporter",
    "primitifs": "brengen – bracht (brachten) – heeft gebracht",
@@ -7003,10 +7054,10 @@
     ]
    },
    "lecture": {
-    "present": "ik breng, jij brengt, u brengt, hij brengt, wij brengen, jullie brengen, zij brengen",
-    "ovt": "ik bracht, jij bracht, u bracht, hij bracht, wij brachten, jullie brachten, zij brachten",
-    "vtt": "ik heb gebracht, jij hebt gebracht, u hebt gebracht, hij heeft gebracht, wij hebben gebracht, jullie hebben gebracht, zij hebben gebracht",
-    "futur": "ik zal brengen, jij zult brengen, u zult brengen, hij zal brengen, wij zullen brengen, jullie zullen brengen, zij zullen brengen"
+    "present": "ik breng, jij brengt, hij brengt, wij brengen, jullie brengen, zij brengen",
+    "ovt": "ik bracht, jij bracht, hij bracht, wij brachten, jullie brachten, zij brachten",
+    "vtt": "ik heb gebracht, jij hebt gebracht, hij heeft gebracht, wij hebben gebracht, jullie hebben gebracht, zij hebben gebracht",
+    "futur": "ik zal brengen, jij zult brengen, hij zal brengen, wij zullen brengen, jullie zullen brengen, zij zullen brengen"
    },
    "questionsTexte": {
     "present": [
@@ -7045,9 +7096,11 @@
      "Zullen jullie brengen?",
      "Zullen zij brengen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "brengen, bracht, brachten, heeft gebracht"
   },
   {
+   "rang": 27,
    "inf": "kijken",
    "fr": "regarder",
    "primitifs": "kijken – keek (keken) – heeft gekeken",
@@ -7271,10 +7324,10 @@
     ]
    },
    "lecture": {
-    "present": "ik kijk, jij kijkt, u kijkt, hij kijkt, wij kijken, jullie kijken, zij kijken",
-    "ovt": "ik keek, jij keek, u keek, hij keek, wij keken, jullie keken, zij keken",
-    "vtt": "ik heb gekeken, jij hebt gekeken, u hebt gekeken, hij heeft gekeken, wij hebben gekeken, jullie hebben gekeken, zij hebben gekeken",
-    "futur": "ik zal kijken, jij zult kijken, u zult kijken, hij zal kijken, wij zullen kijken, jullie zullen kijken, zij zullen kijken"
+    "present": "ik kijk, jij kijkt, hij kijkt, wij kijken, jullie kijken, zij kijken",
+    "ovt": "ik keek, jij keek, hij keek, wij keken, jullie keken, zij keken",
+    "vtt": "ik heb gekeken, jij hebt gekeken, hij heeft gekeken, wij hebben gekeken, jullie hebben gekeken, zij hebben gekeken",
+    "futur": "ik zal kijken, jij zult kijken, hij zal kijken, wij zullen kijken, jullie zullen kijken, zij zullen kijken"
    },
    "questionsTexte": {
     "present": [
@@ -7313,9 +7366,11 @@
      "Zullen jullie kijken?",
      "Zullen zij kijken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "kijken, keek, keken, heeft gekeken"
   },
   {
+   "rang": 28,
    "inf": "spreken",
    "fr": "parler",
    "primitifs": "spreken – sprak (spraken) – heeft gesproken",
@@ -7539,10 +7594,10 @@
     ]
    },
    "lecture": {
-    "present": "ik spreek, jij spreekt, u spreekt, hij spreekt, wij spreken, jullie spreken, zij spreken",
-    "ovt": "ik sprak, jij sprak, u sprak, hij sprak, wij spraken, jullie spraken, zij spraken",
-    "vtt": "ik heb gesproken, jij hebt gesproken, u hebt gesproken, hij heeft gesproken, wij hebben gesproken, jullie hebben gesproken, zij hebben gesproken",
-    "futur": "ik zal spreken, jij zult spreken, u zult spreken, hij zal spreken, wij zullen spreken, jullie zullen spreken, zij zullen spreken"
+    "present": "ik spreek, jij spreekt, hij spreekt, wij spreken, jullie spreken, zij spreken",
+    "ovt": "ik sprak, jij sprak, hij sprak, wij spraken, jullie spraken, zij spraken",
+    "vtt": "ik heb gesproken, jij hebt gesproken, hij heeft gesproken, wij hebben gesproken, jullie hebben gesproken, zij hebben gesproken",
+    "futur": "ik zal spreken, jij zult spreken, hij zal spreken, wij zullen spreken, jullie zullen spreken, zij zullen spreken"
    },
    "questionsTexte": {
     "present": [
@@ -7581,9 +7636,11 @@
      "Zullen jullie spreken?",
      "Zullen zij spreken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "spreken, sprak, spraken, heeft gesproken"
   },
   {
+   "rang": 29,
    "inf": "lopen",
    "fr": "marcher",
    "primitifs": "lopen – liep (liepen) – heeft/is gelopen",
@@ -7827,10 +7884,10 @@
     ]
    },
    "lecture": {
-    "present": "ik loop, jij loopt, u loopt, hij loopt, wij lopen, jullie lopen, zij lopen",
-    "ovt": "ik liep, jij liep, u liep, hij liep, wij liepen, jullie liepen, zij liepen",
-    "vtt": "ik heb gelopen, jij hebt gelopen, u hebt gelopen, hij heeft gelopen, wij hebben gelopen, jullie hebben gelopen, zij hebben gelopen",
-    "futur": "ik zal lopen, jij zult lopen, u zult lopen, hij zal lopen, wij zullen lopen, jullie zullen lopen, zij zullen lopen"
+    "present": "ik loop, jij loopt, hij loopt, wij lopen, jullie lopen, zij lopen",
+    "ovt": "ik liep, jij liep, hij liep, wij liepen, jullie liepen, zij liepen",
+    "vtt": "ik heb gelopen, jij hebt gelopen, hij heeft gelopen, wij hebben gelopen, jullie hebben gelopen, zij hebben gelopen",
+    "futur": "ik zal lopen, jij zult lopen, hij zal lopen, wij zullen lopen, jullie zullen lopen, zij zullen lopen"
    },
    "questionsTexte": {
     "present": [
@@ -7869,9 +7926,11 @@
      "Zullen jullie lopen?",
      "Zullen zij lopen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "lopen, liep, liepen, heeft gelopen"
   },
   {
+   "rang": 30,
    "inf": "horen",
    "fr": "entendre",
    "primitifs": "horen – hoorde (hoorden) – heeft gehoord",
@@ -8095,10 +8154,10 @@
     ]
    },
    "lecture": {
-    "present": "ik hoor, jij hoort, u hoort, hij hoort, wij horen, jullie horen, zij horen",
-    "ovt": "ik hoorde, jij hoorde, u hoorde, hij hoorde, wij hoorden, jullie hoorden, zij hoorden",
-    "vtt": "ik heb gehoord, jij hebt gehoord, u hebt gehoord, hij heeft gehoord, wij hebben gehoord, jullie hebben gehoord, zij hebben gehoord",
-    "futur": "ik zal horen, jij zult horen, u zult horen, hij zal horen, wij zullen horen, jullie zullen horen, zij zullen horen"
+    "present": "ik hoor, jij hoort, hij hoort, wij horen, jullie horen, zij horen",
+    "ovt": "ik hoorde, jij hoorde, hij hoorde, wij hoorden, jullie hoorden, zij hoorden",
+    "vtt": "ik heb gehoord, jij hebt gehoord, hij heeft gehoord, wij hebben gehoord, jullie hebben gehoord, zij hebben gehoord",
+    "futur": "ik zal horen, jij zult horen, hij zal horen, wij zullen horen, jullie zullen horen, zij zullen horen"
    },
    "questionsTexte": {
     "present": [
@@ -8137,9 +8196,11 @@
      "Zullen jullie horen?",
      "Zullen zij horen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "horen, hoorde, hoorden, heeft gehoord"
   },
   {
+   "rang": 31,
    "inf": "beginnen",
    "fr": "commencer",
    "primitifs": "beginnen – begon (begonnen) – is begonnen",
@@ -8361,10 +8422,10 @@
     ]
    },
    "lecture": {
-    "present": "ik begin, jij begint, u begint, hij begint, wij beginnen, jullie beginnen, zij beginnen",
-    "ovt": "ik begon, jij begon, u begon, hij begon, wij begonnen, jullie begonnen, zij begonnen",
-    "vtt": "ik ben begonnen, jij bent begonnen, u bent begonnen, hij is begonnen, wij zijn begonnen, jullie zijn begonnen, zij zijn begonnen",
-    "futur": "ik zal beginnen, jij zult beginnen, u zult beginnen, hij zal beginnen, wij zullen beginnen, jullie zullen beginnen, zij zullen beginnen"
+    "present": "ik begin, jij begint, hij begint, wij beginnen, jullie beginnen, zij beginnen",
+    "ovt": "ik begon, jij begon, hij begon, wij begonnen, jullie begonnen, zij begonnen",
+    "vtt": "ik ben begonnen, jij bent begonnen, hij is begonnen, wij zijn begonnen, jullie zijn begonnen, zij zijn begonnen",
+    "futur": "ik zal beginnen, jij zult beginnen, hij zal beginnen, wij zullen beginnen, jullie zullen beginnen, zij zullen beginnen"
    },
    "questionsTexte": {
     "present": [
@@ -8403,9 +8464,11 @@
      "Zullen jullie beginnen?",
      "Zullen zij beginnen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "beginnen, begon, begonnen, is begonnen"
   },
   {
+   "rang": 32,
    "inf": "kennen",
    "fr": "connaître",
    "primitifs": "kennen – kende (kenden) – heeft gekend",
@@ -8629,10 +8692,10 @@
     ]
    },
    "lecture": {
-    "present": "ik ken, jij kent, u kent, hij kent, wij kennen, jullie kennen, zij kennen",
-    "ovt": "ik kende, jij kende, u kende, hij kende, wij kenden, jullie kenden, zij kenden",
-    "vtt": "ik heb gekend, jij hebt gekend, u hebt gekend, hij heeft gekend, wij hebben gekend, jullie hebben gekend, zij hebben gekend",
-    "futur": "ik zal kennen, jij zult kennen, u zult kennen, hij zal kennen, wij zullen kennen, jullie zullen kennen, zij zullen kennen"
+    "present": "ik ken, jij kent, hij kent, wij kennen, jullie kennen, zij kennen",
+    "ovt": "ik kende, jij kende, hij kende, wij kenden, jullie kenden, zij kenden",
+    "vtt": "ik heb gekend, jij hebt gekend, hij heeft gekend, wij hebben gekend, jullie hebben gekend, zij hebben gekend",
+    "futur": "ik zal kennen, jij zult kennen, hij zal kennen, wij zullen kennen, jullie zullen kennen, zij zullen kennen"
    },
    "questionsTexte": {
     "present": [
@@ -8671,9 +8734,11 @@
      "Zullen jullie kennen?",
      "Zullen zij kennen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "kennen, kende, kenden, heeft gekend"
   },
   {
+   "rang": 33,
    "inf": "vragen",
    "fr": "demander",
    "primitifs": "vragen – vroeg (vroegen) – heeft gevraagd",
@@ -8897,10 +8962,10 @@
     ]
    },
    "lecture": {
-    "present": "ik vraag, jij vraagt, u vraagt, hij vraagt, wij vragen, jullie vragen, zij vragen",
-    "ovt": "ik vroeg, jij vroeg, u vroeg, hij vroeg, wij vroegen, jullie vroegen, zij vroegen",
-    "vtt": "ik heb gevraagd, jij hebt gevraagd, u hebt gevraagd, hij heeft gevraagd, wij hebben gevraagd, jullie hebben gevraagd, zij hebben gevraagd",
-    "futur": "ik zal vragen, jij zult vragen, u zult vragen, hij zal vragen, wij zullen vragen, jullie zullen vragen, zij zullen vragen"
+    "present": "ik vraag, jij vraagt, hij vraagt, wij vragen, jullie vragen, zij vragen",
+    "ovt": "ik vroeg, jij vroeg, hij vroeg, wij vroegen, jullie vroegen, zij vroegen",
+    "vtt": "ik heb gevraagd, jij hebt gevraagd, hij heeft gevraagd, wij hebben gevraagd, jullie hebben gevraagd, zij hebben gevraagd",
+    "futur": "ik zal vragen, jij zult vragen, hij zal vragen, wij zullen vragen, jullie zullen vragen, zij zullen vragen"
    },
    "questionsTexte": {
     "present": [
@@ -8939,9 +9004,11 @@
      "Zullen jullie vragen?",
      "Zullen zij vragen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "vragen, vroeg, vroegen, heeft gevraagd"
   },
   {
+   "rang": 34,
    "inf": "werken",
    "fr": "travailler",
    "primitifs": "werken – werkte (werkten) – heeft gewerkt",
@@ -9165,10 +9232,10 @@
     ]
    },
    "lecture": {
-    "present": "ik werk, jij werkt, u werkt, hij werkt, wij werken, jullie werken, zij werken",
-    "ovt": "ik werkte, jij werkte, u werkte, hij werkte, wij werkten, jullie werkten, zij werkten",
-    "vtt": "ik heb gewerkt, jij hebt gewerkt, u hebt gewerkt, hij heeft gewerkt, wij hebben gewerkt, jullie hebben gewerkt, zij hebben gewerkt",
-    "futur": "ik zal werken, jij zult werken, u zult werken, hij zal werken, wij zullen werken, jullie zullen werken, zij zullen werken"
+    "present": "ik werk, jij werkt, hij werkt, wij werken, jullie werken, zij werken",
+    "ovt": "ik werkte, jij werkte, hij werkte, wij werkten, jullie werkten, zij werkten",
+    "vtt": "ik heb gewerkt, jij hebt gewerkt, hij heeft gewerkt, wij hebben gewerkt, jullie hebben gewerkt, zij hebben gewerkt",
+    "futur": "ik zal werken, jij zult werken, hij zal werken, wij zullen werken, jullie zullen werken, zij zullen werken"
    },
    "questionsTexte": {
     "present": [
@@ -9207,9 +9274,11 @@
      "Zullen jullie werken?",
      "Zullen zij werken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "werken, werkte, werkten, heeft gewerkt"
   },
   {
+   "rang": 35,
    "inf": "spelen",
    "fr": "jouer",
    "primitifs": "spelen – speelde (speelden) – heeft gespeeld",
@@ -9433,10 +9502,10 @@
     ]
    },
    "lecture": {
-    "present": "ik speel, jij speelt, u speelt, hij speelt, wij spelen, jullie spelen, zij spelen",
-    "ovt": "ik speelde, jij speelde, u speelde, hij speelde, wij speelden, jullie speelden, zij speelden",
-    "vtt": "ik heb gespeeld, jij hebt gespeeld, u hebt gespeeld, hij heeft gespeeld, wij hebben gespeeld, jullie hebben gespeeld, zij hebben gespeeld",
-    "futur": "ik zal spelen, jij zult spelen, u zult spelen, hij zal spelen, wij zullen spelen, jullie zullen spelen, zij zullen spelen"
+    "present": "ik speel, jij speelt, hij speelt, wij spelen, jullie spelen, zij spelen",
+    "ovt": "ik speelde, jij speelde, hij speelde, wij speelden, jullie speelden, zij speelden",
+    "vtt": "ik heb gespeeld, jij hebt gespeeld, hij heeft gespeeld, wij hebben gespeeld, jullie hebben gespeeld, zij hebben gespeeld",
+    "futur": "ik zal spelen, jij zult spelen, hij zal spelen, wij zullen spelen, jullie zullen spelen, zij zullen spelen"
    },
    "questionsTexte": {
     "present": [
@@ -9475,9 +9544,11 @@
      "Zullen jullie spelen?",
      "Zullen zij spelen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "spelen, speelde, speelden, heeft gespeeld"
   },
   {
+   "rang": 36,
    "inf": "leren",
    "fr": "apprendre",
    "primitifs": "leren – leerde (leerden) – heeft geleerd",
@@ -9701,10 +9772,10 @@
     ]
    },
    "lecture": {
-    "present": "ik leer, jij leert, u leert, hij leert, wij leren, jullie leren, zij leren",
-    "ovt": "ik leerde, jij leerde, u leerde, hij leerde, wij leerden, jullie leerden, zij leerden",
-    "vtt": "ik heb geleerd, jij hebt geleerd, u hebt geleerd, hij heeft geleerd, wij hebben geleerd, jullie hebben geleerd, zij hebben geleerd",
-    "futur": "ik zal leren, jij zult leren, u zult leren, hij zal leren, wij zullen leren, jullie zullen leren, zij zullen leren"
+    "present": "ik leer, jij leert, hij leert, wij leren, jullie leren, zij leren",
+    "ovt": "ik leerde, jij leerde, hij leerde, wij leerden, jullie leerden, zij leerden",
+    "vtt": "ik heb geleerd, jij hebt geleerd, hij heeft geleerd, wij hebben geleerd, jullie hebben geleerd, zij hebben geleerd",
+    "futur": "ik zal leren, jij zult leren, hij zal leren, wij zullen leren, jullie zullen leren, zij zullen leren"
    },
    "questionsTexte": {
     "present": [
@@ -9743,9 +9814,11 @@
      "Zullen jullie leren?",
      "Zullen zij leren?"
     ]
-   }
+   },
+   "lecturePrimitifs": "leren, leerde, leerden, heeft geleerd"
   },
   {
+   "rang": 37,
    "inf": "wonen",
    "fr": "habiter",
    "primitifs": "wonen – woonde (woonden) – heeft gewoond",
@@ -9969,10 +10042,10 @@
     ]
    },
    "lecture": {
-    "present": "ik woon, jij woont, u woont, hij woont, wij wonen, jullie wonen, zij wonen",
-    "ovt": "ik woonde, jij woonde, u woonde, hij woonde, wij woonden, jullie woonden, zij woonden",
-    "vtt": "ik heb gewoond, jij hebt gewoond, u hebt gewoond, hij heeft gewoond, wij hebben gewoond, jullie hebben gewoond, zij hebben gewoond",
-    "futur": "ik zal wonen, jij zult wonen, u zult wonen, hij zal wonen, wij zullen wonen, jullie zullen wonen, zij zullen wonen"
+    "present": "ik woon, jij woont, hij woont, wij wonen, jullie wonen, zij wonen",
+    "ovt": "ik woonde, jij woonde, hij woonde, wij woonden, jullie woonden, zij woonden",
+    "vtt": "ik heb gewoond, jij hebt gewoond, hij heeft gewoond, wij hebben gewoond, jullie hebben gewoond, zij hebben gewoond",
+    "futur": "ik zal wonen, jij zult wonen, hij zal wonen, wij zullen wonen, jullie zullen wonen, zij zullen wonen"
    },
    "questionsTexte": {
     "present": [
@@ -10011,9 +10084,11 @@
      "Zullen jullie wonen?",
      "Zullen zij wonen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "wonen, woonde, woonden, heeft gewoond"
   },
   {
+   "rang": 38,
    "inf": "schrijven",
    "fr": "écrire",
    "primitifs": "schrijven – schreef (schreven) – heeft geschreven",
@@ -10237,10 +10312,10 @@
     ]
    },
    "lecture": {
-    "present": "ik schrijf, jij schrijft, u schrijft, hij schrijft, wij schrijven, jullie schrijven, zij schrijven",
-    "ovt": "ik schreef, jij schreef, u schreef, hij schreef, wij schreven, jullie schreven, zij schreven",
-    "vtt": "ik heb geschreven, jij hebt geschreven, u hebt geschreven, hij heeft geschreven, wij hebben geschreven, jullie hebben geschreven, zij hebben geschreven",
-    "futur": "ik zal schrijven, jij zult schrijven, u zult schrijven, hij zal schrijven, wij zullen schrijven, jullie zullen schrijven, zij zullen schrijven"
+    "present": "ik schrijf, jij schrijft, hij schrijft, wij schrijven, jullie schrijven, zij schrijven",
+    "ovt": "ik schreef, jij schreef, hij schreef, wij schreven, jullie schreven, zij schreven",
+    "vtt": "ik heb geschreven, jij hebt geschreven, hij heeft geschreven, wij hebben geschreven, jullie hebben geschreven, zij hebben geschreven",
+    "futur": "ik zal schrijven, jij zult schrijven, hij zal schrijven, wij zullen schrijven, jullie zullen schrijven, zij zullen schrijven"
    },
    "questionsTexte": {
     "present": [
@@ -10279,9 +10354,11 @@
      "Zullen jullie schrijven?",
      "Zullen zij schrijven?"
     ]
-   }
+   },
+   "lecturePrimitifs": "schrijven, schreef, schreven, heeft geschreven"
   },
   {
+   "rang": 39,
    "inf": "lezen",
    "fr": "lire",
    "primitifs": "lezen – las (lazen) – heeft gelezen",
@@ -10505,10 +10582,10 @@
     ]
    },
    "lecture": {
-    "present": "ik lees, jij leest, u leest, hij leest, wij lezen, jullie lezen, zij lezen",
-    "ovt": "ik las, jij las, u las, hij las, wij lazen, jullie lazen, zij lazen",
-    "vtt": "ik heb gelezen, jij hebt gelezen, u hebt gelezen, hij heeft gelezen, wij hebben gelezen, jullie hebben gelezen, zij hebben gelezen",
-    "futur": "ik zal lezen, jij zult lezen, u zult lezen, hij zal lezen, wij zullen lezen, jullie zullen lezen, zij zullen lezen"
+    "present": "ik lees, jij leest, hij leest, wij lezen, jullie lezen, zij lezen",
+    "ovt": "ik las, jij las, hij las, wij lazen, jullie lazen, zij lazen",
+    "vtt": "ik heb gelezen, jij hebt gelezen, hij heeft gelezen, wij hebben gelezen, jullie hebben gelezen, zij hebben gelezen",
+    "futur": "ik zal lezen, jij zult lezen, hij zal lezen, wij zullen lezen, jullie zullen lezen, zij zullen lezen"
    },
    "questionsTexte": {
     "present": [
@@ -10547,9 +10624,11 @@
      "Zullen jullie lezen?",
      "Zullen zij lezen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "lezen, las, lazen, heeft gelezen"
   },
   {
+   "rang": 40,
    "inf": "eten",
    "fr": "manger",
    "primitifs": "eten – at (aten) – heeft gegeten",
@@ -10773,10 +10852,10 @@
     ]
    },
    "lecture": {
-    "present": "ik eet, jij eet, u eet, hij eet, wij eten, jullie eten, zij eten",
-    "ovt": "ik at, jij at, u at, hij at, wij aten, jullie aten, zij aten",
-    "vtt": "ik heb gegeten, jij hebt gegeten, u hebt gegeten, hij heeft gegeten, wij hebben gegeten, jullie hebben gegeten, zij hebben gegeten",
-    "futur": "ik zal eten, jij zult eten, u zult eten, hij zal eten, wij zullen eten, jullie zullen eten, zij zullen eten"
+    "present": "ik eet, jij eet, hij eet, wij eten, jullie eten, zij eten",
+    "ovt": "ik at, jij at, hij at, wij aten, jullie aten, zij aten",
+    "vtt": "ik heb gegeten, jij hebt gegeten, hij heeft gegeten, wij hebben gegeten, jullie hebben gegeten, zij hebben gegeten",
+    "futur": "ik zal eten, jij zult eten, hij zal eten, wij zullen eten, jullie zullen eten, zij zullen eten"
    },
    "questionsTexte": {
     "present": [
@@ -10815,9 +10894,11 @@
      "Zullen jullie eten?",
      "Zullen zij eten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "eten, at, aten, heeft gegeten"
   },
   {
+   "rang": 41,
    "inf": "drinken",
    "fr": "boire",
    "primitifs": "drinken – dronk (dronken) – heeft gedronken",
@@ -11041,10 +11122,10 @@
     ]
    },
    "lecture": {
-    "present": "ik drink, jij drinkt, u drinkt, hij drinkt, wij drinken, jullie drinken, zij drinken",
-    "ovt": "ik dronk, jij dronk, u dronk, hij dronk, wij dronken, jullie dronken, zij dronken",
-    "vtt": "ik heb gedronken, jij hebt gedronken, u hebt gedronken, hij heeft gedronken, wij hebben gedronken, jullie hebben gedronken, zij hebben gedronken",
-    "futur": "ik zal drinken, jij zult drinken, u zult drinken, hij zal drinken, wij zullen drinken, jullie zullen drinken, zij zullen drinken"
+    "present": "ik drink, jij drinkt, hij drinkt, wij drinken, jullie drinken, zij drinken",
+    "ovt": "ik dronk, jij dronk, hij dronk, wij dronken, jullie dronken, zij dronken",
+    "vtt": "ik heb gedronken, jij hebt gedronken, hij heeft gedronken, wij hebben gedronken, jullie hebben gedronken, zij hebben gedronken",
+    "futur": "ik zal drinken, jij zult drinken, hij zal drinken, wij zullen drinken, jullie zullen drinken, zij zullen drinken"
    },
    "questionsTexte": {
     "present": [
@@ -11083,9 +11164,11 @@
      "Zullen jullie drinken?",
      "Zullen zij drinken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "drinken, dronk, dronken, heeft gedronken"
   },
   {
+   "rang": 42,
    "inf": "slapen",
    "fr": "dormir",
    "primitifs": "slapen – sliep (sliepen) – heeft geslapen",
@@ -11309,10 +11392,10 @@
     ]
    },
    "lecture": {
-    "present": "ik slaap, jij slaapt, u slaapt, hij slaapt, wij slapen, jullie slapen, zij slapen",
-    "ovt": "ik sliep, jij sliep, u sliep, hij sliep, wij sliepen, jullie sliepen, zij sliepen",
-    "vtt": "ik heb geslapen, jij hebt geslapen, u hebt geslapen, hij heeft geslapen, wij hebben geslapen, jullie hebben geslapen, zij hebben geslapen",
-    "futur": "ik zal slapen, jij zult slapen, u zult slapen, hij zal slapen, wij zullen slapen, jullie zullen slapen, zij zullen slapen"
+    "present": "ik slaap, jij slaapt, hij slaapt, wij slapen, jullie slapen, zij slapen",
+    "ovt": "ik sliep, jij sliep, hij sliep, wij sliepen, jullie sliepen, zij sliepen",
+    "vtt": "ik heb geslapen, jij hebt geslapen, hij heeft geslapen, wij hebben geslapen, jullie hebben geslapen, zij hebben geslapen",
+    "futur": "ik zal slapen, jij zult slapen, hij zal slapen, wij zullen slapen, jullie zullen slapen, zij zullen slapen"
    },
    "questionsTexte": {
     "present": [
@@ -11351,9 +11434,11 @@
      "Zullen jullie slapen?",
      "Zullen zij slapen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "slapen, sliep, sliepen, heeft geslapen"
   },
   {
+   "rang": 43,
    "inf": "zoeken",
    "fr": "chercher",
    "primitifs": "zoeken – zocht (zochten) – heeft gezocht",
@@ -11577,10 +11662,10 @@
     ]
    },
    "lecture": {
-    "present": "ik zoek, jij zoekt, u zoekt, hij zoekt, wij zoeken, jullie zoeken, zij zoeken",
-    "ovt": "ik zocht, jij zocht, u zocht, hij zocht, wij zochten, jullie zochten, zij zochten",
-    "vtt": "ik heb gezocht, jij hebt gezocht, u hebt gezocht, hij heeft gezocht, wij hebben gezocht, jullie hebben gezocht, zij hebben gezocht",
-    "futur": "ik zal zoeken, jij zult zoeken, u zult zoeken, hij zal zoeken, wij zullen zoeken, jullie zullen zoeken, zij zullen zoeken"
+    "present": "ik zoek, jij zoekt, hij zoekt, wij zoeken, jullie zoeken, zij zoeken",
+    "ovt": "ik zocht, jij zocht, hij zocht, wij zochten, jullie zochten, zij zochten",
+    "vtt": "ik heb gezocht, jij hebt gezocht, hij heeft gezocht, wij hebben gezocht, jullie hebben gezocht, zij hebben gezocht",
+    "futur": "ik zal zoeken, jij zult zoeken, hij zal zoeken, wij zullen zoeken, jullie zullen zoeken, zij zullen zoeken"
    },
    "questionsTexte": {
     "present": [
@@ -11619,9 +11704,11 @@
      "Zullen jullie zoeken?",
      "Zullen zij zoeken?"
     ]
-   }
+   },
+   "lecturePrimitifs": "zoeken, zocht, zochten, heeft gezocht"
   },
   {
+   "rang": 44,
    "inf": "leven",
    "fr": "vivre",
    "primitifs": "leven – leefde (leefden) – heeft geleefd",
@@ -11845,10 +11932,10 @@
     ]
    },
    "lecture": {
-    "present": "ik leef, jij leeft, u leeft, hij leeft, wij leven, jullie leven, zij leven",
-    "ovt": "ik leefde, jij leefde, u leefde, hij leefde, wij leefden, jullie leefden, zij leefden",
-    "vtt": "ik heb geleefd, jij hebt geleefd, u hebt geleefd, hij heeft geleefd, wij hebben geleefd, jullie hebben geleefd, zij hebben geleefd",
-    "futur": "ik zal leven, jij zult leven, u zult leven, hij zal leven, wij zullen leven, jullie zullen leven, zij zullen leven"
+    "present": "ik leef, jij leeft, hij leeft, wij leven, jullie leven, zij leven",
+    "ovt": "ik leefde, jij leefde, hij leefde, wij leefden, jullie leefden, zij leefden",
+    "vtt": "ik heb geleefd, jij hebt geleefd, hij heeft geleefd, wij hebben geleefd, jullie hebben geleefd, zij hebben geleefd",
+    "futur": "ik zal leven, jij zult leven, hij zal leven, wij zullen leven, jullie zullen leven, zij zullen leven"
    },
    "questionsTexte": {
     "present": [
@@ -11887,9 +11974,11 @@
      "Zullen jullie leven?",
      "Zullen zij leven?"
     ]
-   }
+   },
+   "lecturePrimitifs": "leven, leefde, leefden, heeft geleefd"
   },
   {
+   "rang": 45,
    "inf": "betalen",
    "fr": "payer",
    "primitifs": "betalen – betaalde (betaalden) – heeft betaald",
@@ -12113,10 +12202,10 @@
     ]
    },
    "lecture": {
-    "present": "ik betaal, jij betaalt, u betaalt, hij betaalt, wij betalen, jullie betalen, zij betalen",
-    "ovt": "ik betaalde, jij betaalde, u betaalde, hij betaalde, wij betaalden, jullie betaalden, zij betaalden",
-    "vtt": "ik heb betaald, jij hebt betaald, u hebt betaald, hij heeft betaald, wij hebben betaald, jullie hebben betaald, zij hebben betaald",
-    "futur": "ik zal betalen, jij zult betalen, u zult betalen, hij zal betalen, wij zullen betalen, jullie zullen betalen, zij zullen betalen"
+    "present": "ik betaal, jij betaalt, hij betaalt, wij betalen, jullie betalen, zij betalen",
+    "ovt": "ik betaalde, jij betaalde, hij betaalde, wij betaalden, jullie betaalden, zij betaalden",
+    "vtt": "ik heb betaald, jij hebt betaald, hij heeft betaald, wij hebben betaald, jullie hebben betaald, zij hebben betaald",
+    "futur": "ik zal betalen, jij zult betalen, hij zal betalen, wij zullen betalen, jullie zullen betalen, zij zullen betalen"
    },
    "questionsTexte": {
     "present": [
@@ -12155,9 +12244,11 @@
      "Zullen jullie betalen?",
      "Zullen zij betalen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "betalen, betaalde, betaalden, heeft betaald"
   },
   {
+   "rang": 46,
    "inf": "kopen",
    "fr": "acheter",
    "primitifs": "kopen – kocht (kochten) – heeft gekocht",
@@ -12381,10 +12472,10 @@
     ]
    },
    "lecture": {
-    "present": "ik koop, jij koopt, u koopt, hij koopt, wij kopen, jullie kopen, zij kopen",
-    "ovt": "ik kocht, jij kocht, u kocht, hij kocht, wij kochten, jullie kochten, zij kochten",
-    "vtt": "ik heb gekocht, jij hebt gekocht, u hebt gekocht, hij heeft gekocht, wij hebben gekocht, jullie hebben gekocht, zij hebben gekocht",
-    "futur": "ik zal kopen, jij zult kopen, u zult kopen, hij zal kopen, wij zullen kopen, jullie zullen kopen, zij zullen kopen"
+    "present": "ik koop, jij koopt, hij koopt, wij kopen, jullie kopen, zij kopen",
+    "ovt": "ik kocht, jij kocht, hij kocht, wij kochten, jullie kochten, zij kochten",
+    "vtt": "ik heb gekocht, jij hebt gekocht, hij heeft gekocht, wij hebben gekocht, jullie hebben gekocht, zij hebben gekocht",
+    "futur": "ik zal kopen, jij zult kopen, hij zal kopen, wij zullen kopen, jullie zullen kopen, zij zullen kopen"
    },
    "questionsTexte": {
     "present": [
@@ -12423,9 +12514,11 @@
      "Zullen jullie kopen?",
      "Zullen zij kopen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "kopen, kocht, kochten, heeft gekocht"
   },
   {
+   "rang": 47,
    "inf": "helpen",
    "fr": "aider",
    "primitifs": "helpen – hielp (hielpen) – heeft geholpen",
@@ -12649,10 +12742,10 @@
     ]
    },
    "lecture": {
-    "present": "ik help, jij helpt, u helpt, hij helpt, wij helpen, jullie helpen, zij helpen",
-    "ovt": "ik hielp, jij hielp, u hielp, hij hielp, wij hielpen, jullie hielpen, zij hielpen",
-    "vtt": "ik heb geholpen, jij hebt geholpen, u hebt geholpen, hij heeft geholpen, wij hebben geholpen, jullie hebben geholpen, zij hebben geholpen",
-    "futur": "ik zal helpen, jij zult helpen, u zult helpen, hij zal helpen, wij zullen helpen, jullie zullen helpen, zij zullen helpen"
+    "present": "ik help, jij helpt, hij helpt, wij helpen, jullie helpen, zij helpen",
+    "ovt": "ik hielp, jij hielp, hij hielp, wij hielpen, jullie hielpen, zij hielpen",
+    "vtt": "ik heb geholpen, jij hebt geholpen, hij heeft geholpen, wij hebben geholpen, jullie hebben geholpen, zij hebben geholpen",
+    "futur": "ik zal helpen, jij zult helpen, hij zal helpen, wij zullen helpen, jullie zullen helpen, zij zullen helpen"
    },
    "questionsTexte": {
     "present": [
@@ -12691,9 +12784,11 @@
      "Zullen jullie helpen?",
      "Zullen zij helpen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "helpen, hielp, hielpen, heeft geholpen"
   },
   {
+   "rang": 48,
    "inf": "rijden",
    "fr": "rouler, conduire",
    "primitifs": "rijden – reed (reden) – heeft/is gereden",
@@ -12937,10 +13032,10 @@
     ]
    },
    "lecture": {
-    "present": "ik rijd, jij rijdt, u rijdt, hij rijdt, wij rijden, jullie rijden, zij rijden",
-    "ovt": "ik reed, jij reed, u reed, hij reed, wij reden, jullie reden, zij reden",
-    "vtt": "ik heb gereden, jij hebt gereden, u hebt gereden, hij heeft gereden, wij hebben gereden, jullie hebben gereden, zij hebben gereden",
-    "futur": "ik zal rijden, jij zult rijden, u zult rijden, hij zal rijden, wij zullen rijden, jullie zullen rijden, zij zullen rijden"
+    "present": "ik rijd, jij rijdt, hij rijdt, wij rijden, jullie rijden, zij rijden",
+    "ovt": "ik reed, jij reed, hij reed, wij reden, jullie reden, zij reden",
+    "vtt": "ik heb gereden, jij hebt gereden, hij heeft gereden, wij hebben gereden, jullie hebben gereden, zij hebben gereden",
+    "futur": "ik zal rijden, jij zult rijden, hij zal rijden, wij zullen rijden, jullie zullen rijden, zij zullen rijden"
    },
    "questionsTexte": {
     "present": [
@@ -12979,9 +13074,11 @@
      "Zullen jullie rijden?",
      "Zullen zij rijden?"
     ]
-   }
+   },
+   "lecturePrimitifs": "rijden, reed, reden, heeft gereden"
   },
   {
+   "rang": 49,
    "inf": "vallen",
    "fr": "tomber",
    "primitifs": "vallen – viel (vielen) – is gevallen",
@@ -13203,10 +13300,10 @@
     ]
    },
    "lecture": {
-    "present": "ik val, jij valt, u valt, hij valt, wij vallen, jullie vallen, zij vallen",
-    "ovt": "ik viel, jij viel, u viel, hij viel, wij vielen, jullie vielen, zij vielen",
-    "vtt": "ik ben gevallen, jij bent gevallen, u bent gevallen, hij is gevallen, wij zijn gevallen, jullie zijn gevallen, zij zijn gevallen",
-    "futur": "ik zal vallen, jij zult vallen, u zult vallen, hij zal vallen, wij zullen vallen, jullie zullen vallen, zij zullen vallen"
+    "present": "ik val, jij valt, hij valt, wij vallen, jullie vallen, zij vallen",
+    "ovt": "ik viel, jij viel, hij viel, wij vielen, jullie vielen, zij vielen",
+    "vtt": "ik ben gevallen, jij bent gevallen, hij is gevallen, wij zijn gevallen, jullie zijn gevallen, zij zijn gevallen",
+    "futur": "ik zal vallen, jij zult vallen, hij zal vallen, wij zullen vallen, jullie zullen vallen, zij zullen vallen"
    },
    "questionsTexte": {
     "present": [
@@ -13245,9 +13342,11 @@
      "Zullen jullie vallen?",
      "Zullen zij vallen?"
     ]
-   }
+   },
+   "lecturePrimitifs": "vallen, viel, vielen, is gevallen"
   },
   {
+   "rang": 50,
    "inf": "wachten",
    "fr": "attendre",
    "primitifs": "wachten – wachtte (wachtten) – heeft gewacht",
@@ -13471,10 +13570,10 @@
     ]
    },
    "lecture": {
-    "present": "ik wacht, jij wacht, u wacht, hij wacht, wij wachten, jullie wachten, zij wachten",
-    "ovt": "ik wachtte, jij wachtte, u wachtte, hij wachtte, wij wachtten, jullie wachtten, zij wachtten",
-    "vtt": "ik heb gewacht, jij hebt gewacht, u hebt gewacht, hij heeft gewacht, wij hebben gewacht, jullie hebben gewacht, zij hebben gewacht",
-    "futur": "ik zal wachten, jij zult wachten, u zult wachten, hij zal wachten, wij zullen wachten, jullie zullen wachten, zij zullen wachten"
+    "present": "ik wacht, jij wacht, hij wacht, wij wachten, jullie wachten, zij wachten",
+    "ovt": "ik wachtte, jij wachtte, hij wachtte, wij wachtten, jullie wachtten, zij wachtten",
+    "vtt": "ik heb gewacht, jij hebt gewacht, hij heeft gewacht, wij hebben gewacht, jullie hebben gewacht, zij hebben gewacht",
+    "futur": "ik zal wachten, jij zult wachten, hij zal wachten, wij zullen wachten, jullie zullen wachten, zij zullen wachten"
    },
    "questionsTexte": {
     "present": [
@@ -13513,7 +13612,8 @@
      "Zullen jullie wachten?",
      "Zullen zij wachten?"
     ]
-   }
+   },
+   "lecturePrimitifs": "wachten, wachtte, wachtten, heeft gewacht"
   }
  ]
 }

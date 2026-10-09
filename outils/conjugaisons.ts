@@ -147,7 +147,8 @@ function conjuguer(v: Verbe) {
 
   // ce qu'on lit à voix haute après un exercice (le même texte sert aux voix mp3)
   const temps = Object.keys(TEMPS) as Temps[]
-  const lecture = Object.fromEntries(temps.map(t => [t, PERSONNES.map((_, i) => `${PRONOMS[i][0]} ${formes[t][i][0]}`).join(', ')]))
+  // sans « u » : dans le tableau de conjugaison, u partage la ligne de jij
+  const lecture = Object.fromEntries(temps.map(t => [t, PERSONNES.map((_, i) => `${PRONOMS[i][0]} ${formes[t][i][0]}`).filter((_, i) => i !== 2).join(', ')]))
   const questionsTexte = Object.fromEntries(temps.map(t => [t, questions[t].map(q => q[0][0].toUpperCase() + q[0].slice(1) + '?')]))
   const auxAffiche = aux === 'zijn' ? 'is' : aux === 'hebben' ? 'heeft' : 'heeft/is'
   return {
@@ -159,6 +160,8 @@ function conjuguer(v: Verbe) {
     questions,
     lecture,
     questionsTexte,
+    // « slapen, sliep, sliepen, heeft geslapen »
+    lecturePrimitifs: `${v.inf}, ${ovt[0][0]}, ${ovt[4][0]}, ${formes.vtt[3][0]}`,
   }
 }
 
@@ -167,7 +170,8 @@ const sortie = {
   personnes: PERSONNES,
   pronoms: PRONOMS,
   temps: TEMPS,
-  verbes: VERBES.map(conjuguer),
+  // dans l'ordre de fréquence : rang 1 = zijn
+  verbes: VERBES.map((v, i) => ({ rang: i + 1, ...conjuguer(v) })),
 }
 const chemin = new URL('../src/data/conjugaisons.json', import.meta.url)
 writeFileSync(chemin, JSON.stringify(sortie, null, 1) + '\n')

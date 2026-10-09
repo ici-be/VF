@@ -8,10 +8,11 @@ import { parler } from '../lib/voix'
 import { choixMatieres, nomChapitre } from './Accueil'
 import { SEP } from '../lib/reglages'
 import { nombre } from '../lib/texte'
+import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 
-export type Vue = 'tous' | 'revoir'
+export type Vue = 'tous' | 'revoir' | 'primitifs'
 
 interface Props {
   voc: Vocabulaire
@@ -39,7 +40,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const choisis = motsChoisis(voc, reglages)
   const aRevoir = motsARevoir(choisis)
   const suivis = new Map<string, Suivi>(aRevoir.map(x => [x.mot.id, x.suivi]))
-  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : choisis).filter(m =>
+  // les temps primitifs : les verbes les plus courants du choix, dans l'ordre de fréquence
+  const verbesPrimitifs = choisis.filter(m => estPrimitif(m.verbe)).sort((a, b) => verbe(a.verbe!)!.rang - verbe(b.verbe!)!.rang)
+  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : choisis).filter(m =>
     !q || [m.nl, m.fr, m.definition, m.remarque, m.exemple].some(t => simple(t).includes(q)))
   // « à revoir » : dans l'ordre de priorité, sans regroupement par chapitre
   const trier = vue === 'tous' ? tri : null
@@ -69,7 +72,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
     return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres: ch.length ? ch.join(', ') : 'tous les chapitres' }
   })
-  const titreImpression = `${vue === 'revoir' ? 'Mots à revoir' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
+  const titreImpression = `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
   // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
   useEffect(() => {
     const avant = document.title
@@ -85,14 +88,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     <main class="page liste">
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
-        <h1>{vue === 'revoir' ? 'Mots à revoir' : 'Vocabulaire néerlandais'}</h1>
+        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : 'Vocabulaire néerlandais'}</h1>
         {titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
-        <p class="meta">{nombre(mots.length, 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
+        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
       <div class="haut">
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
-          <h1>{vue === 'revoir' ? 'Mots à revoir' : 'Liste des mots'}</h1>
+          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Liste des mots'}</h1>
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</p>
@@ -100,6 +103,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
       <div class="segment">
         <button aria-pressed={vue === 'tous'} onClick={() => setVue('tous')}>Tous les mots <span class="n">{choisis.length}</span></button>
         <button aria-pressed={vue === 'revoir'} onClick={() => setVue('revoir')}>À revoir <span class="n">{aRevoir.length}</span></button>
+        {verbesPrimitifs.length > 0 && (
+          <button aria-pressed={vue === 'primitifs'} onClick={() => setVue('primitifs')}>Temps primitifs <span class="n">{verbesPrimitifs.length}</span></button>
+        )}
       </div>
       {vue === 'revoir' && (
         <div class="bandeau">
@@ -121,7 +127,26 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
           </div>
         )}
       </div>
-      {mots.length === 0
+      {vue === 'primitifs' && mots.length > 0 && (
+        <div class="tableau primitifs">
+          <table>
+            <thead><tr><th>Infinitief</th>{PRIMITIFS.map(p => <th>{p.nom}</th>)}<th>Français</th></tr></thead>
+            <tbody>
+              {mots.map(m => {
+                const v = verbe(m.verbe!)!
+                return (
+                  <tr>
+                    <td class="nl">{v.inf}<button class="ecouter" onClick={() => parler(v.lecturePrimitifs, 'nl')} aria-label={`Écouter ${v.inf}`} title="Écouter">🔊</button></td>
+                    {PRIMITIFS.map(p => <td class="forme">{p.formes(v).join(' / ')}</td>)}
+                    <td>{v.fr}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {vue === 'primitifs' ? null : mots.length === 0
         ? <p class="vide">{vue === 'revoir' && !q ? 'Aucun mot raté récemment dans ce choix. Bravo ! 🎉' : 'Aucun mot ne correspond.'}</p>
         : (
           <div class="tableau">

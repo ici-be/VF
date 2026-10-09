@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { corrigerForme, nomTemps, PERSONNES, TEMPS, verbe, type Temps } from '../../lib/conjugaison'
+import { corrigerForme, formesLigne, LIGNES, nomTemps, TEMPS, verbe, type Temps } from '../../lib/conjugaison'
 import type { Correction, Resultat } from '../../lib/correction'
 import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Infos } from './commun'
@@ -8,7 +8,7 @@ import { dire, EntreeSuivant, Infos } from './commun'
 export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
   const v = verbe(carte.mot.verbe!)!
   const temps = useMemo<Temps>(() => (reglages.temps === 'mix' ? TEMPS[Math.floor(Math.random() * TEMPS.length)].id : reglages.temps), [])
-  const [valeurs, setValeurs] = useState<string[]>(() => PERSONNES.map(() => ''))
+  const [valeurs, setValeurs] = useState<string[]>(() => LIGNES.map(() => ''))
   const [corrections, setCorrections] = useState<Correction[] | null>(null)
   const [resultat, setResultat] = useState<Resultat | null>(null)
   const champs = useRef<(HTMLInputElement | null)[]>([])
@@ -17,7 +17,7 @@ export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: Props
 
   const valider = (abandon = false) => {
     if (resultat) { suivant(resultat); return }
-    const cs = PERSONNES.map((_, i) => (abandon ? { resultat: 'faux' as const, message: '' } : corrigerForme(valeurs[i], v, temps, i)))
+    const cs = LIGNES.map((_, i) => (abandon ? { resultat: 'faux' as const, message: '' } : corrigerForme(valeurs[i], v, temps, i)))
     const fautes = cs.filter(c => c.resultat === 'faux').length
     const r: Resultat = fautes === 0 ? 'juste' : fautes === 1 ? 'presque' : 'faux'
     setCorrections(cs)
@@ -35,11 +35,11 @@ export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: Props
         <p class="astuce">{TEMPS.find(t => t.id === temps)!.aide}</p>
       </div>
       <form class="conjugaison" onSubmit={e => { e.preventDefault(); valider() }}>
-        {PERSONNES.map((p, i) => {
+        {LIGNES.map((ligne, i) => {
           const c = corrections?.[i]
           return (
             <div class={`ligne-conj ${c ? c.resultat : ''}`}>
-              <label for={`conj${i}`}>{p}</label>
+              <label for={`conj${i}`}>{ligne.nom}</label>
               {!c
                 ? <input
                     id={`conj${i}`} ref={el => { champs.current[i] = el }} value={valeurs[i]}
@@ -47,7 +47,7 @@ export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: Props
                     onKeyDown={e => {
                       if (e.key !== 'Enter') return
                       e.preventDefault()
-                      if (i < PERSONNES.length - 1) champs.current[i + 1]?.focus()
+                      if (i < LIGNES.length - 1) champs.current[i + 1]?.focus()
                       else valider()
                     }}
                     autocomplete="off" autocapitalize="off" spellcheck={false} lang="nl"
@@ -55,7 +55,7 @@ export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: Props
                 : <span class="corrige">
                     {c.resultat === 'juste'
                       ? valeurs[i].trim()
-                      : <>{valeurs[i].trim() && <s class="tape">{valeurs[i].trim()}</s>} <b>{v.formes[temps][i].join(' / ')}</b></>}
+                      : <>{valeurs[i].trim() && <s class="tape">{valeurs[i].trim()}</s>} <b>{formesLigne(v, temps, i).join(' / ')}</b></>}
                   </span>}
             </div>
           )
