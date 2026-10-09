@@ -31,8 +31,8 @@ export function Conjugaison({ carte, reglages, pause, suivant, annoncer }: Props
     <>
       <div class="carte">
         <p class="mot">{v.inf}</p>
-        <p class="astuce"><strong>{v.fr}</strong> · {nomTemps(temps)}</p>
-        <p class="astuce">{TEMPS.find(t => t.id === temps)!.aide}</p>
+        <p class="sous-titre"><strong>{v.fr}</strong> · {nomTemps(temps)}</p>
+        <p class="consigne">{TEMPS.find(t => t.id === temps)!.aide}</p>
       </div>
       <form class="conjugaison" onSubmit={e => { e.preventDefault(); valider() }}>
         {LIGNES.map((ligne, i) => {

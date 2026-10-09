@@ -109,6 +109,11 @@ button { cursor: pointer; }
 .langue { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; background: var(--panel-2); color: var(--muted); }
 .langue.nl { background: var(--mid-bg); color: var(--mid); }
 .langue.fr { background: var(--blue-bg); color: var(--blue); }
+/* pas de marges propres aux paragraphes : l'espacement de la carte suffit */
+.carte > p { margin: 0; }
+.carte .sous-titre { font-size: 1.2rem; color: var(--fg); }
+.carte .sous-titre strong { color: var(--blue); }
+.carte .consigne { font-size: 1rem; color: var(--muted); max-width: 52ch; }
 .mot { font: 700 clamp(1.7rem, 6vw, 2.6rem)/1.15 var(--display); margin: 0; overflow-wrap: anywhere; text-wrap: balance; }
 .mot.petit { font-size: clamp(1.3rem, 4.5vw, 1.8rem); }
 .repondu { font: 700 clamp(1.4rem, 5vw, 2rem)/1.2 var(--display); color: var(--ok); overflow-wrap: anywhere; }

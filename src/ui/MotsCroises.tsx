@@ -55,6 +55,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
   const debut = useRef(Date.now())
   const champs = useRef<Record<string, HTMLInputElement | null>>({})
   const annonces = useRef<Set<MG>>(new Set())
+  const lecture = useRef(0)
   // les mots déjà trouvés quand elle a demandé la solution (les autres sont « révélés »)
   const [avantSolution, setAvantSolution] = useState<Set<MG> | null>(null)
 
@@ -68,7 +69,12 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
       if (annonces.current.has(m)) continue
       annonces.current.add(m)
       if (solution) continue
-      if (reglages.voix) parler(nlComplet(m.donnee), 'nl')
+      if (reglages.voix) {
+        // le mot néerlandais, puis sa traduction (« beginnen… commencer ») ;
+        // si un autre mot est trouvé entre-temps, cette traduction-là ne vient pas le couper
+        const moi = ++lecture.current
+        parler(nlComplet(m.donnee), 'nl').then(() => { if (moi === lecture.current) parler(m.donnee.fr, 'fr') })
+      }
       noter(m.donnee.id, cases(m).some(k => aides.has(k)) ? 'presque' : 'juste')
     }
     if (fini && !solution) confettis()

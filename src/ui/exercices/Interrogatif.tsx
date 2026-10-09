@@ -19,8 +19,8 @@ export function Interrogatif({ carte, reglages, pause, suivant, annoncer }: Prop
     <>
       <div class="carte">
         <p class="mot">{affirmation(v, temps, personne)}</p>
-        <p class="astuce">{v.inf} – <strong>{v.fr}</strong> · {nomTemps(temps)}</p>
-        <p class="astuce">Mets cette phrase à la forme interrogative.</p>
+        <p class="sous-titre">{v.inf} – <strong>{v.fr}</strong> · {nomTemps(temps)}</p>
+        <p class="consigne">Mets cette phrase à la forme interrogative.</p>
       </div>
       <Saisie
         langue="nl" attendu={question} mot={{ ...carte.mot, remarque: v.primitifs }} pause={pause}

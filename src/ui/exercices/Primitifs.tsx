@@ -29,8 +29,8 @@ export function Primitifs({ carte, reglages, pause, suivant, annoncer }: PropsEx
     <>
       <div class="carte">
         <p class="mot">{v.inf}</p>
-        <p class="astuce"><strong>{v.fr}</strong> · temps primitifs</p>
-        <p class="astuce">Imparfait singulier et pluriel, puis participe passé avec son auxiliaire (heeft / is).</p>
+        <p class="sous-titre"><strong>{v.fr}</strong> · temps primitifs</p>
+        <p class="consigne">Imparfait singulier et pluriel, puis participe passé avec son auxiliaire (heeft / is).</p>
       </div>
       <form class="conjugaison" onSubmit={e => { e.preventDefault(); valider() }}>
         {PRIMITIFS.map((p, i) => {
