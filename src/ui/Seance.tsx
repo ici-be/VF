@@ -110,10 +110,10 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         <span class="quoi">{ex.nom}{ex.beta ? ' (bêta)' : ''} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
-        <button class="icone" onClick={() => setPause(true)} aria-label="Pause" title="Pause (Échap)">⏸</button>
+        <button class="icone" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
       </div>
       <div class="progres"><div style={{ width: `${(i / file.length) * 100}%` }} /></div>
-      <main class="scene">
+      <main class={`scene ${pause ? 'en-pause' : ''}`}>
         {ex.id === 'defilement' && <Defilement key={i} {...props} />}
         {ex.id === 'ecrit' && <Ecrit key={i} {...props} />}
         {ex.id === 'qcm' && <Qcm key={i} {...props} />}
@@ -124,15 +124,11 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'dictee' && <Dictee key={i} {...props} />}
       </main>
       {pause && (
-        <div class="voile" role="dialog" aria-modal="true" aria-label="Pause">
-          <div class="carte">
-            <h2>Pause</h2>
-            <p>{nombre(i, 'mot vu', 'mots vus')} sur {file.length}.</p>
-            <div class="actions">
-              <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
-              <button class="second" onClick={quitter}>Arrêter</button>
-            </div>
-          </div>
+        // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
+        <div class="bandeau-pause" role="status">
+          <span class="quoi-pause"><b>En pause</b> · {nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
+          <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
+          <button class="second" onClick={quitter}>Arrêter</button>
         </div>
       )}
     </>
