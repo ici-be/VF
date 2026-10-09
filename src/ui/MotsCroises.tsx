@@ -55,6 +55,8 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
   const debut = useRef(Date.now())
   const champs = useRef<Record<string, HTMLInputElement | null>>({})
   const annonces = useRef<Set<MG>>(new Set())
+  // les mots déjà trouvés quand elle a demandé la solution (les autres sont « révélés »)
+  const [avantSolution, setAvantSolution] = useState<Set<MG> | null>(null)
 
   const trouve = (m: MG) => cases(m).every((k, i) => saisie[k] === m.lettres[i])
   const trouves = grille.mots.filter(trouve)
@@ -142,6 +144,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
   }
 
   const montrerSolution = () => {
+    setAvantSolution(new Set(grille.mots.filter(trouve)))
     for (const m of grille.mots) if (!trouve(m)) noter(m.donnee.id, 'faux')
     setSolution(true)
     setSaisie(Object.fromEntries(grille.mots.flatMap(m => cases(m).map((k, i) => [k, m.lettres[i]]))))
@@ -156,7 +159,14 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
   const indices = (sens: MG['sens']) => grille.mots.filter(m => m.sens === sens).map(m => (
     <li class={`${m === actif ? 'actif' : ''} ${trouve(m) ? 'trouve' : ''}`} data-cases={cases(m).join(' ')}>
       <button onClick={() => choisirMot(m)}>
-        <b>{m.numero}</b> {m.donnee.fr} <span class="long">({m.lettres.length})</span>
+        <b>{m.numero}</b>
+        <span class="def">
+          {m.donnee.fr} <span class="long">({m.lettres.length})</span>
+          {trouve(m) && (() => {
+            const parElle = !avantSolution || avantSolution.has(m)
+            return <span class={`mot-trouve ${parElle ? '' : 'revele'}`}>→ {nlComplet(m.donnee)}{parElle ? ' ✓' : ''}</span>
+          })()}
+        </span>
       </button>
     </li>
   ))
@@ -188,6 +198,8 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
             </div>
           </div>
         )}
+        <div class="jeu-corps">
+        <div class="jeu-grille">
         <div class="grille-zone">
           <div class="grille" style={{ '--colonnes': grille.colonnes } as Record<string, number>} role="grid" aria-label="Grille de mots croisés">
             {grille.cases.flatMap((ligne, l) => ligne.map((lettre, c) => {
@@ -220,9 +232,11 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
             <button class="second" onClick={montrerSolution}>Solution</button>
           </div>
         )}
+        </div>
         <div class="indices">
           <section><h2>Horizontalement</h2><ol>{indices('horizontal')}</ol></section>
           <section><h2>Verticalement</h2><ol>{indices('vertical')}</ol></section>
+        </div>
         </div>
       </main>
     </>

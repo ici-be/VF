@@ -286,7 +286,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .indices b { min-width: 1.4em; color: var(--accent); font-variant-numeric: tabular-nums; }
 .indices .long { color: var(--muted); font-size: .85rem; }
 .indices li.actif button { background: var(--blue-bg); }
-.indices li.trouve button { color: var(--muted); text-decoration: line-through; }
+.indices li.trouve button { color: var(--muted); }
+.indices .def { min-width: 0; }
+.indices .mot-trouve { display: inline-block; margin-left: 6px; color: var(--ok); font-weight: 700; }
+.indices .mot-trouve.revele { color: var(--muted); }
 .indices li.trouve b { color: var(--ok); }
 .haut-jeu { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; background: var(--bg); }
 .haut-jeu .barre { position: static; }
@@ -352,4 +355,14 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau.primitifs table { table-layout: auto; font-size: 10pt; }
   .tableau.primitifs th, .tableau.primitifs td { width: auto !important; padding: 1mm 2mm; }
   .tableau.primitifs tr:nth-child(5n) td { border-bottom: .8pt solid #888; }   /* un repère tous les 5 verbes */
+}
+
+/* grand écran : la grille à gauche, les définitions à droite (toujours visibles) */
+.jeu-corps { display: flex; flex-direction: column; gap: 16px; }
+.jeu-grille { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (min-width: 900px) {
+  .page.jeu { max-width: 1240px; }
+  .jeu-corps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); align-items: start; gap: 28px; }
+  .jeu-corps .grille { --taille: clamp(22px, calc((min(100vw, 1240px) - 460px) / var(--colonnes) - 2px), 40px); }
+  .jeu-corps .indices { grid-template-columns: 1fr; position: sticky; top: 130px; max-height: calc(100vh - 150px); overflow-y: auto; }
 }
