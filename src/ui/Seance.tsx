@@ -9,6 +9,8 @@ import { Defilement } from './exercices/Defilement'
 import { Ecrit } from './exercices/Ecrit'
 import { Qcm } from './exercices/Qcm'
 import { DeHet } from './exercices/DeHet'
+import { Definitions } from './exercices/Definitions'
+import { Trous } from './exercices/Trous'
 
 export interface Bilan {
   serie: Carte[]
@@ -60,7 +62,10 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   }, [ex.id])
   useEffect(() => { if (pause) taire() }, [pause])
   // les voix de toute la série, téléchargées dès le départ
-  useEffect(() => { if (reglages.voix) precharger(serie.flatMap(c => [question(c), reponse(c)])) }, [])
+  useEffect(() => { if (reglages.voix) precharger(serie.flatMap(c => [
+    question(c), reponse(c),
+    ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: 'nl' as const })),
+  ])) }, [])
 
   if (!file.length) {
     return <div class="vide"><p>Aucun mot à réviser avec ces réglages.</p><button class="go" onClick={quitter}>Retour</button></div>
@@ -109,6 +114,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'ecrit' && <Ecrit key={i} {...props} />}
         {ex.id === 'qcm' && <Qcm key={i} {...props} />}
         {ex.id === 'dehet' && <DeHet key={i} {...props} />}
+        {ex.id === 'definitions' && <Definitions key={i} {...props} />}
+        {ex.id === 'trous' && <Trous key={i} {...props} />}
       </main>
       {pause && (
         <div class="voile" role="dialog" aria-modal="true" aria-label="Pause">

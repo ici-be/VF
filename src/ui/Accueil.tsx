@@ -90,7 +90,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {ex.id === 'dehet' ? 'des noms avec de/het' : 'des mots'}).</p>}
+      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple' }[ex.id as string] ?? 'des mots'}).</p>}
 
       <section class="bloc">
         <h2>Matière</h2>
@@ -152,6 +152,15 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
               </div>
             </div>
           )}
+          {ex.avecRepondre && (
+            <div class="reglage">
+              <span class="lbl">Réponse</span>
+              <div class="segment">
+                <button aria-pressed={r.repondre === 'choix'} onClick={() => maj({ repondre: 'choix' })}>Choisir parmi 4</button>
+                <button aria-pressed={r.repondre === 'ecrit'} onClick={() => maj({ repondre: 'ecrit' })}>Écrire le mot</button>
+              </div>
+            </div>
+          )}
           <div class="reglage">
             <span class="lbl">Nombre de mots</span>
             <div class="segment">
@@ -173,7 +182,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           </div>
           <div class="reglage">
             <label class="case"><input id="voix" type="checkbox" checked={r.voix} onChange={e => maj({ voix: (e.target as HTMLInputElement).checked })} /> Lire les mots à voix haute</label>
-            {r.exercice === 'ecrit' && (
+            {(r.exercice === 'ecrit' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
               <label class="case"><input id="article" type="checkbox" checked={r.exigerArticle} onChange={e => maj({ exigerArticle: (e.target as HTMLInputElement).checked })} /> Exiger l’article (de / het)</label>
             )}
           </div>

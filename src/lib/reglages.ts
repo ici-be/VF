@@ -1,10 +1,12 @@
 // Ce qu'on a choisi la dernière fois : proposé tel quel au lancement suivant.
 import { lire, ecrire } from './stockage'
 import type { Mot, Vocabulaire } from './mots'
+import { aDesTrous } from './trous'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'ecrit' | 'qcm' | 'dehet'
+export type ExerciceId = 'defilement' | 'ecrit' | 'qcm' | 'dehet' | 'definitions' | 'trous'
+export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
   id: ExerciceId
@@ -14,6 +16,8 @@ export interface Exercice {
   avecSens: boolean
   /** l'exercice avance-t-il tout seul (réglage de vitesse) ? */
   avecVitesse: boolean
+  /** répondre en choisissant parmi 4 ou en écrivant ? */
+  avecRepondre?: boolean
   /** mots utilisables par cet exercice */
   accepte: (m: Mot) => boolean
 }
@@ -22,6 +26,8 @@ export const EXERCICES: Exercice[] = [
   { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, accepte: () => true },
   { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
+  { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot néerlandais.', avecSens: false, avecVitesse: false, avecRepondre: true, accepte: m => m.definition !== '' },
+  { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, accepte: aDesTrous },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
 ]
 
@@ -40,6 +46,8 @@ export interface Reglages {
   voix: boolean
   exigerArticle: boolean
   ordre: Ordre
+  /** définitions : choisir parmi 4 ou écrire le mot */
+  repondre: Repondre
 }
 
 export const SEP = '␟'
@@ -47,7 +55,7 @@ export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP 
 
 const DEFAUT: Reglages = {
   matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
-  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles',
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix',
 }
 
 /** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */

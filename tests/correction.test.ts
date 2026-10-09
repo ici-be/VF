@@ -70,3 +70,17 @@ describe('QCM', () => {
     for (let k = 0; k < 20; k++) expect(leurres({ mot: tous[1], sens: 'nl-fr' }, tous)).not.toContain('la plante')
   })
 })
+
+import { synonymes } from '../src/lib/seance'
+describe('synonymes du tableau', () => {
+  const mot = (nl: string, fr: string): Mot => ({ id: nl, matiere: 'Aard', chapitre: '2', nl, det: 'de', fr, definition: '', exemple: '', remarque: '' })
+  const tous = [mot('themakaart', 'la carte thématique'), mot('thematische kaart', 'la carte thématique'), mot('legende', 'la légende'),
+    mot('schaal', "l'échelle"), mot('titel', 'le titre'), mot('atlas', "l'atlas")]
+  it('un synonyme n’est jamais un leurre', () => {
+    for (let k = 0; k < 20; k++) expect(leurres({ mot: tous[0], sens: 'fr-nl' }, tous)).not.toContain('de thematische kaart')
+  })
+  it('les synonymes sont trouvés', () => {
+    expect(synonymes({ mot: tous[0], sens: 'fr-nl' }, tous).map(m => m.nl)).toEqual(['thematische kaart'])
+    expect(synonymes({ mot: tous[0], sens: 'nl-fr' }, tous)).toEqual([])
+  })
+})

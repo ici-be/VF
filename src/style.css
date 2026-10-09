@@ -183,3 +183,13 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 @keyframes vider { from { width: 100%; } to { width: 0%; } }
+
+/* ---------- textes à trous ---------- */
+.phrase { font: 600 clamp(1.15rem, 3.6vw, 1.5rem)/2 var(--body); margin: 0; text-align: center; text-wrap: pretty; }
+.trou { font: inherit; text-align: center; border: 0; border-bottom: 2.5px solid var(--blue); background: var(--blue-bg); border-radius: 6px 6px 0 0; padding: 0 6px; margin: 0 2px; max-width: 100%; }
+.trou:focus { outline: none; border-bottom-color: var(--accent); }
+.trou-corrige { padding: 1px 8px; border-radius: 6px; font-weight: 700; }
+.trou-corrige.juste { background: var(--ok-bg); color: var(--ok); }
+.trou-corrige.presque { background: var(--mid-bg); color: var(--mid); }
+.trou-corrige.faux { background: var(--ko-bg); color: var(--ko); }
+.tape { color: var(--ko); margin-right: 6px; font-weight: 400; text-decoration-thickness: 2px; }

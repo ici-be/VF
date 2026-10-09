@@ -67,8 +67,10 @@ export function leurres(c: Carte, tous: Mot[], n = 3, hasard = Math.random): str
     tous.filter(memeMatiere),
     tous,
   ]
+  // un synonyme (même question, autre mot) serait juste aussi : jamais comme leurre
+  const q = simplifier(question(c).texte)
   const res: string[] = []
-  const vus = new Set([bonne])
+  const vus = new Set([bonne, ...tous.filter(m => simplifier(question({ ...c, mot: m }).texte) === q).map(m => simplifier(texte(m)))])
   for (const g of groupes) {
     for (const m of melanger(g, hasard)) {
       if (res.length >= n) return res
@@ -79,4 +81,10 @@ export function leurres(c: Carte, tous: Mot[], n = 3, hasard = Math.random): str
     }
   }
   return res
+}
+
+/** Les autres mots du tableau qui ont la même question (synonymes) : leurs réponses sont justes aussi. */
+export function synonymes(c: Carte, tous: Mot[]): Mot[] {
+  const q = simplifier(question(c).texte)
+  return tous.filter(m => m.matiere === c.mot.matiere && m.id !== c.mot.id && simplifier(question({ ...c, mot: m }).texte) === q)
 }

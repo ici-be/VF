@@ -1,37 +1,17 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
-import { corriger, type Correction } from '../../lib/correction'
-import { question, reponse } from '../../lib/seance'
+import { useEffect } from 'preact/hooks'
+import { corriger } from '../../lib/correction'
+import { question, reponse, synonymes } from '../../lib/seance'
+import type { Correction } from '../../lib/correction'
+import type { Mot } from '../../lib/mots'
 import type { PropsExercice } from '../Seance'
-import { dire, Infos, Langue, Verdict } from './commun'
+import { dire, Langue } from './commun'
+import { Saisie } from './Reponses'
 
-const LETTRES = { nl: ['ë', 'ï', 'é', 'ö', 'ü'], fr: ['é', 'è', 'ê', 'à', 'ç', 'ï', 'ô', 'û'] }
-
-export function Ecrit({ carte, reglages, pause, suivant }: PropsExercice) {
-  const [texte, setTexte] = useState('')
-  const [correction, setCorrection] = useState<Correction | null>(null)
-  const champ = useRef<HTMLInputElement>(null)
+export function Ecrit({ carte, tous, reglages, pause, suivant }: PropsExercice) {
   const q = question(carte), rep = reponse(carte)
+  const m = carte.mot
 
   useEffect(() => { dire(reglages, q.texte, q.langue) }, [])
-  useEffect(() => { if (!pause) champ.current?.focus() }, [pause, correction])
-
-  const valider = (abandon = false) => {
-    if (correction) { suivant(correction.resultat); return }
-    // en néerlandais, on corrige le mot (l'article est vérifié à part)
-    const c = abandon
-      ? { resultat: 'faux' as const, message: '' }
-      : corriger(texte, rep.langue === 'nl' ? carte.mot.nl : carte.mot.fr, rep.langue, rep.langue === 'nl' ? carte.mot.det : '', { exigerArticle: reglages.exigerArticle })
-    setCorrection(c)
-    dire(reglages, rep.texte, rep.langue)
-  }
-
-  const inserer = (l: string) => {
-    const el = champ.current
-    if (!el) return
-    const debut = el.selectionStart ?? texte.length, fin = el.selectionEnd ?? texte.length
-    setTexte(texte.slice(0, debut) + l + texte.slice(fin))
-    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(debut + 1, debut + 1) })
-  }
 
   return (
     <>
@@ -40,26 +20,21 @@ export function Ecrit({ carte, reglages, pause, suivant }: PropsExercice) {
         <p class="mot">{q.texte}</p>
         <p class="astuce">Écris la traduction en {rep.langue === 'nl' ? 'néerlandais' : 'français'}</p>
       </div>
-      <form class="saisie" onSubmit={e => { e.preventDefault(); valider() }}>
-        <input
-          ref={champ} id="reponse" value={texte} readOnly={!!correction}
-          onInput={e => setTexte((e.target as HTMLInputElement).value)}
-          autocomplete="off" autocapitalize="off" spellcheck={false} lang={rep.langue}
-          aria-label="Ta réponse"
-        />
-        {!correction && (
-          <div class="lettres">{LETTRES[rep.langue].map(l => <button type="button" onClick={() => inserer(l)}>{l}</button>)}</div>
-        )}
-      </form>
-      {correction && <><Verdict c={correction} attendu={rep.texte} /><Infos mot={carte.mot} /></>}
-      <div class="actions">
-        {correction
-          ? <button class="go" onClick={() => valider()}>Suivant ⏎</button>
-          : <>
-              <button class="go" onClick={() => valider()} disabled={!texte.trim()}>Vérifier ⏎</button>
-              <button class="second" onClick={() => valider(true)}>Je ne sais pas</button>
-            </>}
-      </div>
+      <Saisie
+        langue={rep.langue} attendu={rep.texte} mot={m} pause={pause} suivant={suivant}
+        lire={() => dire(reglages, rep.texte, rep.langue)}
+        corriger={t => meilleure([m, ...synonymes(carte, tous)], x => rep.langue === 'nl'
+          // en néerlandais, on corrige le mot ; l'article est vérifié à part
+          ? corriger(t, x.nl, 'nl', x.det, { exigerArticle: reglages.exigerArticle })
+          : corriger(t, x.fr, 'fr'))}
+      />
     </>
   )
+}
+
+const RANG = { juste: 0, presque: 1, faux: 2 }
+
+/** La correction la plus favorable parmi le mot attendu et ses synonymes du tableau. */
+function meilleure(mots: Mot[], corr: (m: Mot) => Correction): Correction {
+  return mots.map(corr).reduce((a, b) => (RANG[b.resultat] < RANG[a.resultat] ? b : a))
 }
