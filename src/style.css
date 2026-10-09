@@ -403,3 +403,20 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .reprendre .titre { display: flex; align-items: center; gap: 8px; }
 .reprendre .titre .icone-ex { color: var(--accent); }
 .barre .quoi .icone-ex { vertical-align: -3px; margin-right: 6px; color: var(--muted); }
+
+/* tuiles d'exercice : toutes de la hauteur d'une tuile dont le nom tient sur deux lignes */
+.tuiles { grid-auto-rows: 1fr; }
+.tuile { min-height: 60px; }
+@media (min-width: 1000px) {
+  .col-exercice { gap: 20px; }
+  .col-exercice .tuiles { gap: 10px; }
+  .col-exercice .tuile { min-height: 64px; padding: 10px 14px; }
+  .col-exercice .description-exercice { margin-bottom: 14px; }   /* de l'air avant les réglages */
+  .col-exercice .reglages { gap: 16px 24px; }
+}
+@media (min-width: 1000px) {
+  .page.accueil { padding-block: 14px 32px; gap: 18px; }
+  .page.accueil .reprendre { padding: 12px 18px; }
+  .page.accueil .reprendre .titre { margin-bottom: 2px; }
+  .page.accueil .reprendre .detail { margin: 0; }
+}
