@@ -1181,6 +1181,11 @@ const MODIFS = {
  ]
 };
 
+// Fautes d'orthographe dans la colonne « Néerlandais » : [ligne, avant, après]
+const MOTS_CORRIGES = {
+ "HW Geschiedenis": [[50, "millenium", "millennium"]]
+};
+
 function ajouterDefinitions() {
   const classeur = SpreadsheetApp.getActiveSpreadsheet();
   for (const feuille of classeur.getSheets()) {
@@ -1215,6 +1220,13 @@ function ajouterDefinitions() {
       feuille.getRange(ligne, colEx).setValue(ex);
       feuille.getRange(ligne, colRem).setValue(rem);
       faites++;
+    }
+    for (const [ligne, avant, apres] of (MOTS_CORRIGES[feuille.getName()] || [])) {
+      const cellule = feuille.getRange(ligne, 1);
+      if (String(cellule.getValue()).trim() === avant) {
+        cellule.setValue(apres);
+        Logger.log(feuille.getName() + ' : « ' + avant + ' » corrigé en « ' + apres + ' ».');
+      }
     }
     Logger.log(feuille.getName() + ' : ' + faites + ' ligne(s) modifiée(s).' + (sautees.length ? ' Lignes sautées car le tableau a changé : ' + sautees.join(', ') : ''));
   }
