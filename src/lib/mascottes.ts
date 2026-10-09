@@ -1,6 +1,8 @@
 // Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes »).
 // Chacune tient un flambeau, qu'elle passe à la suivante quand on change de matière.
 
+import { interrompre } from './surprises'
+
 export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille'
 
 const TRAIT = '#26303d'
@@ -46,8 +48,8 @@ const DESSINS: Record<Mascotte, string> = {
   // Reynaert de vos : le renard de l'épopée flamande, tunique médiévale et livre ouvert
   renard: `
     ${ombre}
-    <path d="M50 108 C30 110 20 96 22 76 C28 90 36 96 48 98 Z" fill="#d26a24" ${t}/>
-    <path d="M22 76 C21 82 22 87 25 91 C27 85 26 80 22 76 Z" fill="#f6efe4" ${t}/>
+    <g class="queue"><path d="M50 108 C30 110 20 96 22 76 C28 90 36 96 48 98 Z" fill="#d26a24" ${t}/>
+      <path d="M22 76 C21 82 22 87 25 91 C27 85 26 80 22 76 Z" fill="#f6efe4" ${t}/></g>
     ${jambes('#a9531c', '#2a2a33')}
     <g class="corps">
       <path d="M55 52 L55 68 L65 68 L65 52 Z" fill="#d26a24" ${t}/>
@@ -79,14 +81,14 @@ const DESSINS: Record<Mascotte, string> = {
       <rect x="54" y="52" width="12" height="16" rx="3" fill="#aab3bf" ${t}/><path d="M54 60 L66 60" stroke="${TRAIT}" stroke-width="1" opacity=".5"/>
       <line x1="30" y1="16" x2="30" y2="138" stroke="${TRAIT}" stroke-width="5" stroke-linecap="round"/>
       <line x1="30" y1="16" x2="30" y2="138" stroke="#7a4f2a" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M31.5 18 L56 23 L31.5 36 Z" fill="#b8392b" ${t}/>
+      <path class="drapeau" d="M31.5 18 L56 23 L31.5 36 Z" fill="#b8392b" ${t}/>
       <path d="M45 66 Q60 60 75 66 L78 110 Q60 116 42 110 Z" fill="#2c518f" ${t}/>
       ${ombrage('M62 62 Q70 63 75 66 L78 110 Q70 113 62 114 Z')}
       <rect x="57" y="70" width="6" height="36" rx="1.5" fill="#d9a92b"/>
       <rect x="49" y="81" width="22" height="6" rx="1.5" fill="#d9a92b"/>
       ${brasGauche('#aab3bf', '#8f99a6', 31, 88)}
       ${bras('#aab3bf', '#8f99a6')}
-      <path d="M60 25 C68 14 78 12 82 6 C83 16 76 24 64 28 Z" fill="#b8392b" ${t}/>
+      <path class="plume" d="M60 25 C68 14 78 12 82 6 C83 16 76 24 64 28 Z" fill="#b8392b" ${t}/>
       <path d="M46 30 Q46 22 60 22 Q74 22 74 30 L74 56 Q60 64 46 56 Z" fill="#c3cad3" ${t}/>
       ${ombrage('M62 22 Q74 22 74 30 L74 56 Q68 60 62 61 Z')}
       <line x1="60" y1="23" x2="60" y2="37" stroke="${TRAIT}" stroke-width="1.6"/>
@@ -119,9 +121,9 @@ const DESSINS: Record<Mascotte, string> = {
       <g class="yeux">${oeil(55.5, 44)}${oeil(64.5, 44)}</g>
       <path d="M58 49 Q60 51 62 49" stroke="${TRAIT}" stroke-width="1.3" fill="none"/>
       <path d="M56.5 53.5 Q60 55 63.5 53.5" stroke="${TRAIT}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-      <ellipse cx="60" cy="32" rx="22" ry="4.5" fill="#24242c" ${t}/>
-      <path d="M47 31 Q48 17 60 16 Q72 17 73 31 Z" fill="#24242c" ${t}/>
-      <path d="M70 21 Q80 12 86 15 Q78 17 72 26 Z" fill="#eceae4" ${t} stroke-width="1.4"/>
+      <g class="chapeau"><ellipse cx="60" cy="32" rx="22" ry="4.5" fill="#24242c" ${t}/>
+        <path d="M47 31 Q48 17 60 16 Q72 17 73 31 Z" fill="#24242c" ${t}/>
+        <path d="M70 21 Q80 12 86 15 Q78 17 72 26 Z" fill="#eceae4" ${t} stroke-width="1.4"/></g>
     </g>`,
 
   // une détective : manteau ajusté, chapeau à carreaux, queue de cheval rousse, loupe
@@ -144,10 +146,10 @@ const DESSINS: Record<Mascotte, string> = {
       <rect x="57.5" y="91.2" width="5" height="6.2" rx="1" fill="none" stroke="#d9a92b" stroke-width="1.5"/>
       <path d="M47 104 L54 104 M66 104 L73 104" stroke="${TRAIT}" stroke-width="1.4" stroke-linecap="round"/>
       ${brasGauche('#c4a066', '#6e4423', 36, 88)}
-      <line x1="36" y1="86" x2="31" y2="78" stroke="${TRAIT}" stroke-width="4.6" stroke-linecap="round"/>
-      <line x1="36" y1="86" x2="31" y2="78" stroke="#5e3d22" stroke-width="2.4" stroke-linecap="round"/>
-      <circle cx="26" cy="70" r="8.5" fill="#cfe8f3" fill-opacity=".9" ${t} stroke-width="2.4"/>
-      <path d="M22 67 Q24 64 28 65" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <g class="loupe"><line x1="36" y1="86" x2="31" y2="78" stroke="${TRAIT}" stroke-width="4.6" stroke-linecap="round"/>
+        <line x1="36" y1="86" x2="31" y2="78" stroke="#5e3d22" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="26" cy="70" r="8.5" fill="#cfe8f3" fill-opacity=".9" ${t} stroke-width="2.4"/>
+        <path d="M22 67 Q24 64 28 65" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>
       ${bras('#c4a066', '#6e4423')}
       <path d="M44 67 Q60 59 76 67 L79 82 Q70 86 60 84 Q50 86 41 82 Z" fill="#a8844d" ${t}/>
       <path d="M60 84 L60 64" stroke="${TRAIT}" stroke-width="1.2" opacity=".5"/>
@@ -157,10 +159,10 @@ const DESSINS: Record<Mascotte, string> = {
       <path d="M48 43 Q50 34 60 34 Q70 34 72 42 Q64 38 57 41 Q52 42 48 43 Z" fill="#b5532a"/>
       <g class="yeux">${oeil(55.5, 46)}${oeil(64.5, 46)}</g>
       <path d="M57 53 Q60 54.5 63 53" stroke="${TRAIT}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-      <path d="M47 35 Q48 20 60 20 Q72 20 73 35 Z" fill="#7d6a55" ${t}/>
-      <path d="M53 21 L53 35 M60 20 L60 35 M67 21 L67 35 M48 28 L72 28" stroke="#5f4f3e" stroke-width="1.2"/>
-      <path d="M43 35 Q60 30 77 35 Q79 38 74 38 Q60 34 46 38 Q41 38 43 35 Z" fill="#7d6a55" ${t}/>
-      <path d="M58 20 Q60 16 62 20" stroke="#5f4f3e" stroke-width="1.6" fill="none"/>
+      <g class="chapeau"><path d="M47 35 Q48 20 60 20 Q72 20 73 35 Z" fill="#7d6a55" ${t}/>
+        <path d="M53 21 L53 35 M60 20 L60 35 M67 21 L67 35 M48 28 L72 28" stroke="#5f4f3e" stroke-width="1.2"/>
+        <path d="M43 35 Q60 30 77 35 Q79 38 74 38 Q60 34 46 38 Q41 38 43 35 Z" fill="#7d6a55" ${t}/>
+        <path d="M58 20 Q60 16 62 20" stroke="#5f4f3e" stroke-width="1.6" fill="none"/></g>
     </g>`,
 
   grenouille: `
@@ -196,7 +198,7 @@ export const svgBuste = (nom: Mascotte) =>
   `<svg class="mascotte buste" viewBox="30 8 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
 
 export const svgMascotte = (nom: Mascotte, classe = '') =>
-  `<svg class="mascotte ${classe}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">${ombre.replace('<ellipse', '<ellipse class="ombre-sol"')}<g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
+  `<svg class="mascotte ${classe}" data-mascotte="${nom}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">${ombre.replace('<ellipse', '<ellipse class="ombre-sol"')}<g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
 
 // Un saut de joie : élan (on se tasse), envol étiré et un peu penché, bras et flambeau levés,
 // jambes écartées en l'air, réception qui s'écrase puis se stabilise ; l'ombre reste au sol et rétrécit.
@@ -221,6 +223,7 @@ export async function sauter(el: Element, fois = 1, leverLeBras = true): Promise
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const svgEl = (el.matches('svg') ? el : el.querySelector('svg')) as SVGSVGElement | null
   if (!svgEl || svgEl.dataset.saute) return
+  interrompre(svgEl)   // le saut de joie passe avant une surprise en cours
   svgEl.dataset.saute = '1'
   const perso = svgEl.querySelector('.perso')!, sol = svgEl.querySelector('.ombre-sol')   // pas d'ombre dans un médaillon
   for (let i = 0; i < fois; i++) {

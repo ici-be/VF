@@ -444,6 +444,14 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .mascotte.en-l-air .bras-d.repos { display: none; }
 .mascotte.en-l-air .jambe.g { transform: rotate(14deg); }
 .mascotte.en-l-air .jambe.d { transform: rotate(-14deg); }
+.mascotte .flambeau { transform-box: fill-box; transform-origin: 50% 50%; }
+/* les pièces qui bougent pendant les surprises (src/lib/surprises.ts) */
+.mascotte .queue { transform-box: view-box; transform-origin: 47px 104px; }
+.mascotte .drapeau { transform-box: fill-box; transform-origin: 0 50%; }
+.mascotte .plume { transform-box: fill-box; transform-origin: 0 100%; }
+.mascotte .chapeau { transform-box: fill-box; transform-origin: 50% 100%; }
+.mascotte .loupe { transform-box: view-box; transform-origin: 37px 88px; }
+.mascotte .bulle text { font-family: var(--display); font-weight: 800; }
 .court .corps { animation: trot .16s ease-in-out infinite alternate; }
 .court .jambe.g { animation: pas .32s ease-in-out infinite alternate; }
 .court .jambe.d { animation: pas .32s ease-in-out infinite alternate-reverse; }
