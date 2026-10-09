@@ -183,7 +183,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
       <div class="haut-jeu">
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter le jeu" title="Quitter">✕</button>
-        <span class="quoi"><IconeExercice id="motscroises" taille={16} />Mots croisés (bêta) · {matieres.map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        <span class="quoi"><IconeExercice id="motscroises" taille={16} />Mots croisés · {matieres.map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
         <span class="compte" title="Mots trouvés">{trouves.length} / {grille.mots.length}</span>
       </div>
       {/* la définition du mot en cours reste visible, même avec le clavier du téléphone ouvert */}

@@ -41,7 +41,7 @@ export const EXERCICES: Exercice[] = [
   { id: 'conjugaison', nom: 'Conjugaison', description: 'Le verbe à conjuguer à toutes les personnes (ik, jij, hij…), puis valider.', avecSens: false, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
-  { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, beta: true, jeu: true, accepte: m => lettresDe(m.nl) !== null },
+  { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, jeu: true, accepte: m => lettresDe(m.nl) !== null },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
 ]
 
