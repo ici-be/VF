@@ -293,3 +293,42 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .indice-actif { margin: 0; padding: 8px 16px; background: var(--blue-bg); color: var(--fg); font-size: 1rem; border-bottom: 1px solid var(--line); }
 .indice-actif b { color: var(--accent); margin-right: 4px; }
 .indice-actif .long { color: var(--muted); font-size: .85rem; }
+
+/* ---------- impression des listes (Ctrl+P) ---------- */
+.impression { display: none; }
+.tableau .details { display: none; }
+@page { size: A4; margin: 12mm 11mm 14mm; @bottom-right { content: counter(page) " / " counter(pages); font: 8pt "Atkinson Hyperlegible", sans-serif; color: #666; } }
+@media print {
+  /* toujours en clair, encre noire, sans ombres ni fonds */
+  :root { --bg: #fff; --panel: #fff; --panel-2: #f0f0f0; --fg: #000; --muted: #444; --line: #bbb; --mid: #000; color-scheme: light; }
+  body { background: #fff; color: #000; font-size: 9.5pt; line-height: 1.3; }
+  #app { display: block; }
+  .page.liste { max-width: none; padding: 0; gap: 0; display: block; }
+  .page.liste > :not(.impression):not(.tableau) { display: none !important; }
+  .impression { display: block; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 1.5pt solid #000; }
+  .impression h1 { font: 800 16pt/1.1 var(--display); margin: 0 0 1mm; }
+  .impression .sujet { margin: 0; font-size: 11pt; }
+  .impression .meta { margin: .5mm 0 0; font-size: 8.5pt; color: #444; }
+  .tableau { overflow: visible; box-shadow: none; border-radius: 0; background: none; }
+  .tableau table { font-size: 9pt; line-height: 1.2; table-layout: fixed; }
+  .tableau thead { display: table-header-group; }   /* en-têtes répétés sur chaque page */
+  .tableau th { position: static; padding: .6mm 1.2mm; font-size: 7pt; color: #000; border-bottom: 1pt solid #000; }
+  .tableau td { padding: .45mm 1.2mm; border-bottom: .3pt solid #ccc; overflow-wrap: anywhere; }
+  .tableau tr { break-inside: avoid; }
+  .tableau tr.chap td { background: none; color: #000; font-size: 9.5pt; padding-top: 2.5mm; border-bottom: 1pt solid #000; }
+  .tableau tr.chap { break-after: avoid; }
+  .tableau .ico-matiere { display: none; }
+  .tableau tr.chap.seul { display: none; }          /* un seul chapitre : déjà dans le titre */
+  .tableau th:first-child, .tableau td.det { width: 6mm; color: #555; padding-right: 0; }
+  .tableau th:nth-child(2), .tableau td.nl { width: 24%; white-space: normal; }
+  .tableau th:nth-child(3) { width: 25%; }
+  .tableau td > .extra { display: none; }           /* sous la traduction : seulement à l'écran */
+  .tableau .details { display: table-cell; }
+  .tableau .details .extra { display: inline; color: #333; font-size: 8pt; }
+  .tableau .details .extra + .extra::before { content: " · "; color: #888; }
+  .tableau .extra i { color: #000; font-weight: 700; }
+  .tableau td.rate, .tableau th:last-child:not(.details) { width: 13mm; color: #000; }
+  .tableau td.rate .extra { display: block; font-size: 7pt; }
+  .ecouter { display: none !important; }
+  canvas.confettis { display: none; }
+}

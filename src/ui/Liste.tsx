@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, motsChoisis, type Reglages } from '../lib/reglages'
 import { motsARevoir, type Suivi } from '../lib/progression'
@@ -6,6 +6,8 @@ import { construireSerie, type Carte } from '../lib/seance'
 import { sansAccents } from '../lib/correction'
 import { parler } from '../lib/voix'
 import { choixMatieres, nomChapitre } from './Accueil'
+import { SEP } from '../lib/reglages'
+import { nombre } from '../lib/texte'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 
@@ -49,11 +51,11 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   if (trier === 'nl') mots = [...mots].sort((a, b) => cmp(a.nl, b.nl))
   if (trier === 'fr') mots = [...mots].sort((a, b) => cmp(a.fr.replace(/^(le |la |les |l')/i, ''), b.fr.replace(/^(le |la |les |l')/i, '')))
 
-  const lignes: (Mot | string)[] = []
+  const lignes: (Mot | { groupe: string; matiere: string })[] = []
   let groupe = ''
   for (const m of mots) {
-    const g = `${apparence(m.matiere).icone} ${apparence(m.matiere).titre} · ${nomChapitre(m.chapitre)}`
-    if (trier === 'chapitre' && g !== groupe) { lignes.push(g); groupe = g }
+    const g = `${apparence(m.matiere).titre} · ${nomChapitre(m.chapitre)}`
+    if (trier === 'chapitre' && g !== groupe) { lignes.push({ groupe: g, matiere: m.matiere }); groupe = g }
     lignes.push(m)
   }
 
@@ -61,12 +63,37 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const serieARevoir = construireSerie(aRevoir.map(x => x.mot), { ...reglages, nombre: 0, ordre: 'hasard' })
   const colonnes = vue === 'revoir' ? 4 : 3
 
+  // titre de la page imprimée : « Biologie / Biologie — 1. De ecosystemen »
+  const titreMatieres = reglages.matieres.map(n => {
+    const a = apparence(n)
+    const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
+    return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres: ch.length ? ch.join(', ') : 'tous les chapitres' }
+  })
+  const titreImpression = `${vue === 'revoir' ? 'Mots à revoir' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
+  // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
+  useEffect(() => {
+    const avant = document.title
+    const pendant = () => { document.title = titreImpression }
+    const apres = () => { document.title = avant }
+    addEventListener('beforeprint', pendant)
+    addEventListener('afterprint', apres)
+    return () => { removeEventListener('beforeprint', pendant); removeEventListener('afterprint', apres); document.title = avant }
+  }, [titreImpression])
+  const aujourdhui = new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+
   return (
-    <main class="page">
+    <main class="page liste">
+      {/* en-tête de la page imprimée (caché à l'écran) */}
+      <header class="impression">
+        <h1>{vue === 'revoir' ? 'Mots à revoir' : 'Vocabulaire néerlandais'}</h1>
+        {titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
+        <p class="meta">{nombre(mots.length, 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
+      </header>
       <div class="haut">
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
           <h1>{vue === 'revoir' ? 'Mots à revoir' : 'Liste des mots'}</h1>
+          <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</p>
       </div>
@@ -99,10 +126,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         : (
           <div class="tableau">
             <table>
-              <thead><tr><th></th><th>Nederlands</th><th>Français</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
+              <thead><tr><th></th><th>Nederlands</th><th>Français</th><th class="details">Définition · exemple · remarque</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
-                {lignes.map(l => typeof l === 'string'
-                  ? <tr class="chap"><td colSpan={colonnes}>{l}</td></tr>
+                {lignes.map(l => 'groupe' in l
+                  ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><span class="ico-matiere">{apparence(l.matiere).icone} </span>{l.groupe}</td></tr>
                   : (
                     <tr>
                       <td class="det">{l.det}</td>
@@ -112,10 +139,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
                       </td>
                       <td>
                         {l.fr}
-                        {l.definition && <span class="extra"><i>Définition :</i> {l.definition}</span>}
-                        {l.exemple && <span class="extra"><i>Exemple :</i> {l.exemple.replace(/[\[\]]/g, '')}</span>}
-                        {l.remarque && <span class="extra"><i>Remarque :</i> {l.remarque}</span>}
+                        <Details m={l} />
                       </td>
+                      {/* à l'impression, les détails passent dans leur propre colonne (une ligne par mot) */}
+                      <td class="details"><Details m={l} /></td>
                       {vue === 'revoir' && (() => {
                         const su = suivis.get(l.id)!
                         return <td class="rate">{su.rates}×<span class="extra">{quand(su.dernierRate!)}</span></td>
@@ -127,5 +154,15 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
           </div>
         )}
     </main>
+  )
+}
+
+function Details({ m }: { m: Mot }) {
+  return (
+    <>
+      {m.definition && <span class="extra"><i>Définition :</i> {m.definition}</span>}
+      {m.exemple && <span class="extra"><i>Exemple :</i> {m.exemple.replace(/[\[\]]/g, '')}</span>}
+      {m.remarque && <span class="extra"><i>Remarque :</i> {m.remarque}</span>}
+    </>
   )
 }
