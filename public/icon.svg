@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1f5fbf"/>
+  <rect x="96" y="120" width="230" height="160" rx="28" fill="#ffffff"/>
+  <path d="M150 280 l-10 60 l60 -60z" fill="#ffffff"/>
+  <text x="211" y="228" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-weight="700" font-size="96" fill="#1f5fbf">NL</text>
+  <rect x="200" y="232" width="220" height="160" rx="28" fill="#e2681f"/>
+  <path d="M370 392 l10 60 l-60 -60z" fill="#e2681f"/>
+  <text x="310" y="342" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-weight="700" font-size="96" fill="#ffffff">FR</text>
+</svg>

@@ -1,0 +1,79 @@
+// Ce qu'on a choisi la dernière fois : proposé tel quel au lancement suivant.
+import { lire, ecrire } from './stockage'
+import type { Mot, Vocabulaire } from './mots'
+
+export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
+export type Ordre = 'hasard' | 'fragiles' | 'tableau'
+export type ExerciceId = 'defilement' | 'ecrit' | 'qcm' | 'dehet'
+
+export interface Exercice {
+  id: ExerciceId
+  nom: string
+  description: string
+  /** le sens FR→NL / NL→FR a-t-il un effet ? */
+  avecSens: boolean
+  /** l'exercice avance-t-il tout seul (réglage de vitesse) ? */
+  avecVitesse: boolean
+  /** mots utilisables par cet exercice */
+  accepte: (m: Mot) => boolean
+}
+
+export const EXERCICES: Exercice[] = [
+  { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, accepte: () => true },
+  { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
+  { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
+  { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
+]
+
+export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? EXERCICES[0]
+
+export interface Reglages {
+  matieres: string[]
+  /** `${matière}␟${chapitre}` ; liste vide = tous les chapitres */
+  chapitres: string[]
+  exercice: ExerciceId
+  sens: Sens
+  /** nombre de mots par série ; 0 = tous */
+  nombre: number
+  /** secondes de réflexion avant la réponse (défilement) */
+  delai: number
+  voix: boolean
+  exigerArticle: boolean
+  ordre: Ordre
+}
+
+export const SEP = '␟'
+export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP + chapitre
+
+const DEFAUT: Reglages = {
+  matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles',
+}
+
+/** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */
+export function chargerReglages(voc: Vocabulaire | null): Reglages {
+  const r: Reglages = { ...DEFAUT, ...lire<Partial<Reglages>>('reglages', {}) }
+  if (!EXERCICES.some(e => e.id === r.exercice)) r.exercice = DEFAUT.exercice
+  if (voc) {
+    const noms = voc.matieres.map(m => m.nom)
+    r.matieres = r.matieres.filter(n => noms.includes(n))
+    if (!r.matieres.length) r.matieres = noms.slice(0, 1)
+    const existants = new Set(voc.matieres.flatMap(m => m.chapitres.map(c => cleChapitre(m.nom, c))))
+    r.chapitres = r.chapitres.filter(c => existants.has(c) && r.matieres.includes(c.split(SEP)[0]))
+  }
+  return r
+}
+
+export function enregistrerReglages(r: Reglages): void {
+  ecrire('reglages', r)
+}
+
+/** Les mots des matières et chapitres choisis (tous les chapitres d'une matière si aucun n'est coché pour elle). */
+export function motsChoisis(voc: Vocabulaire, r: Reglages): Mot[] {
+  return voc.matieres
+    .filter(m => r.matieres.includes(m.nom))
+    .flatMap(m => {
+      const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
+      return coches.length ? m.mots.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : m.mots
+    })
+}
