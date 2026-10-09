@@ -7,6 +7,7 @@ import { sansAccents } from '../lib/correction'
 import { parler } from '../lib/voix'
 import { choixMatieres, nomChapitre } from './Accueil'
 import { apparence } from '../lib/apparence'
+import { accord } from '../lib/texte'
 
 export type Vue = 'tous' | 'revoir'
 
@@ -75,10 +76,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
       </div>
       {vue === 'revoir' && (
         <div class="bandeau">
-          <p>Les {aRevoir.length > 1 ? `${aRevoir.length} mots` : 'mots'} ratés ces 30 derniers jours et pas encore rattrapés, les plus souvent ratés d’abord (30 au maximum). Un mot sort de la liste quand il est réussi plusieurs fois de suite.</p>
+          <p>{aRevoir.length > 1 ? `Les ${aRevoir.length} mots ratés` : aRevoir.length === 1 ? 'Le mot raté' : 'Les mots ratés'} ces 30 derniers jours et pas encore {accord(aRevoir.length, 'rattrapé')}, les plus souvent ratés d’abord (30 au maximum). Un mot sort de la liste quand il est réussi plusieurs fois de suite.</p>
           {aRevoir.length > 0 && (
             serieARevoir.length
-              ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur ces mots · {ex.nom} ▶</button>
+              ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur {aRevoir.length > 1 ? 'ces mots' : 'ce mot'} · {ex.nom} ▶</button>
               : <p class="astuce gauche">L’exercice « {ex.nom} » ne convient à aucun de ces mots : choisis-en un autre dans le menu.</p>
           )}
         </div>

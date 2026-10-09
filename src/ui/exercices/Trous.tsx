@@ -4,6 +4,7 @@ import { decouper } from '../../lib/trous'
 import type { PropsExercice } from '../Seance'
 import { dire, Infos, Verdict } from './commun'
 import { Actions } from './Reponses'
+import { nombre } from '../../lib/texte'
 
 // L'exemple du tableau avec un trou (ou plusieurs) à compléter ; la traduction
 // française du mot sert d'indice.
@@ -57,7 +58,7 @@ export function Trous({ carte, reglages, pause, suivant }: PropsExercice) {
             )
           })}
         </p>
-        <p class="astuce">Indice : <strong>{m.fr}</strong>{trous.length > 1 ? ` · ${trous.length} trous` : ''}</p>
+        <p class="astuce">Indice : <strong>{m.fr}</strong>{trous.length > 1 ? ` · ${nombre(trous.length, 'trou')}` : ''}</p>
       </div>
       {correction && <><Verdict c={correction} attendu={trous.join(' … ')} /><Infos mot={{ ...m, exemple: '' }} /></>}
       <Actions correction={correction} vide={valeurs.every(v => !v.trim())} valider={valider} />

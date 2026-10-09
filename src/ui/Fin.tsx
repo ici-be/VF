@@ -2,6 +2,7 @@ import type { Reglages } from '../lib/reglages'
 import { exercice } from '../lib/reglages'
 import { nlComplet, type Carte } from '../lib/seance'
 import type { Bilan } from './Seance'
+import { accord, nombre } from '../lib/texte'
 
 interface Props {
   bilan: Bilan
@@ -20,13 +21,13 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
     <main class="scene">
       <div class="carte">
         <p class="mot">{bilan.note ? bravo : 'Série terminée'}</p>
-        <p class="astuce">{exercice(reglages.exercice).nom} · {bilan.serie.length} mots</p>
+        <p class="astuce">{exercice(reglages.exercice).nom} · {nombre(bilan.serie.length, 'mot')}</p>
       </div>
       {bilan.note && (
         <div class="score">
-          <div class="j"><b>{bilan.juste}</b>justes</div>
+          <div class="j"><b>{bilan.juste}</b>{accord(bilan.juste, 'juste')}</div>
           {bilan.presque > 0 && <div class="p"><b>{bilan.presque}</b>presque</div>}
-          <div class="f"><b>{bilan.faux}</b>ratés</div>
+          <div class="f"><b>{bilan.faux}</b>{accord(bilan.faux, 'raté')}</div>
         </div>
       )}
       {bilan.aRevoir.length > 0 && (
@@ -37,7 +38,7 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
         </div>
       )}
       <div class="actions">
-        {aRevoir.length > 0 && <button class="go" onClick={() => rejouer(aRevoir)}>Revoir les {aRevoir.length} mots ratés</button>}
+        {aRevoir.length > 0 && <button class="go" onClick={() => rejouer(aRevoir)}>{aRevoir.length > 1 ? `Revoir les ${aRevoir.length} mots ratés` : 'Revoir le mot raté'}</button>}
         <button class={aRevoir.length ? 'second' : 'go'} onClick={() => rejouer()}>Nouvelle série</button>
         <button class="second" onClick={accueil}>Menu</button>
       </div>

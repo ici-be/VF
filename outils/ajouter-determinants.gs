@@ -46,6 +46,6 @@ function ajouterDeterminants() {
       det.setValue(article);
       faites++;
     }
-    Logger.log(nom + ' : ' + faites + ' article(s) ajouté(s).' + (sautees.length ? ' Lignes sautées car le tableau a changé : ' + sautees.join(', ') : ''));
+    Logger.log(nom + ' : ' + faites + (faites > 1 ? ' articles ajoutés.' : ' article ajouté.') + (sautees.length ? ' Lignes sautées car le tableau a changé : ' + sautees.join(', ') : ''));
   }
 }

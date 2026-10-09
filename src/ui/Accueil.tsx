@@ -7,6 +7,7 @@ import type { Chargement } from './App'
 import { apparence } from '../lib/apparence'
 import { motsARevoir } from '../lib/progression'
 import type { Vue } from './Liste'
+import { nombre } from '../lib/texte'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -36,7 +37,7 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = motsChoisis(voc, r).filter(ex.accepte).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [choixMatieres(r), ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', `${n} mot${n > 1 ? 's' : ''}`]
+  return [choixMatieres(r), ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, 'mot')]
     .filter(Boolean).join(' · ')
 }
 

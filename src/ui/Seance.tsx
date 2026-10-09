@@ -14,6 +14,7 @@ import { Definitions } from './exercices/Definitions'
 import { Trous } from './exercices/Trous'
 import { Oral } from './exercices/Oral'
 import { Dictee } from './exercices/Dictee'
+import { nombre } from '../lib/texte'
 
 export interface Bilan {
   serie: Carte[]
@@ -126,7 +127,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         <div class="voile" role="dialog" aria-modal="true" aria-label="Pause">
           <div class="carte">
             <h2>Pause</h2>
-            <p>{i} mot{i > 1 ? 's' : ''} sur {file.length} déjà vus.</p>
+            <p>{nombre(i, 'mot vu', 'mots vus')} sur {file.length}.</p>
             <div class="actions">
               <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
               <button class="second" onClick={quitter}>Arrêter</button>

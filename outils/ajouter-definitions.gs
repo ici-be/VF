@@ -1228,6 +1228,6 @@ function ajouterDefinitions() {
         Logger.log(feuille.getName() + ' : « ' + avant + ' » corrigé en « ' + apres + ' ».');
       }
     }
-    Logger.log(feuille.getName() + ' : ' + faites + ' ligne(s) modifiée(s).' + (sautees.length ? ' Lignes sautées car le tableau a changé : ' + sautees.join(', ') : ''));
+    Logger.log(feuille.getName() + ' : ' + faites + (faites > 1 ? ' lignes modifiées.' : ' ligne modifiée.') + (sautees.length ? ' Lignes sautées car le tableau a changé : ' + sautees.join(', ') : ''));
   }
 }
