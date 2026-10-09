@@ -11,6 +11,8 @@ import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
+import { Scene } from './Scene'
+import { sauter } from '../lib/mascottes'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -73,6 +75,14 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const dispo = choisis.filter(ex.accepte).length
   const nbARevoir = motsARevoir(choisis).length
 
+  // « Commencer » : la mascotte saute de joie, puis la série démarre (pendant la réception)
+  const commencer = () => {
+    const visibles = [...document.querySelectorAll<HTMLElement>('.reprendre .acteur')].filter(el => el.offsetParent !== null)
+    if (!visibles.length || matchMedia('(prefers-reduced-motion: reduce)').matches) { lancer(); return }
+    visibles.forEach(el => sauter(el))
+    setTimeout(lancer, 600)
+  }
+
   // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
   const choisirMatiere = (nom: string) => maj({ matieres: [nom] })
   const ajouterMatiere = (nom: string) => maj({ matieres: [...r.matieres, nom] })
@@ -100,11 +110,13 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       </div>
 
       <section class="reprendre" aria-label="Exercice choisi">
+        <Scene matieres={r.matieres} />
+        <Scene matieres={r.matieres} petit />
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           <p class="detail">{resume(voc, r)}</p>
         </div>
-        <button class="go" onClick={lancer} disabled={dispo === 0}>Commencer ▶</button>
+        <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
       {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
 

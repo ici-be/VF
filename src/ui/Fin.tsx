@@ -4,6 +4,9 @@ import { nlComplet, type Carte } from '../lib/seance'
 import { noteSerie, type Bilan } from './Seance'
 import { useEffect } from 'preact/hooks'
 import { confettis } from '../lib/confettis'
+import { useRef } from 'preact/hooks'
+import { apparence } from '../lib/apparence'
+import { sauter, svgMascotte } from '../lib/mascottes'
 import { accord, niveauNote, nombre, note } from '../lib/texte'
 
 interface Props {
@@ -17,12 +20,20 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
   const sur20 = noteSerie(bilan)
   const parfait = bilan.notee && bilan.faux === 0 && bilan.juste + bilan.presque > 0
   const bravo = parfait ? 'Parfait !' : sur20 >= 16 ? 'Très bien !' : sur20 >= 10 ? 'Pas mal, continue !' : 'Il faut encore s’entraîner.'
-  useEffect(() => { if (parfait) confettis() }, [])
+  // 20/20 : la mascotte de la matière saute de joie au milieu des confettis
+  const mascotte = parfait ? bilan.serie.map(c => apparence(c.mot.matiere).mascotte).find(Boolean) : undefined
+  const scene = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!parfait) return
+    confettis()
+    if (scene.current) sauter(scene.current, 3)
+  }, [])
   const aRevoir = bilan.serie.filter(c => bilan.aRevoir.includes(c.mot)).map(c => ({ ...c, reprise: false }))
 
   return (
     <main class="scene">
       <div class="carte">
+        {mascotte && <div class="mascotte-fin" ref={scene} aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgMascotte(mascotte) }} />}
         {bilan.notee && <p class={`note-serie ${niveauNote(sur20)}`}>{note(sur20)}</p>}
         <p class="mot">{bilan.notee ? bravo : 'Série terminée'}</p>
         <p class="astuce">{exercice(reglages.exercice).nom} · {nombre(bilan.serie.length, 'mot')}</p>

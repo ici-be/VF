@@ -1,4 +1,5 @@
-// Icône et nom en français de chaque matière, d'après le nom de l'onglet.
+// Icône, nom en français et mascotte de chaque matière, d'après le nom de l'onglet.
+import type { Mascotte } from './mascottes'
 // Un onglet dont le nom commence par un emoji garde cet emoji comme icône.
 
 interface Apparence {
@@ -7,13 +8,15 @@ interface Apparence {
   titre: string
   /** nom français, si on le connaît (même identique : Biologie) */
   fr?: string
+  /** la mascotte de la matière (les cinq matières actuelles) */
+  mascotte?: Mascotte
 }
 
-const CONNUES: [RegExp, string, string][] = [
-  [/geschiedenis|histoire/i, '🏛️', 'Histoire'],
-  [/aardrijkskunde|geografie|géographie/i, '🌍', 'Géographie'],
-  [/socio|economi/i, '🤝', 'Socio-économie'],
-  [/biologie/i, '🌱', 'Biologie'],
+const CONNUES: [RegExp, string, string, Mascotte?][] = [
+  [/geschiedenis|histoire/i, '🏛️', 'Histoire', 'chevalier'],
+  [/aardrijkskunde|geografie|géographie/i, '🌍', 'Géographie', 'colomb'],
+  [/socio|economi/i, '🤝', 'Socio-économie', 'detective'],
+  [/biologie/i, '🌱', 'Biologie', 'grenouille'],
   [/wetenschap|sciences?/i, '🔬', 'Sciences'],
   [/fysica|natuurkunde|physique/i, '⚛️', 'Physique'],
   [/chemie|chimie/i, '🧪', 'Chimie'],
@@ -26,7 +29,7 @@ const CONNUES: [RegExp, string, string][] = [
   [/godsdienst|religi|levensbeschouw|morale?/i, '🕊️', 'Religion / morale'],
   [/engels|anglais|english/i, '🇬🇧', 'Anglais'],
   [/duits|allemand/i, '🇩🇪', 'Allemand'],
-  [/néerlandais|nederlands|neerlandais/i, '💬', 'Néerlandais'],
+  [/néerlandais|nederlands|neerlandais/i, '💬', 'Néerlandais', 'renard'],
 ]
 
 const EMOJI_DEBUT = /^(\p{Extended_Pictographic}|\p{Regional_Indicator}{2})️?\s*/u
@@ -36,5 +39,5 @@ export function apparence(nom: string): Apparence {
   const sansEmoji = emoji ? nom.slice(emoji[0].length) : nom
   const titre = sansEmoji.replace(/^(HW|NW|MW|AV)\s+/, '').trim() || sansEmoji
   const connue = CONNUES.find(([re]) => re.test(sansEmoji))
-  return { icone: emoji ? emoji[1] : connue?.[1] ?? '📚', titre, fr: connue?.[2] }
+  return { icone: emoji ? emoji[1] : connue?.[1] ?? '📚', titre, fr: connue?.[2], mascotte: connue?.[3] }
 }
