@@ -236,3 +236,11 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .entendu { margin: 0; color: var(--muted); font-style: italic; }
 
 .beta { display: inline-block; vertical-align: middle; margin-left: 8px; font: 700 .65rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mid); background: var(--mid-bg); padding: 3px 6px; border-radius: 4px; }
+
+/* ---------- mots à revoir ---------- */
+.bandeau { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.bandeau p { margin: 0; flex: 1 1 320px; color: var(--muted); font-size: .92rem; }
+.tableau td.rate { white-space: nowrap; font-weight: 700; color: var(--ko); font-variant-numeric: tabular-nums; }
+.tableau td.rate .extra { font-weight: 400; }
+.segment .n { font-size: .78rem; color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.entete .revoir { border-color: var(--ko); color: var(--ko); }

@@ -5,7 +5,7 @@ import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
 import { Seance, type Bilan } from './Seance'
 import { Fin } from './Fin'
-import { Liste } from './Liste'
+import { Liste, type Vue } from './Liste'
 
 export type Chargement =
   | { etat: 'chargement' }
@@ -16,7 +16,7 @@ type Ecran =
   | { nom: 'accueil' }
   | { nom: 'seance'; serie: Carte[]; cle: number }
   | { nom: 'fin'; bilan: Bilan }
-  | { nom: 'liste' }
+  | { nom: 'liste'; vue: Vue }
 
 export function App() {
   const [voc, setVoc] = useState<Vocabulaire | null>(vocabulaireEnCache)
@@ -84,7 +84,7 @@ export function App() {
         />
       )
     case 'liste':
-      return <Liste voc={voc} reglages={reglages} retour={() => setEcran({ nom: 'accueil' })} />
+      return <Liste key={ecran.vue} voc={voc} reglages={reglages} vueInitiale={ecran.vue} retour={() => setEcran({ nom: 'accueil' })} lancer={lancer} />
     default:
       return (
         <Accueil
@@ -94,7 +94,7 @@ export function App() {
           reglages={reglages}
           setReglages={setReglages}
           lancer={() => lancer()}
-          liste={() => setEcran({ nom: 'liste' })}
+          liste={(vue: Vue) => setEcran({ nom: 'liste', vue })}
         />
       )
   }

@@ -5,6 +5,8 @@ import {
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence } from '../lib/apparence'
+import { motsARevoir } from '../lib/progression'
+import type { Vue } from './Liste'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -49,7 +51,7 @@ interface Props {
   reglages: Reglages
   setReglages: (r: Reglages) => void
   lancer: () => void
-  liste: () => void
+  liste: (vue: Vue) => void
 }
 
 export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages, lancer, liste }: Props) {
@@ -57,6 +59,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const ex = exercice(r.exercice)
   const choisis = motsChoisis(voc, r)
   const dispo = choisis.filter(ex.accepte).length
+  const nbARevoir = motsARevoir(choisis).length
 
   // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
   const choisirMatiere = (nom: string) => maj({ matieres: [nom] })
@@ -71,7 +74,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <div class="haut">
       <header class="entete">
         <h1>Vocabulaire <span class="nl">NL</span></h1>
-        <button class="second" onClick={liste}>Liste des mots</button>
+        {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
+        <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
       </header>
       <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
         {chargement.etat === 'chargement' && 'Mise à jour des mots…'}

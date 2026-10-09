@@ -3,12 +3,15 @@
 // haute, plus le mot est su et plus on attend avant de le reproposer.
 import { lire, ecrire } from './stockage'
 import type { Resultat } from './correction'
+import type { Mot } from './mots'
 
 export interface Suivi {
   boite: number        // 0 (jamais su) … 5 (bien su)
   vus: number
   justes: number
   dernier: number      // date de la dernière réponse (ms)
+  rates: number        // nombre de réponses fausses
+  dernierRate?: number // date de la dernière réponse fausse (ms)
 }
 
 /** Jours d'attente avant de revoir un mot, selon sa boîte (pour la séance du jour). */
@@ -19,15 +22,21 @@ let cache: Record<string, Suivi> | null = null
 const tout = () => (cache ??= lire<Record<string, Suivi>>('progression', {}))
 
 export function suivi(id: string): Suivi | undefined {
-  return tout()[id]
+  const s = tout()[id]
+  // suivis enregistrés avant qu'on compte les échecs : on les estime
+  if (s && s.rates === undefined) {
+    s.rates = s.vus - s.justes
+    if (s.rates > 0) s.dernierRate = s.dernier
+  }
+  return s
 }
 
 export function noter(id: string, resultat: Resultat, maintenant = Date.now()): Suivi {
-  const s = { ...(tout()[id] ?? { boite: 0, vus: 0, justes: 0, dernier: 0 }) }
+  const s = { ...(suivi(id) ?? { boite: 0, vus: 0, justes: 0, dernier: 0, rates: 0 }) }
   s.vus++
   if (resultat === 'juste') { s.justes++; s.boite = Math.min(5, s.boite + 1) }
   else if (resultat === 'presque') { s.justes++ }      // ni monté ni descendu
-  else s.boite = 0
+  else { s.boite = 0; s.rates++; s.dernierRate = maintenant }
   s.dernier = maintenant
   tout()[id] = s
   ecrire('progression', tout())
@@ -40,6 +49,27 @@ export function fragilite(id: string, maintenant = Date.now()): number {
   if (!s) return 1.5
   const enRetard = maintenant - s.dernier > INTERVALLES[s.boite] * JOUR
   return s.boite + (enRetard ? 0 : 3)
+}
+
+export const RECEMMENT = 30 * JOUR
+/** Un mot réussi assez de fois depuis son dernier échec (boîte 3) n'est plus « à revoir ». */
+const SU = 3
+
+export interface ARevoir {
+  mot: Mot
+  suivi: Suivi
+}
+
+/**
+ * Les mots ratés récemment et pas encore rattrapés : d'abord les plus fragiles
+ * (boîte basse), puis les plus souvent ratés, puis les plus récemment ratés.
+ */
+export function motsARevoir(mots: Mot[], max = 30, maintenant = Date.now()): ARevoir[] {
+  return mots
+    .map(mot => ({ mot, suivi: suivi(mot.id) }))
+    .filter((x): x is ARevoir => !!x.suivi?.dernierRate && maintenant - x.suivi.dernierRate < RECEMMENT && x.suivi.boite < SU)
+    .sort((a, b) => a.suivi.boite - b.suivi.boite || b.suivi.rates - a.suivi.rates || b.suivi.dernierRate! - a.suivi.dernierRate!)
+    .slice(0, max)
 }
 
 /** Pour les tests : oublier la copie en mémoire. */
