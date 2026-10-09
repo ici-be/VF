@@ -20,7 +20,7 @@ export const SENS: { id: Sens; nom: string }[] = [
 ]
 const NOMBRES = [10, 20, 30, 0]
 const ORDRES: { id: Ordre; nom: string }[] = [
-  { id: 'fragiles', nom: 'Mots à revoir d’abord' },
+  { id: 'fragiles', nom: 'À revoir d’abord' },
   { id: 'hasard', nom: 'Au hasard' },
   { id: 'tableau', nom: 'Ordre du tableau' },
 ]
@@ -81,7 +81,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const tousChapitres = (matiere: string) => maj({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
 
   return (
-    <main class="page">
+    <main class="page accueil">
       <div class="haut">
       <header class="entete">
         <h1>Vocabulaire <span class="nl">NL</span></h1>
@@ -107,6 +107,9 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       </section>
       {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
 
+      {/* grand écran : matière et chapitres à gauche, exercice et réglages à droite */}
+      <div class="accueil-corps">
+        <div class="col-choix">
       <section class="bloc">
         <h2>Matière</h2>
         <div class="matieres">
@@ -153,20 +156,24 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           )
         })}
       </section>
+        </div>
 
+        <div class="col-exercice">
       <section class="bloc">
         <h2>Exercice</h2>
         <div class="tuiles">
           {EXERCICES.map(e => {
             const n = choisis.filter(e.accepte).length
             return (
-              <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}>
+              <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
+                title={n === 0 ? `${e.description} (rien à réviser avec ce choix de matière et de chapitres)` : e.description}>
                 <b>{e.nom}{e.beta && <span class="beta">bêta</span>}</b>
-                <span>{e.description}</span>
               </button>
             )
           })}
         </div>
+        {/* la description de l'exercice choisi, une seule fois (les tuiles restent compactes) */}
+        <p class="description-exercice"><b>{ex.nom}</b> · {ex.description}</p>
       </section>
 
       <section class="bloc">
@@ -225,6 +232,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           </div>
         </div>
       </section>
+        </div>
+      </div>
     </main>
   )
 }

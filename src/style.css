@@ -371,3 +371,26 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .jeu-corps .grille { --taille: clamp(22px, calc((min(100vw, 1240px) - 460px) / var(--colonnes) - 2px), 40px); }
   .jeu-corps .indices { grid-template-columns: 1fr; position: sticky; top: 130px; max-height: calc(100vh - 150px); overflow-y: auto; }
 }
+
+/* ---------- accueil en deux colonnes sur grand écran ---------- */
+.accueil-corps, .col-choix, .col-exercice { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+@media (min-width: 1000px) {
+  .page.accueil { max-width: 1240px; }
+  .accueil-corps { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .col-choix .matieres { grid-template-columns: 1fr; gap: 8px; }
+  .col-choix .matiere-choix { padding-block: 8px; }
+  .col-exercice .tuiles { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
+/* tuiles d'exercice compactes : le nom seulement, la description en dessous */
+.tuiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tuile { padding: 10px 12px; justify-content: center; min-height: 48px; }
+.description-exercice { margin: 0; font-size: .92rem; color: var(--muted); }
+.description-exercice b { color: var(--fg); }
+@media (min-width: 1000px) { .col-exercice .tuiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .tuiles { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1000px) {
+  .col-exercice { gap: 16px; }
+  .col-exercice .reglages { gap: 12px 20px; }
+  .col-exercice .segment button { padding: 6px 11px; }
+}
