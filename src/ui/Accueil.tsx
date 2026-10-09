@@ -194,14 +194,12 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <h2>Mots</h2>
         <div class="reglages">
           <div class="reglage">
-            <span class="lbl">Combien ?</span>
-            <div class="segment">
-              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })}>{n || 'Tous'}</button>)}
+            <div class="segment" role="group" aria-label="Combien de mots ?">
+              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? `${n} mots` : 'Tous les mots'}>{n ? `${n} mots` : 'Tous'}</button>)}
             </div>
           </div>
           <div class="reglage">
-            <span class="lbl">Quels mots ?</span>
-            <div class="segment">
+            <div class="segment" role="group" aria-label="Quels mots ?">
               {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
             </div>
           </div>
