@@ -12,6 +12,8 @@ import { Qcm } from './exercices/Qcm'
 import { DeHet } from './exercices/DeHet'
 import { Definitions } from './exercices/Definitions'
 import { Trous } from './exercices/Trous'
+import { Oral } from './exercices/Oral'
+import { Dictee } from './exercices/Dictee'
 
 export interface Bilan {
   serie: Carte[]
@@ -63,7 +65,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   }, [ex.id])
   useEffect(() => { if (pause) taire() }, [pause])
   // les voix de toute la série, téléchargées dès le départ
-  useEffect(() => { if (reglages.voix) precharger(serie.flatMap(c => [
+  useEffect(() => { if (reglages.voix || ex.id === 'oral' || ex.id === 'dictee') precharger(serie.flatMap(c => [
     question(c), reponse(c),
     ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: 'nl' as const })),
   ])) }, [])
@@ -117,6 +119,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'dehet' && <DeHet key={i} {...props} />}
         {ex.id === 'definitions' && <Definitions key={i} {...props} />}
         {ex.id === 'trous' && <Trous key={i} {...props} />}
+        {ex.id === 'oral' && <Oral key={i} {...props} />}
+        {ex.id === 'dictee' && <Dictee key={i} {...props} />}
       </main>
       {pause && (
         <div class="voile" role="dialog" aria-modal="true" aria-label="Pause">

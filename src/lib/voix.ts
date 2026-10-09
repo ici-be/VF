@@ -54,13 +54,13 @@ function choisirVoix(langue: 'fr' | 'nl'): SpeechSynthesisVoice | undefined {
   return undefined
 }
 
-function parlerNavigateur(texte: string, langue: 'fr' | 'nl', fini: () => void): () => void {
+function parlerNavigateur(texte: string, langue: 'fr' | 'nl', vitesse: number, fini: () => void): () => void {
   if (!synth) { fini(); return () => {} }
   const u = new SpeechSynthesisUtterance(texte)
   const v = choisirVoix(langue)
   if (v) u.voice = v
   u.lang = v?.lang ?? (langue === 'nl' ? 'nl-BE' : 'fr-BE')
-  u.rate = 0.9
+  u.rate = 0.9 * vitesse
   // filet de sécurité, large, pour les navigateurs qui n'envoient jamais « end »
   const secours = setTimeout(fini, 4000 + texte.length * 200)
   u.onend = u.onerror = () => { clearTimeout(secours); fini() }
@@ -72,8 +72,11 @@ function parlerNavigateur(texte: string, langue: 'fr' | 'nl', fini: () => void):
 const lecteur = typeof Audio !== 'undefined' ? new Audio() : null
 let arreterEnCours: (() => void) | null = null
 
-/** Lit le texte ; la promesse se résout quand la lecture est finie (ou interrompue). */
-export function parler(texte: string, langue: 'fr' | 'nl'): Promise<void> {
+/**
+ * Lit le texte ; la promesse se résout quand la lecture est finie (ou interrompue).
+ * vitesse : 1 = normale, 0.7 = au ralenti (dictée).
+ */
+export function parler(texte: string, langue: 'fr' | 'nl', vitesse = 1): Promise<void> {
   taire()
   const t = texteALire(texte)
   if (!t) return Promise.resolve()
@@ -93,7 +96,7 @@ export function parler(texte: string, langue: 'fr' | 'nl'): Promise<void> {
     const secours = () => {
       if (termine || secoursLance) return
       secoursLance = true
-      arreterNavigateur = parlerNavigateur(t, langue, fini)
+      arreterNavigateur = parlerNavigateur(t, langue, vitesse, fini)
     }
     urlMp3(t, langue).then(url => {
       if (termine) return
@@ -102,6 +105,7 @@ export function parler(texte: string, langue: 'fr' | 'nl'): Promise<void> {
       // mp3 introuvable (hors ligne et pas encore en cache…) : voix du navigateur
       lecteur.onerror = secours
       lecteur.src = url
+      lecteur.defaultPlaybackRate = lecteur.playbackRate = vitesse
       lecteur.play().catch(secours)
     })
   })

@@ -5,7 +5,7 @@ import { aDesTrous } from './trous'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'ecrit' | 'qcm' | 'dehet' | 'definitions' | 'trous'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -24,8 +24,10 @@ export interface Exercice {
 
 export const EXERCICES: Exercice[] = [
   { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, accepte: () => true },
+  { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
+  { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, accepte: () => true },
   { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot néerlandais.', avecSens: false, avecVitesse: false, avecRepondre: true, accepte: m => m.definition !== '' },
   { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, accepte: aDesTrous },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },

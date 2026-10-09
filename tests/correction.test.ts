@@ -84,3 +84,15 @@ describe('synonymes du tableau', () => {
     expect(synonymes({ mot: tous[0], sens: 'nl-fr' }, tous)).toEqual([])
   })
 })
+
+import { differences } from '../src/lib/correction'
+describe('différences lettre à lettre (dictée)', () => {
+  const vue = (t: string, a: string) => differences(t, a).map(s => s.etat === 'ok' ? s.texte : s.etat === 'faux' ? `(${s.texte})` : `[${s.texte}]`).join('')
+  it('lettre oubliée, en trop, remplacée', () => {
+    expect(vue('orientatie', 'oriëntatie')).toBe('ori(e)[ë]ntatie')
+    expect(vue('geloof', 'geloof')).toBe('geloof')
+    expect(vue('gelooff', 'geloof')).toBe('geloof(f)')
+    expect(vue('glof', 'geloof')).toBe('g[e]lo[o]f')
+    expect(vue('Geloof', 'geloof')).toBe('Geloof')
+  })
+})

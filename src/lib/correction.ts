@@ -7,6 +7,8 @@ export type Resultat = 'juste' | 'presque' | 'faux'
 export interface Correction {
   resultat: Resultat
   message: string   // explication courte quand ce n'est pas « juste »
+  /** pourquoi « presque » : mauvais article, accents, ou une lettre de travers */
+  cause?: 'article' | 'accents' | 'lettre'
 }
 
 export interface OptionsCorrection {
@@ -93,16 +95,49 @@ export function corriger(
   const candidats = [r, rMot]
 
   const exact = candidats.some(c => accepte.includes(c))
-  if (exact) return messageArticle ? { resultat: 'presque', message: messageArticle } : { resultat: 'juste', message: '' }
+  if (exact) return messageArticle ? { resultat: 'presque', message: messageArticle, cause: 'article' } : { resultat: 'juste', message: '' }
 
   if (!options.strict) {
     const accepteSA = accepte.map(sansAccents)
     if (candidats.some(c => accepteSA.includes(sansAccents(c)))) {
-      return { resultat: 'presque', message: `Attention aux accents. ${messageArticle}`.trim() }
+      return { resultat: 'presque', message: `Attention aux accents. ${messageArticle}`.trim(), cause: 'accents' }
     }
     // une seule lettre de travers, sur un mot assez long pour que ce soit une faute de frappe
     const proche = accepte.find(a => a.length >= 5 && candidats.some(c => distance(sansAccents(c), sansAccents(a)) === 1))
-    if (proche) return { resultat: 'presque', message: `Presque : une lettre à corriger. ${messageArticle}`.trim() }
+    if (proche) return { resultat: 'presque', message: `Presque : une lettre à corriger. ${messageArticle}`.trim(), cause: 'lettre' }
   }
   return { resultat: 'faux', message: '' }
+}
+
+export interface Segment {
+  texte: string
+  /** 'ok' : lettre juste ; 'faux' : lettre en trop ou erronée ; 'manque' : lettre oubliée */
+  etat: 'ok' | 'faux' | 'manque'
+}
+
+/**
+ * Compare lettre à lettre la réponse tapée et l'attendu (sans tenir compte des
+ * majuscules) : ce qui est juste, en trop, et oublié, dans l'ordre de lecture.
+ */
+export function differences(tape: string, attendu: string): Segment[] {
+  const a = [...tape], b = [...attendu]
+  const egal = (x: string, y: string) => x.toLowerCase() === y.toLowerCase()
+  // plus longue sous-suite commune
+  const L = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0))
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--)
+      L[i][j] = egal(a[i], b[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1])
+  const res: Segment[] = []
+  const pousser = (texte: string, etat: Segment['etat']) => {
+    const der = res[res.length - 1]
+    if (der && der.etat === etat) der.texte += texte
+    else res.push({ texte, etat })
+  }
+  let i = 0, j = 0
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && egal(a[i], b[j])) { pousser(a[i], 'ok'); i++; j++ }
+    else if (j < b.length && (i >= a.length || L[i][j + 1] > L[i + 1][j])) { pousser(b[j], 'manque'); j++ }
+    else { pousser(a[i], 'faux'); i++ }
+  }
+  return res
 }

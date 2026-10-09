@@ -1,6 +1,7 @@
 // Les deux façons de répondre, partagées par plusieurs exercices :
 // choisir parmi quelques propositions, ou écrire la réponse.
 import { useEffect, useRef, useState } from 'preact/hooks'
+import type { ComponentChildren } from 'preact'
 import type { Correction, Resultat } from '../../lib/correction'
 import type { Mot } from '../../lib/mots'
 import { attendre, Infos, Verdict } from './commun'
@@ -75,9 +76,12 @@ interface PropsSaisie {
   corriger: (texte: string) => Correction
   lire: () => Promise<void>
   suivant: (r: Resultat) => void
+  /** affiché sous la correction (la dictée y montre les lettres fausses) */
+  apres?: (texte: string, c: Correction) => ComponentChildren
+  placeholder?: string
 }
 
-export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant }: PropsSaisie) {
+export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, apres, placeholder }: PropsSaisie) {
   const [texte, setTexte] = useState('')
   const [correction, setCorrection] = useState<Correction | null>(null)
   const champ = useRef<HTMLInputElement>(null)
@@ -105,13 +109,13 @@ export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant }:
           ref={champ} id="reponse" value={texte} readOnly={!!correction}
           onInput={e => setTexte((e.target as HTMLInputElement).value)}
           autocomplete="off" autocapitalize="off" spellcheck={false} lang={langue}
-          aria-label="Ta réponse"
+          aria-label="Ta réponse" placeholder={placeholder}
         />
         {!correction && (
           <div class="lettres">{LETTRES[langue].map(l => <button type="button" onClick={() => inserer(l)}>{l}</button>)}</div>
         )}
       </form>
-      {correction && <><Verdict c={correction} attendu={attendu} /><Infos mot={mot} /></>}
+      {correction && <><Verdict c={correction} attendu={attendu} />{apres?.(texte, correction)}<Infos mot={mot} /></>}
       <Actions correction={correction} vide={!texte.trim()} valider={valider} />
     </>
   )

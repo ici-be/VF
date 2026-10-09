@@ -192,7 +192,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           </div>
           <div class="reglage">
             <label class="case"><input id="voix" type="checkbox" checked={r.voix} onChange={e => maj({ voix: (e.target as HTMLInputElement).checked })} /> Lire les mots à voix haute</label>
-            {(r.exercice === 'ecrit' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
+            {(r.exercice === 'ecrit' || r.exercice === 'dictee' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
               <label class="case"><input id="article" type="checkbox" checked={r.exigerArticle} onChange={e => maj({ exigerArticle: (e.target as HTMLInputElement).checked })} /> Exiger l’article (de / het)</label>
             )}
           </div>
