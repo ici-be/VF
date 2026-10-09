@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Vocabulaire NL
+Comment=Réviser le vocabulaire néerlandais et les cours d'immersion
+Exec=google-chrome --app=https://ici-be.github.io/VF/ --class=VocabulaireNL
+Icon=vocabulaire-nl
+StartupWMClass=VocabulaireNL
+Terminal=false
+Categories=Education;Languages;

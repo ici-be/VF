@@ -21,6 +21,22 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Les changements du tableau apparaissent au prochain lancement de l'appli.
 
+## Installer
+
+Adresse : **https://ici-be.github.io/VF/**
+
+- **Laptop Fedora** : installer Google Chrome (`sudo dnf install google-chrome-stable`
+  après avoir activé le dépôt Google dans *Logiciels*), puis copier l'icône :
+  ```sh
+  curl -o ~/Bureau/vocabulaire-nl.desktop https://raw.githubusercontent.com/ici-be/VF/main/outils/vocabulaire-nl.desktop
+  mkdir -p ~/.local/share/icons && curl -o ~/.local/share/icons/vocabulaire-nl.png https://ici-be.github.io/VF/icon-512.png
+  chmod +x ~/Bureau/vocabulaire-nl.desktop
+  ```
+  (ou, dans Chrome, menu ⋮ → *Caster, enregistrer et partager* → *Installer la page en tant qu'application*).
+- **Android** : ouvrir l'adresse dans Chrome, menu ⋮ → *Ajouter à l'écran d'accueil* → *Installer*.
+
+La progression et les réglages sont enregistrés sur chaque appareil séparément.
+
 ## Développer
 
 ```sh
