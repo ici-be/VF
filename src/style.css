@@ -547,3 +547,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .col-exercice { gap: 30px; }
   .col-exercice .description-exercice { margin-bottom: 0; }
 }
+@media (min-width: 1000px) {
+  /* de l'air entre les matières et les réglages (comme à droite) */
+  .col-choix { gap: 30px; }
+}
