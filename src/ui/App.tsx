@@ -6,6 +6,9 @@ import { Accueil } from './Accueil'
 import { Seance, type Bilan } from './Seance'
 import { Fin } from './Fin'
 import { Liste, type Vue } from './Liste'
+import { MotsCroises } from './MotsCroises'
+import { exercice } from '../lib/reglages'
+import type { Mot } from '../lib/mots'
 
 export type Chargement =
   | { etat: 'chargement' }
@@ -17,6 +20,7 @@ type Ecran =
   | { nom: 'seance'; serie: Carte[]; cle: number }
   | { nom: 'fin'; bilan: Bilan }
   | { nom: 'liste'; vue: Vue }
+  | { nom: 'jeu'; mots: Mot[]; cle: number }
 
 export function App() {
   const [voc, setVoc] = useState<Vocabulaire | null>(vocabulaireEnCache)
@@ -42,6 +46,12 @@ export function App() {
 
   const lancer = (serie?: Carte[]) => {
     if (!voc) return
+    if (exercice(reglages.exercice).jeu) {
+      // une trentaine de mots (les plus utiles d'abord, selon « Quels mots ? ») parmi lesquels la grille choisit
+      const cartes = serie ?? construireSerie(motsChoisis(voc, reglages), { ...reglages, nombre: 30 })
+      setEcran({ nom: 'jeu', mots: cartes.map(c => c.mot), cle: Date.now() })
+      return
+    }
     setEcran({ nom: 'seance', serie: serie ?? construireSerie(motsChoisis(voc, reglages), reglages), cle: Date.now() })
   }
 
@@ -74,6 +84,8 @@ export function App() {
           terminer={bilan => setEcran({ nom: 'fin', bilan })}
         />
       )
+    case 'jeu':
+      return <MotsCroises key={ecran.cle} mots={ecran.mots} reglages={reglages} quitter={() => setEcran({ nom: 'accueil' })} rejouer={() => lancer()} />
     case 'fin':
       return (
         <Fin

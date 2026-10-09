@@ -8,7 +8,7 @@ import { nombre } from '../../lib/texte'
 
 // L'exemple du tableau avec un trou (ou plusieurs) à compléter ; la traduction
 // française du mot sert d'indice.
-export function Trous({ carte, reglages, pause, suivant }: PropsExercice) {
+export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
   const m = carte.mot
   const morceaux = decouper(m.exemple, m.nl) ?? [{ texte: m.exemple }]
   const trous = morceaux.flatMap(x => ('trou' in x ? [x.trou] : []))
@@ -24,6 +24,7 @@ export function Trous({ carte, reglages, pause, suivant }: PropsExercice) {
     const res = trous.map((t, k) => (abandon ? { resultat: 'faux' as const, message: '' } : corriger(valeurs[k], t, 'nl', '', {})))
     const pire = res.some(r => r.resultat === 'faux') ? 'faux' : res.some(r => r.resultat === 'presque') ? 'presque' : 'juste'
     setParTrou(res)
+    annoncer(pire)
     setCorrection({ resultat: pire, message: [...new Set(res.map(r => r.message).filter(Boolean))].join(' ') })
     dire(reglages, m.exemple, 'nl')
   }

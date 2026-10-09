@@ -7,7 +7,7 @@ import { Saisie } from './Reponses'
 
 // J'entends le mot néerlandais (avec son article) et je l'écris : orthographe exacte.
 // La voix est toujours lue ici, même si elle est coupée dans les réglages.
-export function Dictee({ carte, reglages, pause, suivant }: PropsExercice) {
+export function Dictee({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
   const m = carte.mot
   const complet = nlComplet(m)
   const ecouter = (vitesse = 1) => parler(complet, 'nl', vitesse)
@@ -31,7 +31,7 @@ export function Dictee({ carte, reglages, pause, suivant }: PropsExercice) {
         <p class="astuce">Indice : <strong>{m.fr}</strong></p>
       </div>
       <Saisie
-        langue="nl" attendu={complet} mot={m} pause={pause} suivant={suivant}
+        langue="nl" attendu={complet} mot={m} pause={pause} suivant={suivant} annoncer={annoncer}
         placeholder="Écris le mot entendu"
         lire={() => ecouter()}
         corriger={t => corriger(t, m.nl, 'nl', m.det, { strict: true, exigerArticle: reglages.exigerArticle })}

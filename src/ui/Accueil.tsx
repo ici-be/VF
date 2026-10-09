@@ -5,9 +5,10 @@ import {
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence } from '../lib/apparence'
-import { motsARevoir } from '../lib/progression'
+import { motsARevoir, noteSur20, suivi } from '../lib/progression'
 import type { Vue } from './Liste'
-import { nombre } from '../lib/texte'
+import { niveauNote, nombre, note } from '../lib/texte'
+import type { Mot } from '../lib/mots'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -22,6 +23,14 @@ const ORDRES: { id: Ordre; nom: string }[] = [
   { id: 'hasard', nom: 'Au hasard' },
   { id: 'tableau', nom: 'Ordre du tableau' },
 ]
+
+/** La note de maîtrise d'un groupe de mots, s'il a déjà été travaillé. */
+function Note({ mots }: { mots: Mot[] }) {
+  const n = mots.some(m => suivi(m.id)) ? noteSur20(mots) : null
+  return n === null ? null : (
+    <span class={`note ${niveauNote(n)}`} title="Ce que tu sais déjà : un mot compte comme su après 3 bonnes réponses sans erreur">{note(n)}</span>
+  )
+}
 
 /** « NW Biologie (1. De ecosystemen) + HW Geschiedenis » */
 export function choixMatieres(r: Reglages): string {
@@ -107,7 +116,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
               <div class={`matiere ${choisie ? 'choisie' : ''}`}>
                 <button class="matiere-choix" aria-pressed={choisie} onClick={() => choisirMatiere(m.nom)}>
                   <span class="ico" aria-hidden="true">{a.icone}</span>
-                  <span class="noms"><b>{a.titre}</b>{a.fr && <span>{a.fr}</span>}</span>
+                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} /></span></span>
                   <span class="n">{m.mots.length}</span>
                 </button>
                 {!choisie
@@ -134,6 +143,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   return (
                     <button class="puce" aria-pressed={coches.includes(cle)} onClick={() => basculerChapitre(cle)}>
                       {nomChapitre(c)} <span class="n">{m.mots.filter(x => x.chapitre === c).length}</span>
+                      <Note mots={m.mots.filter(x => x.chapitre === c)} />
                     </button>
                   )
                 })}

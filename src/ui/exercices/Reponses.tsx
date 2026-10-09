@@ -14,9 +14,10 @@ interface PropsChoix {
   /** lit la bonne réponse ; l'enchaînement attend la fin de la lecture */
   lire: () => Promise<void>
   suivant: (r: Resultat) => void
+  annoncer: (r: Resultat) => void
 }
 
-export function Choix({ options, bonne, mot, pause, lire, suivant }: PropsChoix) {
+export function Choix({ options, bonne, mot, pause, lire, suivant, annoncer }: PropsChoix) {
   const [choisi, setChoisi] = useState<number | null>(null)
   const juste = choisi !== null && options[choisi] === bonne
   const lecture = useRef<Promise<void>>(Promise.resolve())
@@ -24,6 +25,7 @@ export function Choix({ options, bonne, mot, pause, lire, suivant }: PropsChoix)
   const choisir = (k: number) => {
     if (choisi !== null) return
     setChoisi(k)
+    annoncer(options[k] === bonne ? 'juste' : 'faux')
     lecture.current = lire()
   }
 
@@ -76,12 +78,13 @@ interface PropsSaisie {
   corriger: (texte: string) => Correction
   lire: () => Promise<void>
   suivant: (r: Resultat) => void
+  annoncer: (r: Resultat) => void
   /** affiché sous la correction (la dictée y montre les lettres fausses) */
   apres?: (texte: string, c: Correction) => ComponentChildren
   placeholder?: string
 }
 
-export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, apres, placeholder }: PropsSaisie) {
+export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, annoncer, apres, placeholder }: PropsSaisie) {
   const [texte, setTexte] = useState('')
   const [correction, setCorrection] = useState<Correction | null>(null)
   const champ = useRef<HTMLInputElement>(null)
@@ -90,7 +93,9 @@ export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, a
 
   const valider = (abandon = false) => {
     if (correction) { suivant(correction.resultat); return }
-    setCorrection(abandon ? { resultat: 'faux', message: '' } : corriger(texte))
+    const c: Correction = abandon ? { resultat: 'faux', message: '' } : corriger(texte)
+    setCorrection(c)
+    annoncer(c.resultat)
     lire()
   }
 

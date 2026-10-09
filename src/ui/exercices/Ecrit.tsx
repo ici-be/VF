@@ -7,7 +7,7 @@ import type { PropsExercice } from '../Seance'
 import { dire, Langue } from './commun'
 import { Saisie } from './Reponses'
 
-export function Ecrit({ carte, tous, reglages, pause, suivant }: PropsExercice) {
+export function Ecrit({ carte, tous, reglages, pause, suivant, annoncer }: PropsExercice) {
   const q = question(carte), rep = reponse(carte)
   const m = carte.mot
 
@@ -21,7 +21,7 @@ export function Ecrit({ carte, tous, reglages, pause, suivant }: PropsExercice) 
         <p class="astuce">Écris la traduction en {rep.langue === 'nl' ? 'néerlandais' : 'français'}</p>
       </div>
       <Saisie
-        langue={rep.langue} attendu={rep.texte} mot={m} pause={pause} suivant={suivant}
+        langue={rep.langue} attendu={rep.texte} mot={m} pause={pause} suivant={suivant} annoncer={annoncer}
         lire={() => dire(reglages, rep.texte, rep.langue)}
         corriger={t => meilleure([m, ...synonymes(carte, tous)], x => rep.langue === 'nl'
           // en néerlandais, on corrige le mot ; l'article est vérifié à part

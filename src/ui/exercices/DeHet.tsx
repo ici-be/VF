@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PropsExercice } from '../Seance'
 import { attendre, dire, Infos } from './commun'
 
-export function DeHet({ carte, reglages, pause, suivant }: PropsExercice) {
+export function DeHet({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
   const mot = carte.mot
   const [choisi, setChoisi] = useState<string | null>(null)
   const juste = choisi === mot.det
@@ -11,6 +11,7 @@ export function DeHet({ carte, reglages, pause, suivant }: PropsExercice) {
   const choisir = (a: string) => {
     if (choisi) return
     setChoisi(a)
+    annoncer(a === mot.det ? 'juste' : 'faux')
     lecture.current = dire(reglages, `${mot.det} ${mot.nl}`, 'nl')
   }
 

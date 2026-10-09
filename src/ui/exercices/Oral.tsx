@@ -20,7 +20,7 @@ const RANG = { juste: 0, presque: 1, faux: 2 }
 // Le mot est lu (toujours : c'est un exercice oral), puis l'appli écoute la
 // réponse au micro. Sans reconnaissance vocale (Firefox) ou si le micro est
 // bloqué : auto-évaluation.
-export function Oral({ carte, tous, pause, suivant }: PropsExercice) {
+export function Oral({ carte, tous, pause, suivant, annoncer }: PropsExercice) {
   const q = question(carte), rep = reponse(carte)
   const [micro, setMicro] = useState(ecouteDisponible())
   const [message, setMessage] = useState('')
@@ -50,6 +50,7 @@ export function Oral({ carte, tous, pause, suivant }: PropsExercice) {
       const { texte, c } = meilleure(entendu, [carte.mot, ...synonymes(carte, tous)], rep.langue)
       setEssais(n => n + 1)
       setEtape({ nom: 'resultat', entendu: texte, c })
+      annoncer(c.resultat)
       lireReponse()
     }).catch((err: unknown) => {
       if (annule) return
@@ -108,7 +109,7 @@ export function Oral({ carte, tous, pause, suivant }: PropsExercice) {
           <p class="astuce">Je n’ai rien entendu.</p>
           <div class="actions">
             <button class="go" onClick={reessayer}>🎤 Réessayer ⏎</button>
-            <button class="second" onClick={() => { setEtape({ nom: 'resultat', entendu: '', c: { resultat: 'faux', message: '' } }); lireReponse() }}>Je ne sais pas</button>
+            <button class="second" onClick={() => { setEtape({ nom: 'resultat', entendu: '', c: { resultat: 'faux', message: '' } }); annoncer('faux'); lireReponse() }}>Je ne sais pas</button>
           </div>
         </>
       )}

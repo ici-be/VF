@@ -245,3 +245,51 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .tableau td.rate .extra { font-weight: 400; }
 .segment .n { font-size: .78rem; color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
 .entete .revoir { border-color: var(--ko); color: var(--ko); }
+
+/* ---------- combo, note, confettis ---------- */
+.combo { font-weight: 800; color: var(--accent); margin-right: 10px; display: inline-block; transform-origin: center; font-variant-numeric: tabular-nums; animation: pop .35s ease-out; white-space: nowrap; }
+.combo.palier { animation: palier .7s ease-out; }
+@keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes palier { 0% { transform: scale(.6) rotate(-8deg); } 40% { transform: scale(1.8) rotate(6deg); } 100% { transform: scale(1) rotate(0); } }
+.note-serie { margin: 0; font: 800 clamp(2.4rem, 9vw, 3.4rem)/1 var(--display); font-variant-numeric: tabular-nums; }
+.note-serie.bien, .note.bien { color: var(--ok); }
+.note-serie.moyen, .note.moyen { color: var(--mid); }
+.note-serie.faible, .note.faible { color: var(--ko); }
+.score .c b { color: var(--accent); }
+canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 50; }
+.note { font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.matiere-choix .noms .note { font-size: .8rem; }
+.matiere-choix .noms .note.bien { color: var(--ok); }
+.matiere-choix .noms .note.moyen { color: var(--mid); }
+.matiere-choix .noms .note.faible { color: var(--ko); }
+
+/* ---------- mots croisés ---------- */
+.page.jeu { gap: 16px; padding-top: 16px; }
+/* margin auto (et non justify-content: center) : une grille trop large reste entièrement accessible en faisant défiler */
+.grille-zone { overflow-x: auto; padding: 4px 0; }
+.grille { --taille: clamp(22px, calc((min(100vw, 860px) - 40px) / var(--colonnes) - 2px), 40px); width: max-content; margin: 0 auto; display: grid; grid-template-columns: repeat(var(--colonnes), var(--taille)); grid-auto-rows: var(--taille); gap: 2px; }
+.grille .noire { background: transparent; }
+.grille .case { position: relative; background: var(--panel); border: 1.5px solid var(--line); border-radius: 4px; }
+.grille .case input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; text-align: center; text-transform: uppercase; font: 700 calc(var(--taille) * .52)/1 var(--display); color: var(--fg); padding: 0; caret-color: transparent; }
+.grille .case input:focus { outline: none; }
+.grille .case:focus-within { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.grille .case .num { position: absolute; top: 1px; left: 3px; font-size: calc(var(--taille) * .26); line-height: 1; color: var(--muted); pointer-events: none; }
+.grille .case.active { background: var(--blue-bg); }
+.grille .case.trouvee { background: var(--ok-bg); border-color: var(--ok); }
+.grille .case.trouvee input { color: var(--ok); }
+.grille .case.fausse { background: var(--ko-bg); border-color: var(--ko); }
+.grille .case.aidee input { color: var(--mid); }
+.indices { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; }
+.indices h2 { font: 700 .8rem/1 var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
+.indices ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.indices button { width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 6px 8px; display: flex; gap: 8px; align-items: baseline; }
+.indices b { min-width: 1.4em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.indices .long { color: var(--muted); font-size: .85rem; }
+.indices li.actif button { background: var(--blue-bg); }
+.indices li.trouve button { color: var(--muted); text-decoration: line-through; }
+.indices li.trouve b { color: var(--ok); }
+.haut-jeu { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; background: var(--bg); }
+.haut-jeu .barre { position: static; }
+.indice-actif { margin: 0; padding: 8px 16px; background: var(--blue-bg); color: var(--fg); font-size: 1rem; border-bottom: 1px solid var(--line); }
+.indice-actif b { color: var(--accent); margin-right: 4px; }
+.indice-actif .long { color: var(--muted); font-size: .85rem; }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
 import { apparence } from '../lib/apparence'
@@ -6,6 +6,7 @@ import { question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
 import { noter } from '../lib/progression'
 import { precharger, taire } from '../lib/voix'
+import { confettis } from '../lib/confettis'
 import { Defilement } from './exercices/Defilement'
 import { Ecrit } from './exercices/Ecrit'
 import { Qcm } from './exercices/Qcm'
@@ -23,7 +24,14 @@ export interface Bilan {
   faux: number
   /** mots ratés ou presque, à revoir */
   aRevoir: Mot[]
-  note: boolean   // false pour le défilement (pas de réponse notée)
+  notee: boolean   // false pour le défilement (pas de réponse notée)
+  meilleurCombo: number
+}
+
+/** Note sur 20 d'une série, au demi-point (un « presque » vaut un demi). */
+export const noteSerie = (b: Bilan) => {
+  const total = b.juste + b.presque + b.faux
+  return total ? Math.round(((b.juste + b.presque / 2) / total) * 40) / 2 : 0
 }
 
 /** Ce que reçoit chaque exercice. */
@@ -35,6 +43,8 @@ export interface PropsExercice {
   pause: boolean
   /** passer à la carte suivante, avec le résultat (null = pas noté) */
   suivant: (r: Resultat | null) => void
+  /** signaler le résultat dès qu'il est connu (le combo réagit tout de suite) */
+  annoncer: (r: Resultat) => void
 }
 
 interface Props {
@@ -51,6 +61,17 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   const [i, setI] = useState(0)
   const [resultats, setResultats] = useState<Map<string, Resultat>>(new Map())
   const [pause, setPause] = useState(false)
+  // bonnes réponses d'affilée (« presque » compte) ; une erreur remet à zéro
+  const [combo, setCombo] = useState(0)
+  const meilleurCombo = useRef(0)
+  const annonce = useRef(false)   // le résultat de la carte en cours a-t-il déjà compté pour le combo ?
+  const compter = (r: Resultat) => {
+    const c = r === 'faux' ? 0 : combo + 1
+    setCombo(c)
+    meilleurCombo.current = Math.max(meilleurCombo.current, c)
+    if (c > 0 && c % 10 === 0) confettis(80)
+  }
+  const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = true; compter(r) } }
   const ex = exercice(reglages.exercice)
   const tous = voc.matieres.flatMap(m => m.mots)
 
@@ -80,11 +101,13 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     let nouvelleFile = file
     const res = new Map(resultats)
     if (r) {
+      if (!annonce.current) compter(r)
       // la première réponse compte pour le score et la progression
       if (!carte.reprise && !res.has(carte.mot.id)) { res.set(carte.mot.id, r); noter(carte.mot.id, r) }
       // un mot raté revient une fois en fin de série
       if (r === 'faux' && !carte.reprise) nouvelleFile = [...file, { ...carte, reprise: true }]
     }
+    annonce.current = false
     setResultats(res)
     setFile(nouvelleFile)
     if (i + 1 < nouvelleFile.length) { setI(i + 1); return }
@@ -96,11 +119,12 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       presque: valeurs.filter(v => v === 'presque').length,
       faux: valeurs.filter(v => v === 'faux').length,
       aRevoir: serie.filter(c => res.get(c.mot.id) && res.get(c.mot.id) !== 'juste').map(c => c.mot),
-      note: r !== null,
+      notee: r !== null,
+      meilleurCombo: meilleurCombo.current,
     })
   }
 
-  const props: PropsExercice = { carte, tous, reglages, setReglages, pause, suivant }
+  const props: PropsExercice = { carte, tous, reglages, setReglages, pause, suivant, annoncer }
   const justes = [...resultats.values()].filter(v => v !== 'faux').length
 
   return (
@@ -108,6 +132,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
         <span class="quoi">{ex.nom}{ex.beta ? ' (bêta)' : ''} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        {combo >= 3 && <span key={combo} class={`combo ${combo % 5 === 0 ? 'palier' : ''}`} title="Bonnes réponses d’affilée">🔥 ×{combo}</span>}
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
         <button class="icone" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>

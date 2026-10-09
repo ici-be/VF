@@ -7,7 +7,7 @@ import { dire, Langue } from './commun'
 import { Choix, Saisie } from './Reponses'
 
 // La définition (sans le mot qu'elle définit), il faut trouver le mot néerlandais.
-export function Definitions({ carte, tous, reglages, pause, suivant }: PropsExercice) {
+export function Definitions({ carte, tous, reglages, pause, suivant, annoncer }: PropsExercice) {
   const m = carte.mot
   const definition = masquer(m.definition, m.nl)
   const bonne = nlComplet(m)
@@ -30,8 +30,8 @@ export function Definitions({ carte, tous, reglages, pause, suivant }: PropsExer
         <p class="astuce">Quel mot correspond à cette définition ?</p>
       </div>
       {reglages.repondre === 'choix'
-        ? <Choix options={options} bonne={bonne} mot={m} pause={pause} lire={lireMot} suivant={suivant} />
-        : <Saisie langue="nl" attendu={`${bonne} (${m.fr})`} mot={m} pause={pause} lire={lireMot} suivant={suivant}
+        ? <Choix options={options} bonne={bonne} mot={m} pause={pause} lire={lireMot} suivant={suivant} annoncer={annoncer} />
+        : <Saisie langue="nl" attendu={`${bonne} (${m.fr})`} mot={m} pause={pause} lire={lireMot} suivant={suivant} annoncer={annoncer}
             corriger={t => corriger(t, m.nl, 'nl', m.det, { exigerArticle: reglages.exigerArticle })} />}
     </>
   )

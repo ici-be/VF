@@ -4,7 +4,7 @@ import type { PropsExercice } from '../Seance'
 import { dire, Langue } from './commun'
 import { Choix } from './Reponses'
 
-export function Qcm({ carte, tous, reglages, pause, suivant }: PropsExercice) {
+export function Qcm({ carte, tous, reglages, pause, suivant, annoncer }: PropsExercice) {
   const q = question(carte), rep = reponse(carte)
   const options = useMemo(() => melanger([rep.texte, ...leurres(carte, tous)]), [])
 
@@ -17,7 +17,7 @@ export function Qcm({ carte, tous, reglages, pause, suivant }: PropsExercice) {
         <p class="mot">{q.texte}</p>
       </div>
       <Choix options={options} bonne={rep.texte} mot={carte.mot} pause={pause}
-        lire={() => dire(reglages, rep.texte, rep.langue)} suivant={suivant} />
+        lire={() => dire(reglages, rep.texte, rep.langue)} suivant={suivant} annoncer={annoncer} />
     </>
   )
 }

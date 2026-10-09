@@ -9,3 +9,9 @@ export function nombre(n: number, singulier: string, pluriel = singulier.replace
 /** Seulement le mot accordé, sans le nombre : « juste » / « justes ». */
 export const accord = (n: number, singulier: string, pluriel = singulier.replace(/(\S+)/g, '$1s')) =>
   Math.abs(n) >= 2 ? pluriel : singulier
+
+/** 12.5 → « 12,5/20 » */
+export const note = (n: number) => `${String(n).replace('.', ',')}/20`
+
+/** Couleur d'une note : comme un bulletin. */
+export const niveauNote = (n: number): 'faible' | 'moyen' | 'bien' => (n < 10 ? 'faible' : n < 14 ? 'moyen' : 'bien')
