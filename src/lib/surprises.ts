@@ -1,6 +1,8 @@
 // Les surprises des mascottes (easter eggs validés dans la démo) : de temps en temps, une mascotte
 // à l'écran joue une petite animation. Jamais moins de 30 secondes entre deux, souvent bien plus.
-// Raccourci : S pour une surprise au hasard, Maj+S pour les passer toutes en revue.
+// Aussi dans les médaillons du menu des matières.
+// Raccourci : S pour une surprise au hasard (sur une mascotte visible au hasard), Maj+S pour passer
+// en revue celles de la mascotte du bloc « Commencer ».
 // Six surprises communes, et une propre à chaque mascotte.
 import type { Mascotte } from './mascottes'
 
@@ -52,11 +54,19 @@ const parties = (svg: SVGSVGElement) => ({
 })
 const tour = <T,>(n: number, f: (i: number) => T) => Array.from({ length: n }, (_, i) => f(i))
 
-interface Surprise { id: string; pour?: Mascotte; jouer: (svg: SVGSVGElement) => Promise<void> }
+interface Surprise {
+  id: string
+  pour?: Mascotte
+  /** la surprise joue avec le flambeau : seulement si la mascotte le tient (dans le menu, seule celle de la matière choisie) */
+  flambeau?: boolean
+  /** ce qui bouge sort du cadre d'un médaillon (la queue du renard) : seulement en pied */
+  enPied?: boolean
+  jouer: (svg: SVGSVGElement) => Promise<void>
+}
 
 export const SURPRISES: Surprise[] = [
   // elle lance le flambeau, qui fait deux tours en l'air, le suit des yeux et le rattrape
-  { id: 'jonglage', async jouer(svg) {
+  { id: 'jonglage', flambeau: true, async jouer(svg) {
     const p = parties(svg), D = 1300
     anim(p.yeux, [{ transform: 'translate(0,0)' }, { transform: 'translate(1px,-2px)', offset: .15 }, { transform: 'translate(1px,-2.5px)', offset: .75 }, { transform: 'translate(0,0)' }], D)
     anim(p.perso, [{ transform: 'scale(1,1)' }, { transform: 'scale(1,1)', offset: .86 }, { transform: 'scale(1.04,.95)', offset: .92 }, { transform: 'scale(1,1)' }], D)
@@ -69,7 +79,7 @@ export const SURPRISES: Surprise[] = [
   } },
 
   // deux inspirations, l'éternuement souffle la flamme, un peu de fumée, puis elle se rallume
-  { id: 'atchoum', async jouer(svg) {
+  { id: 'atchoum', flambeau: true, async jouer(svg) {
     const p = parties(svg), D = 2400
     anim(p.yeux, [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1)', offset: .32 }, { transform: 'scaleY(.12)', offset: .4 }, { transform: 'scaleY(.12)', offset: .6 }, { transform: 'scaleY(1)', offset: .66 }, { transform: 'scaleY(1)' }], D)
     anim(p.flamme, [{ transform: 'scale(1)' }, { transform: 'scale(1)', offset: .5 }, { transform: 'scale(0)', offset: .53 }, { transform: 'scale(0)', offset: .82 }, { transform: 'scale(1.35)', offset: .88 }, { transform: 'scale(1)' }], D)
@@ -120,7 +130,7 @@ export const SURPRISES: Surprise[] = [
   } },
 
   // Reynaert remue la queue en se dandinant, et un petit cœur s'envole
-  { id: 'queue', pour: 'renard', async jouer(svg) {
+  { id: 'queue', pour: 'renard', enPied: true, async jouer(svg) {
     const p = parties(svg), D = 1800
     envol(svg, `<path d="M0 3 C-6 -2 -4 -7 0 -4 C4 -7 6 -2 0 3 Z" fill="#e0607e" stroke="${TRAIT}" stroke-width="1"/>`, 30, 70, { dx: -6, dy: -40, duree: 1500, delai: 300, echelle: 1.6 })
     anim(p.perso, [...tour(4, i => [{ transform: 'rotate(0)' }, { transform: `rotate(${i % 2 ? 2 : -2}deg)` }]).flat(), { transform: 'rotate(0)' }], D)
@@ -217,9 +227,16 @@ export function interrompre(svg: SVGSVGElement) {
 
 // la surprise : une fois sur trois celle de la mascotte, sinon une commune ; jamais deux fois la même de suite
 let derniere = ''
-export function choisirSurprise(m: Mascotte, hasard = Math.random): Surprise {
-  const propre = SURPRISES.find(s => s.pour === m && s.id !== derniere)
-  const communes = SURPRISES.filter(s => !s.pour && s.id !== derniere)
+/** La mascotte tient-elle son flambeau ? (dans un médaillon du menu, pas toujours) */
+export const tientLeFlambeau = (svg: SVGSVGElement) => {
+  const f = svg.querySelector('.bras-d.repos .flambeau')
+  return !!f && getComputedStyle(f).visibility !== 'hidden'
+}
+
+export function choisirSurprise(m: Mascotte, hasard = Math.random, avecFlambeau = true, medaillon = false): Surprise {
+  const ok = (s: Surprise) => s.id !== derniere && (avecFlambeau || !s.flambeau) && !(medaillon && s.enPied)
+  const propre = SURPRISES.find(s => s.pour === m && ok(s))
+  const communes = SURPRISES.filter(s => !s.pour && ok(s))
   const s = propre && hasard() < 1 / 3 ? propre : communes[Math.floor(hasard() * communes.length)]
   derniere = s.id
   return s
@@ -240,7 +257,7 @@ function essayer() {
   // onglet caché, élève en pleine action ou mascotte occupée : on retente dans 30 secondes
   if (document.hidden || Date.now() - calme < 5000 || !candidates.length) return void setTimeout(essayer, 30_000)
   const svg = candidates[Math.floor(Math.random() * candidates.length)]
-  surprendre(svg, choisirSurprise(svg.dataset.mascotte as Mascotte))
+  surprendre(svg, choisirSurprise(svg.dataset.mascotte as Mascotte, Math.random, tientLeFlambeau(svg), svg.classList.contains('buste')))
   setTimeout(essayer, delai())
 }
 
@@ -250,18 +267,19 @@ function declencher(dansLOrdre: boolean) {
   const candidates = [...document.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')]
     .filter(svg => { const r = svg.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight && !svg.closest('.en-course') })
   if (!candidates.length) return
-  const svg = candidates[0]
+  // S : une mascotte visible au hasard (scène ou médaillon) ; Maj+S : la mascotte du bloc « Commencer »
+  const svg = dansLOrdre ? candidates[0] : candidates[Math.floor(Math.random() * candidates.length)]
   const m = svg.dataset.mascotte as Mascotte
   interrompre(svg)
   if (svg.dataset.saute) return
   let s: Surprise
   if (dansLOrdre) {
     // les surprises possibles pour cette mascotte : les communes, puis la sienne
-    const possibles = SURPRISES.filter(x => !x.pour || x.pour === m)
+    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && (!x.flambeau || tientLeFlambeau(svg)))
     revue = (revue + 1) % possibles.length
     s = possibles[revue]
   } else {
-    s = choisirSurprise(m)
+    s = choisirSurprise(m, Math.random, tientLeFlambeau(svg), svg.classList.contains('buste'))
   }
   surprendre(svg, s)
 }

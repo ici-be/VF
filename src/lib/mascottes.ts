@@ -195,7 +195,7 @@ const DESSINS: Record<Mascotte, string> = {
 
 /** Le buste, pour le médaillon du menu des matières : la tête et, à côté, le flambeau tenu à hauteur d'épaule. */
 export const svgBuste = (nom: Mascotte) =>
-  `<svg class="mascotte buste" viewBox="30 8 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
+  `<svg class="mascotte buste" data-mascotte="${nom}" viewBox="30 8 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
 
 export const svgMascotte = (nom: Mascotte, classe = '') =>
   `<svg class="mascotte ${classe}" data-mascotte="${nom}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">${ombre.replace('<ellipse', '<ellipse class="ombre-sol"')}<g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
