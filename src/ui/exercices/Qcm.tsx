@@ -1,27 +1,29 @@
-import { useEffect, useMemo, useState } from 'preact/hooks'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { leurres, melanger, question, reponse } from '../../lib/seance'
 import type { PropsExercice } from '../Seance'
-import { dire, Infos, Langue } from './commun'
+import { attendre, dire, Infos, Langue } from './commun'
 
 export function Qcm({ carte, tous, reglages, pause, suivant }: PropsExercice) {
   const q = question(carte), rep = reponse(carte)
   const options = useMemo(() => melanger([rep.texte, ...leurres(carte, tous)]), [])
   const [choisi, setChoisi] = useState<number | null>(null)
   const juste = choisi !== null && options[choisi] === rep.texte
+  const lecture = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => { dire(reglages, q.texte, q.langue) }, [])
 
   const choisir = (k: number) => {
     if (choisi !== null) return
     setChoisi(k)
-    dire(reglages, rep.texte, rep.langue)
+    lecture.current = dire(reglages, rep.texte, rep.langue)
   }
 
-  // bonne réponse : on enchaîne tout seul ; erreur : on laisse le temps de lire
+  // bonne réponse : on enchaîne tout seul, une fois la réponse lue ; erreur : on laisse le temps de lire
   useEffect(() => {
     if (!juste || pause) return
-    const t = setTimeout(() => suivant('juste'), 1300)
-    return () => clearTimeout(t)
+    let annule = false
+    Promise.all([lecture.current, attendre(1000)]).then(() => { if (!annule) suivant('juste') })
+    return () => { annule = true }
   }, [juste, pause])
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { question, reponse } from '../../lib/seance'
 import type { PropsExercice } from '../Seance'
-import { dire, Infos, Langue } from './commun'
+import { attendre, dire, Infos, Langue } from './commun'
 
 // Le mot s'affiche (et est lu), la réponse arrive après « délai » secondes,
 // puis on passe au mot suivant. La pause arrête tout et reprend l'étape en cours.
@@ -13,7 +13,6 @@ export function Defilement({ carte, reglages, setReglages, pause, suivant }: Pro
   useEffect(() => {
     if (pause) return
     let annule = false
-    const attendre = (ms: number) => new Promise(r => setTimeout(r, ms))
     ;(async () => {
       if (etape === 'question') {
         await Promise.all([dire(reglages, q.texte, q.langue), attendre(delai * 1000)])

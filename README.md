@@ -46,6 +46,16 @@ npm test         # tests (correction des réponses, lecture du tableau)
 npm run build    # version finale dans dist/
 ```
 
+## Les voix
+
+Les mots sont lus par des voix belges (edge-tts : `nl-BE-DenaNeural`, `fr-BE-CharlineNeural`),
+préparées en mp3 par `outils/voix.py` dans `public/audio/`. GitHub relance ce script
+toutes les heures : un mot ajouté dans le tableau a sa voix dans l'heure. En attendant,
+il est lu par la voix du navigateur. Pour ne pas attendre : onglet *Actions* →
+*Publier* → *Run workflow*. Pour changer de voix : `VOIX` et `VITESSE` dans
+`outils/voix.py` **et** dans `src/lib/voix.ts` (le test `tests/voix.test.ts` vérifie
+qu'ils calculent les mêmes noms de fichiers).
+
 ## Mettre à jour l'appli
 
 `git push` suffit : GitHub compile, teste et publie (onglet *Actions* du dépôt).
@@ -55,4 +65,5 @@ Les appareils reçoivent la nouvelle version au lancement suivant.
 
 - `src/lib/` : la logique sans interface (lecture du tableau, correction, progression, séries)
 - `src/ui/` : les écrans (accueil, exercices, fin, liste)
+- `outils/voix.py` : prépare les voix (mp3)
 - `outils/ajouter-definitions.gs` : script ponctuel pour le tableau (colonnes Définition / Exemple)

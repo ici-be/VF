@@ -1,24 +1,60 @@
-# À chaque « git push » sur main : tests, compilation, publication sur GitHub Pages.
+# Prépare les voix des mots nouveaux du tableau, puis publie l'appli sur GitHub Pages.
+# - à chaque « git push » sur main
+# - toutes les heures : les mots ajoutés dans le tableau reçoivent leur voix
+#   (l'appli n'est republiée que si de nouvelles voix ont été créées)
+# - à la demande : onglet Actions → Publier → Run workflow
 name: Publier
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 * * * *'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: publier
+  cancel-in-progress: false
 jobs:
+  voix:
+    runs-on: ubuntu-latest
+    outputs:
+      nouvelles: ${{ steps.commit.outputs.nouvelles }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install edge-tts
+      - run: python outils/voix.py
+      - id: commit
+        name: Enregistrer les nouvelles voix
+        run: |
+          git add public/audio
+          if git diff --cached --quiet; then
+            echo "nouvelles=false" >> "$GITHUB_OUTPUT"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Voix des nouveaux mots du tableau"
+            git pull --rebase origin main
+            git push origin HEAD:main
+            echo "nouvelles=true" >> "$GITHUB_OUTPUT"
+          fi
+
   publier:
+    needs: voix
+    if: github.event_name != 'schedule' || needs.voix.outputs.nouvelles == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploiement.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # avec les voix qui viennent d'être ajoutées
       - uses: actions/setup-node@v4
         with:
           node-version: 22

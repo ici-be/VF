@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PropsExercice } from '../Seance'
-import { dire, Infos } from './commun'
+import { attendre, dire, Infos } from './commun'
 
 export function DeHet({ carte, reglages, pause, suivant }: PropsExercice) {
   const mot = carte.mot
   const [choisi, setChoisi] = useState<string | null>(null)
   const juste = choisi === mot.det
+  const lecture = useRef<Promise<void>>(Promise.resolve())
 
   const choisir = (a: string) => {
     if (choisi) return
     setChoisi(a)
-    dire(reglages, `${mot.det} ${mot.nl}`, 'nl')
+    lecture.current = dire(reglages, `${mot.det} ${mot.nl}`, 'nl')
   }
 
   useEffect(() => {
     if (!juste || pause) return
-    const t = setTimeout(() => suivant('juste'), 1100)
-    return () => clearTimeout(t)
+    let annule = false
+    Promise.all([lecture.current, attendre(800)]).then(() => { if (!annule) suivant('juste') })
+    return () => { annule = true }
   }, [juste, pause])
 
   useEffect(() => {

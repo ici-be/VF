@@ -27,12 +27,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // les voix (mp3) seront mises en cache au fur et à mesure qu'on les écoute
-        runtimeCaching: [{
-          urlPattern: /\/audio\/.*\.mp3$/,
-          handler: 'CacheFirst',
-          options: { cacheName: 'voix', expiration: { maxEntries: 5000 } },
-        }],
+        runtimeCaching: [
+          {
+            // le nom de chaque mp3 change avec son texte : une fois en cache, il est bon pour toujours
+            urlPattern: /\/audio\/.*\.mp3$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'voix', expiration: { maxEntries: 5000 } },
+          },
+          {
+            urlPattern: /\/audio\/index\.json$/,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'voix-index', networkTimeoutSeconds: 4 },
+          },
+        ],
       },
     }),
   ],

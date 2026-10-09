@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
-import type { Carte } from '../lib/seance'
+import { question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
 import { noter } from '../lib/progression'
-import { taire } from '../lib/voix'
+import { precharger, taire } from '../lib/voix'
 import { Defilement } from './exercices/Defilement'
 import { Ecrit } from './exercices/Ecrit'
 import { Qcm } from './exercices/Qcm'
@@ -59,6 +59,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     return () => { removeEventListener('keydown', touche); document.removeEventListener('visibilitychange', cache); taire() }
   }, [ex.id])
   useEffect(() => { if (pause) taire() }, [pause])
+  // les voix de toute la série, téléchargées dès le départ
+  useEffect(() => { if (reglages.voix) precharger(serie.flatMap(c => [question(c), reponse(c)])) }, [])
 
   if (!file.length) {
     return <div class="vide"><p>Aucun mot à réviser avec ces réglages.</p><button class="go" onClick={quitter}>Retour</button></div>

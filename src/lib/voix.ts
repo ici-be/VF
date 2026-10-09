@@ -1,52 +1,113 @@
-// Lecture à voix haute. Pour l'instant : la synthèse vocale du navigateur, en
-// choisissant la meilleure voix belge / néerlandaise / française disponible.
-// (Étape suivante : des mp3 edge-tts préparés à l'avance, cette voix-ci en secours.)
+// Lecture à voix haute. D'abord les mp3 edge-tts préparés par outils/voix.py
+// (voix belges, identiques sur tous les appareils) ; pour un mot qui n'a pas
+// encore son mp3, la synthèse vocale du navigateur prend le relais.
 
-const PREFERENCES: Record<'fr' | 'nl', string[]> = {
-  nl: ['nl-BE', 'nl-NL', 'nl'],
-  fr: ['fr-BE', 'fr-FR', 'fr'],
+export const VOIX = { nl: 'nl-BE-DenaNeural', fr: 'fr-BE-CharlineNeural' } as const
+export const VITESSE = '-10%'
+
+/** Le texte à lire : sans crochets ni précisions entre parenthèses (identique à outils/voix.py). */
+export function texteALire(t: string): string {
+  return t.normalize('NFC').replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
 }
 
+/** Nom du fichier mp3 d'un texte (identique à empreinte() dans outils/voix.py). */
+export async function empreinte(langue: 'fr' | 'nl', texte: string): Promise<string> {
+  const cle = new TextEncoder().encode(`${VOIX[langue]}|${VITESSE}|${texteALire(texte)}`)
+  const h = new Uint8Array(await crypto.subtle.digest('SHA-1', cle))
+  return Array.from(h.slice(0, 8), b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// ---------------------------------------------------------- mp3 disponibles
+let index: Promise<Set<string>> | null = null
+function fichiersDisponibles(): Promise<Set<string>> {
+  return (index ??= fetch('./audio/index.json')
+    .then(r => (r.ok ? r.json() : { fichiers: [] }))
+    .then(j => new Set<string>(j.fichiers ?? []))
+    .catch(() => new Set<string>()))
+}
+
+async function urlMp3(texte: string, langue: 'fr' | 'nl'): Promise<string | null> {
+  const h = await empreinte(langue, texte)
+  return (await fichiersDisponibles()).has(h) ? `./audio/${h}.mp3` : null
+}
+
+/** Télécharge à l'avance les voix d'une série (pas d'attente, et disponibles hors ligne). */
+export async function precharger(textes: { texte: string; langue: 'fr' | 'nl' }[]): Promise<void> {
+  const urls = (await Promise.all(textes.map(t => urlMp3(t.texte, t.langue)))).filter((u): u is string => !!u)
+  for (let i = 0; i < urls.length; i += 6) {
+    await Promise.all(urls.slice(i, i + 6).map(u => fetch(u).catch(() => null)))
+  }
+}
+
+// ------------------------------------------------------- voix du navigateur
 const synth = typeof speechSynthesis !== 'undefined' ? speechSynthesis : null
-let voixDispo: SpeechSynthesisVoice[] = []
-const charger = () => (voixDispo = synth?.getVoices() ?? [])
-charger()
-synth?.addEventListener?.('voiceschanged', charger)
+let voixNavigateur: SpeechSynthesisVoice[] = []
+const chargerVoix = () => (voixNavigateur = synth?.getVoices() ?? [])
+chargerVoix()
+synth?.addEventListener?.('voiceschanged', chargerVoix)
 
 function choisirVoix(langue: 'fr' | 'nl'): SpeechSynthesisVoice | undefined {
-  for (const code of PREFERENCES[langue]) {
-    const candidates = voixDispo.filter(v => v.lang.replace('_', '-').toLowerCase().startsWith(code.toLowerCase()))
-    if (!candidates.length) continue
-    // les voix « en ligne » / Google / Natural sont nettement moins robotiques
-    return candidates.find(v => /google|natural|online|neural/i.test(v.name)) ?? candidates[0]
+  for (const code of langue === 'nl' ? ['nl-be', 'nl-nl', 'nl'] : ['fr-be', 'fr-fr', 'fr']) {
+    const candidates = voixNavigateur.filter(v => v.lang.replace('_', '-').toLowerCase().startsWith(code))
+    if (candidates.length) return candidates.find(v => /google|natural|online|neural/i.test(v.name)) ?? candidates[0]
   }
   return undefined
 }
 
-/** Le texte à lire : sans crochets ni précisions entre parenthèses. */
-export function texteALire(t: string): string {
-  return t.replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
+function parlerNavigateur(texte: string, langue: 'fr' | 'nl', fini: () => void): () => void {
+  if (!synth) { fini(); return () => {} }
+  const u = new SpeechSynthesisUtterance(texte)
+  const v = choisirVoix(langue)
+  if (v) u.voice = v
+  u.lang = v?.lang ?? (langue === 'nl' ? 'nl-BE' : 'fr-BE')
+  u.rate = 0.9
+  // filet de sécurité, large, pour les navigateurs qui n'envoient jamais « end »
+  const secours = setTimeout(fini, 4000 + texte.length * 200)
+  u.onend = u.onerror = () => { clearTimeout(secours); fini() }
+  synth.speak(u)
+  return () => { clearTimeout(secours); synth.cancel() }
 }
 
-/** Lit le texte ; la promesse se résout à la fin (ou tout de suite sans voix). */
-export function parler(texte: string, langue: 'fr' | 'nl', vitesse = 0.9): Promise<void> {
-  if (!synth || !texte.trim()) return Promise.resolve()
-  synth.cancel()
+// ---------------------------------------------------------------- lecture
+const lecteur = typeof Audio !== 'undefined' ? new Audio() : null
+let arreterEnCours: (() => void) | null = null
+
+/** Lit le texte ; la promesse se résout quand la lecture est finie (ou interrompue). */
+export function parler(texte: string, langue: 'fr' | 'nl'): Promise<void> {
+  taire()
+  const t = texteALire(texte)
+  if (!t) return Promise.resolve()
   return new Promise(resolve => {
-    const u = new SpeechSynthesisUtterance(texteALire(texte))
-    const v = choisirVoix(langue)
-    if (v) u.voice = v
-    u.lang = v?.lang ?? PREFERENCES[langue][0]
-    u.rate = vitesse
-    // filet de sécurité : certains navigateurs n'envoient jamais « end »
-    const fin = setTimeout(resolve, 1500 + texte.length * 120)
-    u.onend = u.onerror = () => { clearTimeout(fin); resolve() }
-    synth.speak(u)
+    let termine = false
+    let arreterNavigateur = () => {}
+    const fini = () => {
+      if (termine) return
+      termine = true
+      if (lecteur) { lecteur.onended = lecteur.onerror = null }
+      arreterEnCours = null
+      resolve()
+    }
+    arreterEnCours = () => { lecteur?.pause(); arreterNavigateur(); fini() }
+
+    let secoursLance = false
+    const secours = () => {
+      if (termine || secoursLance) return
+      secoursLance = true
+      arreterNavigateur = parlerNavigateur(t, langue, fini)
+    }
+    urlMp3(t, langue).then(url => {
+      if (termine) return
+      if (!url || !lecteur) { secours(); return }
+      lecteur.onended = fini
+      // mp3 introuvable (hors ligne et pas encore en cache…) : voix du navigateur
+      lecteur.onerror = secours
+      lecteur.src = url
+      lecteur.play().catch(secours)
+    })
   })
 }
 
+/** Coupe la lecture en cours (la promesse de parler() se résout). */
 export function taire(): void {
-  synth?.cancel()
+  arreterEnCours?.()
 }
-
-export const voixDisponible = () => synth !== null

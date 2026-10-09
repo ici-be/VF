@@ -3,6 +3,8 @@ import type { Correction } from '../../lib/correction'
 import { parler } from '../../lib/voix'
 import type { Reglages } from '../../lib/reglages'
 
+export const attendre = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+
 /** Lit le texte si la voix est activée (la promesse se résout tout de suite sinon). */
 export const dire = (r: Reglages, texte: string, langue: 'fr' | 'nl') =>
   r.voix ? parler(texte, langue) : Promise.resolve()
