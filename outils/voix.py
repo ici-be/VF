@@ -13,6 +13,8 @@ import asyncio
 import hashlib
 import io
 import json
+import os
+import tempfile
 import re
 import sys
 import unicodedata
@@ -135,6 +137,14 @@ async def main() -> int:
     print(f'{len(voulus)} textes, {len(manquants)} voix à créer')
 
     limite = asyncio.Semaphore(EN_PARALLELE)
+    if not manquants and os.environ.get('GITHUB_EVENT_NAME', 'schedule') != 'schedule':
+        # rien à créer : on vérifie quand même qu'edge-tts répond (sinon les prochains mots n'auraient pas de voix)
+        with tempfile.TemporaryDirectory() as d:
+            if not await creer('nl', 'de test', Path(d) / 'test.mp3', limite):
+                print('edge-tts ne répond pas', file=sys.stderr)
+                return 1
+            print('edge-tts répond')
+
     await asyncio.gather(*(creer(lg, t, DOSSIER / f'{h}.mp3', limite) for h, (lg, t) in manquants.items()))
 
     inutiles = [f for f in DOSSIER.glob('*.mp3') if f.stem not in voulus]
