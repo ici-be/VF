@@ -17,12 +17,27 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Exemple | une phrase ; la partie à trouver dans les textes à trous va entre crochets : `Het bevolkingsaantal [neemt af]` |
 | Remarque | le reste : pluriel, synonyme, contraire, forme… |
 | Chapitre | le chapitre (vide = « Sans chapitre ») |
+| Page | la page du cours (ignorée par l'appli ; sert à garder l'ordre du cours) |
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
 📐 Wiskunde…, 📚 sinon) ; pour en imposer une, commencer le nom de l'onglet par un
 emoji, par exemple « 🦖 NW Biologie ».
 Les changements du tableau apparaissent au prochain lancement de l'appli.
+
+## Ajouter un cours
+
+1. Scanner le chapitre en PDF (300 dpi, couleur), nommé par exemple
+   `Aardrijkskunde - 3. Klimaat.pdf`, dans un dossier hors du dépôt.
+2. Dans ce dossier, lancer `claude` puis `/cours ~/Documents/Cours/Aardrijkskunde - 3. Klimaat.pdf`.
+   Claude lit les pages, compare avec le tableau et propose les mots (gras, définitions,
+   mots fréquents) avec chapitre et page ; la proposition est aussi enregistrée en `.tsv`
+   à côté du PDF.
+3. Après relecture et accord, il les envoie : les nouveaux mots arrivent **en jaune** dans
+   l'onglet, trié par chapitre puis par page. Enlever le jaune une fois relus.
+
+Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
+`python3 outils/cours.py configurer`.
 
 ## Installer
 
