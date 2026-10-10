@@ -117,4 +117,7 @@ export const questionsChoisies = (voc: Vocabulaire, r: Reglages) => motsChoisis(
 
 /** Ce que l'exercice peut réviser avec ce choix de matières et de chapitres : des mots ou des questions. */
 export const aReviser = (voc: Vocabulaire, r: Reglages, ex = exercice(r.exercice)) =>
-  motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)
+  ex.nederlands
+    // les verbes du chapitre Conjugaison, même si d'autres chapitres de Nederlands sont cochés
+    ? voc.matieres.filter(m => r.matieres.includes(m.nom)).flatMap(m => m.mots).filter(ex.accepte)
+    : motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)

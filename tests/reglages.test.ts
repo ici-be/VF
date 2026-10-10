@@ -24,3 +24,13 @@ describe('mots et questions à réviser', () => {
     expect(aReviser(ancien, r({ exercice: 'questions' }))).toEqual([])
   })
 })
+
+describe('exercices de Nederlands', () => {
+  it('portent sur les verbes de Conjugaison même si un autre chapitre est coché', () => {
+    const verbe = (nl: string): Mot => ({ ...mot(nl, 'Conjugaison'), verbe: nl })
+    const ned: Vocabulaire = { matieres: [{ nom: 'Nederlands', chapitres: ['1', 'Conjugaison'], mots: [mot('klinker', '1'), verbe('zijn')] }], misAJour: 0 }
+    const choix = r({ matieres: ['Nederlands'], chapitres: [cleChapitre('Nederlands', '1')] })
+    expect(aReviser(ned, { ...choix, exercice: 'conjugaison' }).map(m => m.nl)).toEqual(['zijn'])
+    expect(aReviser(ned, { ...choix, exercice: 'qcm' }).map(m => m.nl)).toEqual(['klinker'])
+  })
+})

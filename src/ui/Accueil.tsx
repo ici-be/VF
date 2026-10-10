@@ -84,6 +84,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const unite = ex.surQuestions ? 'question' : 'mot'
   // la conjugaison n'existe que dans Nederlands : ses exercices n'apparaissent que si cette matière est choisie
   const avecConjugaison = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe))
+  // un exercice de Nederlands choisi alors que Nederlands ne l'est plus : on passe au QCM
+  useEffect(() => { if (ex.nederlands && !avecConjugaison) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecConjugaison])
   const nbARevoir = motsARevoir(choisis).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
