@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { lireXlsx } from '../src/lib/xlsx'
-import { dateAjout, derniersAjouts, matiereDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
+import { dateAjout, derniersAjouts, matiereDepuisOnglet, questionsDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
 
 // petit classeur .xlsx fabriqué à la main, avec la même structure que Google Sheets
 function classeur(): Uint8Array {
@@ -62,5 +62,17 @@ describe('lecture du tableau', () => {
     expect(d.mots.map(m => m.nl)).toEqual(['zee', 'cel'])
     expect(a.mots[0].ajoute).toBeUndefined()
     expect(derniersAjouts({ matieres: [], misAJour: 0 })).toEqual({ date: '', mots: [] })
+  })
+  it('lit les questions de cours d’un onglet « Vragen »', () => {
+    const q = questionsDepuisOnglet({ nom: 'Vragen', lignes: [
+      ['Matière', 'Chapitre', 'Page', 'Question', 'Réponse', 'Leurres', 'Ajouté'],
+      ['HW Aardrijkskunde', '1. Overbevolkte planeet', '11', 'Wat is migratie?', 'De verplaatsing van mensen', 'Een reis | Een verhuis binnen een stad ', '2026-10-10'],
+      ['HW Aardrijkskunde', '', '', 'Zonder antwoord?', '', '', ''],
+    ] })!
+    expect(q).toHaveLength(1)
+    expect(q[0]).toMatchObject({ nl: 'Wat is migratie?', fr: 'De verplaatsing van mensen', chapitre: '1. Overbevolkte planeet', ajoute: '2026-10-10' })
+    expect(q[0].vraag).toEqual({ leurres: ['Een reis', 'Een verhuis binnen een stad'], page: '11' })
+    expect(questionsDepuisOnglet({ nom: 'A', lignes: [['Néerlandais', 'Français'], ['zee', 'la mer']] })).toBeNull()
+    expect(matiereDepuisOnglet({ nom: 'Vragen', lignes: [['Matière', 'Question', 'Réponse']] })).toBeNull()
   })
 })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { derniersAjouts, type Mot, type Vocabulaire } from '../lib/mots'
-import { exercice, motsChoisis, type Reglages } from '../lib/reglages'
+import { exercice, motsChoisis, questionsChoisies, type Reglages } from '../lib/reglages'
 import { motsARevoir, type Suivi } from '../lib/progression'
 import { construireSerie, type Carte } from '../lib/seance'
 import { sansAccents } from '../lib/correction'
@@ -12,7 +12,7 @@ import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 
-export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux'
+export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux' | 'questions'
 
 interface Props {
   voc: Vocabulaire
@@ -44,11 +44,12 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const verbesPrimitifs = choisis.filter(m => estPrimitif(m.verbe)).sort((a, b) => verbe(a.verbe!)!.rang - verbe(b.verbe!)!.rang)
   // les mots du dernier envoi /cours, toutes matières confondues (pas seulement celles choisies)
   const nouveaux = derniersAjouts(voc)
+  const questions = questionsChoisies(voc, reglages)
   const dateNouveaux = nouveaux.date && new Date(nouveaux.date + 'T12:00').toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
-  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : vue === 'nouveaux' ? nouveaux.mots : choisis).filter(m =>
+  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : vue === 'nouveaux' ? nouveaux.mots : vue === 'questions' ? questions : choisis).filter(m =>
     !q || [m.nl, m.fr, m.definition, m.remarque, m.exemple].some(t => simple(t).includes(q)))
   // « à revoir » : dans l'ordre de priorité, sans regroupement par chapitre
-  const trier = vue === 'tous' ? tri : vue === 'nouveaux' ? 'chapitre' : null
+  const trier = vue === 'tous' ? tri : vue === 'nouveaux' || vue === 'questions' ? 'chapitre' : null
   if (trier === 'chapitre') {
     // dans l'ordre des chapitres du tableau, même si les lignes y sont mélangées
     const rang = new Map(voc.matieres.flatMap((m, i) => m.chapitres.map((c, j) => [`${m.nom}|${c}`, i * 1000 + j] as const)))
@@ -78,7 +79,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   })
   const titreImpression = vue === 'nouveaux'
     ? `Nouveaux mots – ${dateNouveaux}`
-    : `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
+    : `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
   // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
   useEffect(() => {
     const avant = document.title
@@ -94,14 +95,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     <main class="page liste">
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
-        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : 'Vocabulaire néerlandais'}</h1>
+        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
         {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
-        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
+        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : vue === 'questions' ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
       <div class="haut">
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
-          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : 'Liste des mots'}</h1>
+          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <>{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</>}</p>
@@ -111,6 +112,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         <button aria-pressed={vue === 'revoir'} onClick={() => setVue('revoir')}>À revoir <span class="n">{aRevoir.length}</span></button>
         {verbesPrimitifs.length > 0 && (
           <button aria-pressed={vue === 'primitifs'} onClick={() => setVue('primitifs')}>Temps primitifs <span class="n">{verbesPrimitifs.length}</span></button>
+        )}
+        {questions.length > 0 && (
+          <button aria-pressed={vue === 'questions'} onClick={() => setVue('questions')}>Questions <span class="n">{questions.length}</span></button>
         )}
         {nouveaux.mots.length > 0 && (
           <button aria-pressed={vue === 'nouveaux'} onClick={() => setVue('nouveaux')}>Nouveaux <span class="n">{nouveaux.mots.length}</span></button>
@@ -164,11 +168,11 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         </div>
       )}
       {vue === 'primitifs' ? null : mots.length === 0
-        ? <p class="vide">{vue === 'revoir' && !q ? 'Aucun mot raté récemment dans ce choix. Bravo ! 🎉' : 'Aucun mot ne correspond.'}</p>
+        ? <p class="vide">{vue === 'revoir' && !q ? 'Aucun mot raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
         : (
-          <div class="tableau">
+          <div class={`tableau ${vue === 'questions' ? 'questions' : ''}`}>
             <table>
-              <thead><tr><th></th><th>Nederlands</th><th>Français</th><th class="details">Définition · exemple · remarque</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
+              <thead><tr><th></th>{vue === 'questions' ? <><th>Vraag</th><th>Antwoord</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{vue === 'questions' ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
                 {lignes.map(l => 'groupe' in l
                   ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><span class="ico-matiere">{apparence(l.matiere).icone} </span>{l.groupe}</td></tr>

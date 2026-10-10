@@ -15,9 +15,11 @@ interface PropsChoix {
   lire: () => Promise<void>
   suivant: (r: Resultat) => void
   annoncer: (r: Resultat) => void
+  /** propositions longues (des phrases) : une par ligne */
+  longues?: boolean
 }
 
-export function Choix({ options, bonne, mot, pause, lire, suivant, annoncer }: PropsChoix) {
+export function Choix({ options, bonne, mot, pause, lire, suivant, annoncer, longues }: PropsChoix) {
   const [choisi, setChoisi] = useState<number | null>(null)
   const juste = choisi !== null && options[choisi] === bonne
   const lecture = useRef<Promise<void>>(Promise.resolve())
@@ -50,7 +52,7 @@ export function Choix({ options, bonne, mot, pause, lire, suivant, annoncer }: P
 
   return (
     <>
-      <div class="choix">
+      <div class={`choix ${longues ? 'longues' : ''}`}>
         {options.map((o, k) => (
           <button
             class={choisi === null ? '' : o === bonne ? 'bon' : k === choisi ? 'mauvais' : ''}

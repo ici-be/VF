@@ -7,7 +7,9 @@
     python3 outils/cours.py envoyer mots.tsv --onglet "HW Aardrijkskunde" [--essai] [--dater]
 
 Le fichier envoyé est un TSV avec une ligne de titres :
-Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre.
+- mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
+- questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres
+  (leurres séparés par « | »), envoyées avec --onglet Vragen.
 L'URL et la clé restent dans ~/.config/vocabulaire-nl/envoi.json, hors du dépôt (public).
 """
 import argparse
@@ -29,6 +31,7 @@ CONFIG = Path.home() / '.config' / 'vocabulaire-nl' / 'envoi.json'
 TITRES = {
     'page': 'page', 'néerlandais': 'nl', 'dét.': 'det', 'français': 'fr', 'remarque': 'remarque',
     'définition': 'definition', 'exemple': 'exemple', 'chapitre': 'chapitre',
+    'matière': 'matiere', 'question': 'question', 'réponse': 'reponse', 'leurres': 'leurres',
 }
 
 
@@ -119,15 +122,22 @@ def envoyer(args):
     with open(args.fichier, newline='', encoding='utf-8') as f:
         lecteur = csv.reader(f, delimiter='\t')
         titres = [TITRES.get(t.strip().lower()) for t in next(lecteur)]
-        if 'nl' not in titres or 'fr' not in titres or 'chapitre' not in titres:
-            sys.exit('Il faut au moins les colonnes Néerlandais, Français et Chapitre.')
+        questions = 'question' in titres
+        requis = ('matiere', 'question', 'reponse', 'chapitre') if questions else ('nl', 'fr', 'chapitre')
+        if not all(k in titres for k in requis):
+            sys.exit('Il faut au moins les colonnes ' + (
+                'Matière, Question, Réponse et Chapitre.' if questions else 'Néerlandais, Français et Chapitre.'))
         lignes = [{k: v.strip() for k, v in zip(titres, l) if k} for l in lecteur if any(c.strip() for c in l)]
     for l in lignes:
         if l.get('page', '').isdigit():
             l['page'] = int(l['page'])
     res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai, 'dater': args.dater})
     quoi = 'Serait fait' if args.essai else 'Fait'
-    print(f'{quoi} dans « {args.onglet} » :')
+    print(f'{quoi} dans « {args.onglet} »' + (' (nouvel onglet)' if res.get('nouvelOnglet') else '') + ' :')
+    if questions:
+        print(f'  {len(res["ajoutes"])} questions ajoutées')
+        print(f'  {len(res["pages"]) + len(res["dejaLa"])} questions déjà présentes')
+        return
     print(f'  {len(res["ajoutes"])} mots ajoutés : {", ".join(res["ajoutes"]) or "—"}')
     print(f'  {len(res["pages"])} mots déjà présents, page ajoutée')
     print(f'  {len(res["dejaLa"])} mots déjà présents avec leur page')

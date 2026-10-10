@@ -1,5 +1,6 @@
 // Le tableau Google → une liste de mots. Les colonnes sont reconnues par leur
-// nom (peu importe leur ordre), chaque onglet est une matière.
+// nom (peu importe leur ordre), chaque onglet est une matière. Un onglet avec les
+// colonnes « Question » et « Réponse » (« Vragen ») contient les questions de cours.
 import { lireXlsx, type Onglet } from './xlsx'
 import { lire, ecrire } from './stockage'
 import { avecConjugaison } from './conjugaison'
@@ -21,12 +22,23 @@ export interface Mot {
   ajoute?: string
   /** pour le chapitre Conjugaison : l'infinitif du verbe (voir conjugaison.ts) */
   verbe?: string
+  /** question de cours : nl = la question, fr = la réponse (en néerlandais aussi) */
+  vraag?: Vraag
+}
+
+export interface Vraag {
+  /** mauvaises réponses proposées dans le choix parmi 4 */
+  leurres: string[]
+  /** page du cours, '' si inconnue */
+  page: string
 }
 
 export interface Matiere {
   nom: string
   chapitres: string[]  // dans l'ordre du tableau
   mots: Mot[]
+  /** questions de cours (absentes des copies enregistrées avant leur arrivée) */
+  questions?: Mot[]
 }
 
 export interface Vocabulaire {
@@ -97,9 +109,58 @@ export function derniersAjouts(voc: Vocabulaire): { date: string; mots: Mot[] } 
   return { date, mots: date ? tous.filter(m => m.ajoute === date) : [] }
 }
 
+const COLONNES_QUESTIONS = {
+  matiere: ['matière', 'matiere', 'vak'],
+  chapitre: COLONNES.chapitre,
+  page: ['page', 'pagina', 'blz', 'blz.'],
+  question: ['question', 'vraag'],
+  reponse: ['réponse', 'reponse', 'antwoord'],
+  leurres: ['leurres', 'mauvaises réponses', 'fout'],
+  ajoute: COLONNES.ajoute,
+}
+
+/** Les questions d'un onglet « Vragen » (null si l'onglet n'en est pas un). */
+export function questionsDepuisOnglet(onglet: Onglet): Mot[] | null {
+  const entete = onglet.lignes.findIndex(l => l.some(c => COLONNES_QUESTIONS.question.includes(norm(c))))
+  if (entete < 0) return null
+  const titres = onglet.lignes[entete].map(norm)
+  const col = Object.fromEntries(
+    Object.entries(COLONNES_QUESTIONS).map(([cle, noms]) => [cle, titres.findIndex(t => noms.includes(t))]),
+  ) as Record<keyof typeof COLONNES_QUESTIONS, number>
+  if (col.reponse < 0 || col.matiere < 0) return null
+  const res: Mot[] = []
+  for (const ligne of onglet.lignes.slice(entete + 1)) {
+    const val = (k: keyof typeof COLONNES_QUESTIONS) => (col[k] >= 0 ? (ligne[col[k]] ?? '').trim() : '')
+    const q = val('question'), r = val('reponse'), matiere = val('matiere')
+    if (!q || !r || !matiere) continue
+    const ajoute = dateAjout(val('ajoute'))
+    res.push({
+      id: `${matiere}|?|${q}`, matiere, chapitre: val('chapitre') || SANS_CHAPITRE, nl: q, fr: r,
+      det: '', definition: '', exemple: '', remarque: '',
+      vraag: { leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page') },
+      ...(ajoute && { ajoute }),
+    })
+  }
+  return res
+}
+
 export function vocabulaireDepuisXlsx(octets: Uint8Array): Vocabulaire {
-  const matieres = lireXlsx(octets).map(matiereDepuisOnglet).filter((m): m is Matiere => m !== null)
+  const onglets = lireXlsx(octets)
+  const matieres = onglets.map(matiereDepuisOnglet).filter((m): m is Matiere => m !== null)
   if (!matieres.length) throw new Error('Aucun onglet du tableau n’a de colonnes « Néerlandais » et « Français ».')
+  // chaque question rejoint sa matière (colonne « Matière » = nom de l'onglet des mots)
+  for (const q of onglets.flatMap(o => questionsDepuisOnglet(o) ?? [])) {
+    const m = matieres.find(x => norm(x.nom) === norm(q.matiere))
+    if (!m) continue
+    q.matiere = m.nom
+    q.id = `${m.nom}|?|${q.nl}`
+    ;(m.questions ??= []).push(q)
+    if (!m.chapitres.includes(q.chapitre)) {
+      // un chapitre sans mots, seulement des questions : avant « Sans chapitre »
+      const i = m.chapitres.indexOf(SANS_CHAPITRE)
+      m.chapitres.splice(i < 0 ? m.chapitres.length : i, 0, q.chapitre)
+    }
+  }
   return { matieres, misAJour: Date.now() }
 }
 

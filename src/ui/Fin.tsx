@@ -29,6 +29,7 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
     if (scene.current) sauter(scene.current, 3)
   }, [])
   const aRevoir = bilan.serie.filter(c => bilan.aRevoir.includes(c.mot)).map(c => ({ ...c, reprise: false }))
+  const questions = bilan.serie.some(c => c.mot.vraag)
 
   return (
     <main class="scene">
@@ -36,7 +37,7 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
         {mascotte && <div class="mascotte-fin" ref={scene} aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgMascotte(mascotte) }} />}
         {bilan.notee && <p class={`note-serie ${niveauNote(sur20)}`}>{note(sur20)}</p>}
         <p class="mot">{bilan.notee ? bravo : 'Série terminée'}</p>
-        <p class="astuce">{exercice(reglages.exercice).nom} · {nombre(bilan.serie.length, 'mot')}</p>
+        <p class="astuce">{exercice(reglages.exercice).nom} · {nombre(bilan.serie.length, questions ? 'question' : 'mot')}</p>
       </div>
       {bilan.notee && (
         <div class="score">
@@ -54,7 +55,9 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
         </div>
       )}
       <div class="actions">
-        {aRevoir.length > 0 && <button class="go" onClick={() => rejouer(aRevoir)}>{aRevoir.length > 1 ? `Revoir les ${aRevoir.length} mots ratés` : 'Revoir le mot raté'}</button>}
+        {aRevoir.length > 0 && <button class="go" onClick={() => rejouer(aRevoir)}>{questions
+          ? (aRevoir.length > 1 ? `Revoir les ${aRevoir.length} questions ratées` : 'Revoir la question ratée')
+          : (aRevoir.length > 1 ? `Revoir les ${aRevoir.length} mots ratés` : 'Revoir le mot raté')}</button>}
         <button class={aRevoir.length ? 'second' : 'go'} onClick={() => rejouer()}>Nouvelle série</button>
         <button class="second" onClick={accueil}>Menu</button>
       </div>

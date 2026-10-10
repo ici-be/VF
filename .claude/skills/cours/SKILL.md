@@ -1,6 +1,6 @@
 ---
 name: cours
-description: Extraire le vocabulaire d'un cours scanné (PDF) et l'ajouter au tableau Google Sheets de l'appli, dans l'ordre du cours, avec chapitre et page. À utiliser quand l'utilisateur donne un ou plusieurs PDF de cours, ou tape /cours.
+description: Extraire le vocabulaire et les questions de cours d'un cours scanné (PDF) et les ajouter au tableau Google Sheets de l'appli, dans l'ordre du cours, avec chapitre et page. À utiliser quand l'utilisateur donne un ou plusieurs PDF de cours, ou tape /cours.
 argument-hint: <fichier.pdf> [autres PDF]
 ---
 
@@ -68,6 +68,35 @@ demander quand même ; l'appli accepte un mot dans deux chapitres).
 `Page	Néerlandais	Dét.	Français	Remarque	Définition	Exemple	Chapitre`,
 **à côté du PDF**, même nom en `.tsv` (l'utilisateur peut l'ouvrir dans LibreOffice).
 
+## 4 bis. Questions de cours
+
+Pour l'exercice « Questions de cours » : ce qu'un élève doit savoir répondre à l'interro.
+Compter 1 à 2 questions par page de contenu (moins pour les pages d'exercices pratiques).
+
+- **Sources**, par ordre de priorité : les questions que le cours pose lui-même
+  (« Wat is bevolkingsgroei? ») ; les encadrés ⚠ et définitions en gras ; les conclusions
+  (« Conclusie: … ») ; les tableaux de synthèse (types de cartes, lokalisatiefactoren…).
+- **Pas** de questions sur un exercice à faire en classe dont la réponse n'est pas dans le
+  cours (« Welke landen hebben de hoogste geboortecijfers? » avec une ligne vide), ni sur des
+  chiffres isolés d'un document (inwoners van Caïro).
+- **Question** : en néerlandais, courte, comme un professeur la poserait : `Wat is …?`,
+  `Waarom …?`, `Wat is het verschil tussen … en …?`, `Noem twee …`, `Hoe bereken je …?`.
+- **Réponse** : en néerlandais, **avec les mots du cours**, une phrase (deux au plus), sans
+  point final. Elle doit se comprendre seule.
+- **Leurres** : trois mauvaises réponses, séparées par ` | `, plausibles pour un élève qui
+  confond (une notion voisine du même chapitre, l'inverse, une réponse à moitié juste),
+  de même longueur et même forme que la bonne réponse, et clairement fausses pour qui a étudié.
+  La bonne réponse ne doit **jamais** se repérer à sa longueur ou à sa précision : raccourcir
+  la réponse ou allonger les leurres pour qu'ils se ressemblent.
+  Jamais « toutes les réponses » ni de piège sur un détail de formulation.
+- **Matière** : le nom exact de l'onglet des mots (`HW Aardrijkskunde`).
+- **Chapitre**, **Page** : comme pour les mots.
+
+Écrire les questions dans un second TSV à côté du PDF, nom suivi de ` - questions.tsv`, avec
+la ligne de titres `Matière	Chapitre	Page	Question	Réponse	Leurres`, dans l'ordre du cours.
+Avant d'en écrire, lire l'onglet des questions (`python3 outils/cours.py lire Vragen`, s'il
+existe) pour ne pas reposer une question déjà là.
+
 ## 5. Faire relire
 
 Montrer un compte rendu court :
@@ -75,7 +104,9 @@ Montrer un compte rendu court :
 - les **nouveaux** mots (néerlandais → français, page), en tableau compact ;
 - le nombre de mots déjà présents qui recevront leur page ;
 - les mots écartés car déjà dans un autre chapitre ;
-- les doutes (lecture incertaine, traduction à vérifier).
+- les doutes (lecture incertaine, traduction à vérifier) ;
+- les **questions** proposées (question → réponse, page), en liste compacte ; les leurres
+  restent dans le TSV, sauf si l'utilisateur veut les voir.
 
 Appliquer les corrections demandées dans le TSV. N'envoyer **qu'après accord explicite**.
 
@@ -84,9 +115,11 @@ Appliquer les corrections demandées dans le TSV. N'envoyer **qu'après accord e
 ```sh
 python3 outils/cours.py envoyer "<fichier.tsv>" --onglet "<onglet>" --essai   # vérifier
 python3 outils/cours.py envoyer "<fichier.tsv>" --onglet "<onglet>"
+python3 outils/cours.py envoyer "<fichier - questions.tsv>" --onglet Vragen   # (--essai d'abord aussi)
 ```
 
 Si `cours.py` dit « Pas encore configuré », renvoyer l'utilisateur au mode d'emploi en tête
 de `outils/recevoir-mots.gs`. Les nouveaux mots reçoivent la date du jour (colonne « Ajouté »),
 l'onglet est trié par chapitre puis par page. Rappeler que l'appli les montre dans la liste
-des mots, onglet « Nouveaux », et que les voix suivent dans l'heure.
+des mots, onglet « Nouveaux », que les questions sont dans l'exercice « Questions de cours »
+(et la liste des mots, onglet « Questions »), et que les voix suivent dans l'heure.

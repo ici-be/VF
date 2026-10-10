@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
-import { chargerReglages, enregistrerReglages, motsChoisis, type Reglages } from '../lib/reglages'
+import { aReviser, chargerReglages, enregistrerReglages, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
 import { Seance, type Bilan } from './Seance'
@@ -48,11 +48,11 @@ export function App() {
     if (!voc) return
     if (exercice(reglages.exercice).jeu) {
       // une trentaine de mots (les plus utiles d'abord, selon « Quels mots ? ») parmi lesquels la grille choisit
-      const cartes = serie ?? construireSerie(motsChoisis(voc, reglages), { ...reglages, nombre: 30 })
+      const cartes = serie ?? construireSerie(aReviser(voc, reglages), { ...reglages, nombre: 30 })
       setEcran({ nom: 'jeu', mots: cartes.map(c => c.mot), cle: Date.now() })
       return
     }
-    setEcran({ nom: 'seance', serie: serie ?? construireSerie(motsChoisis(voc, reglages), reglages), cle: Date.now() })
+    setEcran({ nom: 'seance', serie: serie ?? construireSerie(aReviser(voc, reglages), reglages), cle: Date.now() })
   }
 
   if (!voc) {

@@ -20,6 +20,11 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Page | la page du cours (ignorée par l'appli ; sert à garder l'ordre du cours) |
 | Ajouté | la date d'ajout par `/cours` (AAAA-MM-JJ) : les mots de la date la plus récente sont les « Nouveaux » de l'appli |
 
+Les **questions de cours** sont dans l'onglet « Vragen » (créé par `/cours`) : colonnes
+Matière (le nom exact de l'onglet des mots), Chapitre, Page, Question, Réponse, Leurres
+(trois mauvaises réponses séparées par `|`, pour le choix parmi 4) et Ajouté. Elles servent
+à l'exercice « Questions de cours » et à l'onglet « Questions » de la liste des mots.
+
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
 📐 Wiskunde…, 📚 sinon) ; pour en imposer une, commencer le nom de l'onglet par un
@@ -32,8 +37,8 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
    `Aardrijkskunde - 3. Klimaat.pdf`, dans un dossier hors du dépôt.
 2. Dans ce dossier, lancer `claude` puis `/cours ~/Documents/Cours/Aardrijkskunde - 3. Klimaat.pdf`.
    Claude lit les pages, compare avec le tableau et propose les mots (gras, définitions,
-   mots fréquents) avec chapitre et page ; la proposition est aussi enregistrée en `.tsv`
-   à côté du PDF.
+   mots fréquents) avec chapitre et page, ainsi que des questions de cours avec leur réponse ;
+   les propositions sont aussi enregistrées en `.tsv` à côté du PDF.
 3. Après relecture et accord, il les envoie : les nouveaux mots arrivent dans l'onglet avec
    la date du jour (colonne « Ajouté »), et l'onglet est trié par chapitre puis par page.
    Dans l'appli, la liste des mots les montre dans l'onglet **Nouveaux** (et un bouton

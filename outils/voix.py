@@ -91,6 +91,7 @@ def textes(octets: bytes) -> set[tuple[str, str]]:
     """Tous les (langue, texte) que l'appli peut lire à voix haute."""
     res = set()
     for _, lignes in lire_onglets(octets):
+        res |= textes_questions(lignes)
         entete = next((i for i, l in enumerate(lignes) if any(c.strip().lower() in COLONNES['nl'] for c in l)), None)
         if entete is None:
             continue
@@ -110,6 +111,16 @@ def textes(octets: bytes) -> set[tuple[str, str]]:
                 if val(k):
                     res.add(('nl', val(k)))
     return {(lg, t) for lg, t in res if texte_a_lire(t)}
+
+
+def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
+    """Un onglet de questions de cours (« Vragen ») : questions et réponses, en néerlandais."""
+    entete = next((i for i, l in enumerate(lignes) if any(c.strip().lower() in ('question', 'vraag') for c in l)), None)
+    if entete is None:
+        return set()
+    titres = [c.strip().lower() for c in lignes[entete]]
+    cols = [i for i, t in enumerate(titres) if t in ('question', 'vraag', 'réponse', 'reponse', 'antwoord')]
+    return {('nl', l[i].strip()) for l in lignes[entete + 1:] for i in cols if i < len(l) and l[i].strip()}
 
 
 def textes_conjugaison() -> set[tuple[str, str]]:

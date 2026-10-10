@@ -7,7 +7,7 @@ import { estPrimitif, type Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -26,6 +26,8 @@ export interface Exercice {
   jeu?: boolean
   /** encore en rodage : affiché « bêta » */
   beta?: boolean
+  /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
+  surQuestions?: boolean
   /** mots utilisables par cet exercice */
   accepte: (m: Mot) => boolean
 }
@@ -42,6 +44,7 @@ export const EXERCICES: Exercice[] = [
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, jeu: true, accepte: m => lettresDe(m.nl) !== null },
+  { id: 'questions', nom: 'Questions de cours', description: 'Une question du cours : choisir la bonne réponse, ou y répondre dans sa tête puis vérifier.', avecSens: false, avecVitesse: false, avecRepondre: true, surQuestions: true, accepte: m => !!m.vraag },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
 ]
 
@@ -94,11 +97,19 @@ export function enregistrerReglages(r: Reglages): void {
 }
 
 /** Les mots des matières et chapitres choisis (tous les chapitres d'une matière si aucun n'est coché pour elle). */
-export function motsChoisis(voc: Vocabulaire, r: Reglages): Mot[] {
+export function motsChoisis(voc: Vocabulaire, r: Reglages, questions = false): Mot[] {
   return voc.matieres
     .filter(m => r.matieres.includes(m.nom))
     .flatMap(m => {
+      const tous = questions ? m.questions ?? [] : m.mots
       const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
-      return coches.length ? m.mots.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : m.mots
+      return coches.length ? tous.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : tous
     })
 }
+
+/** Les questions de cours des matières et chapitres choisis. */
+export const questionsChoisies = (voc: Vocabulaire, r: Reglages) => motsChoisis(voc, r, true)
+
+/** Ce que l'exercice peut réviser avec ce choix de matières et de chapitres : des mots ou des questions. */
+export const aReviser = (voc: Vocabulaire, r: Reglages, ex = exercice(r.exercice)) =>
+  motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)

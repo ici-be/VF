@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
-  EXERCICES, cleChapitre, exercice, motsChoisis, SEP,
+  EXERCICES, aReviser, cleChapitre, exercice, motsChoisis, SEP,
   type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
@@ -50,9 +50,9 @@ export function choixMatieres(r: Reglages): string {
 /** « NW Biologie (1. De ecosystemen) · NL → FR · 20 mots » */
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
-  const dispo = motsChoisis(voc, r).filter(ex.accepte).length
+  const dispo = aReviser(voc, r, ex).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [choixMatieres(r), ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, 'mot')]
+  return [choixMatieres(r), ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
     .filter(Boolean).join(' · ')
 }
 
@@ -87,7 +87,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const maj = (p: Partial<Reglages>) => setReglages({ ...r, ...p })
   const ex = exercice(r.exercice)
   const choisis = motsChoisis(voc, r)
-  const dispo = choisis.filter(ex.accepte).length
+  const dispo = aReviser(voc, r, ex).length
+  const unite = ex.surQuestions ? 'question' : 'mot'
   const nbARevoir = motsARevoir(choisis).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
@@ -171,7 +172,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
               <span class="lbl">Réponse</span>
               <div class="segment">
                 <button aria-pressed={r.repondre === 'choix'} onClick={() => maj({ repondre: 'choix' })}>Choisir parmi 4</button>
-                <button aria-pressed={r.repondre === 'ecrit'} onClick={() => maj({ repondre: 'ecrit' })}>Écrire le mot</button>
+                <button aria-pressed={r.repondre === 'ecrit'} onClick={() => maj({ repondre: 'ecrit' })}>{ex.surQuestions ? 'Dans ma tête' : 'Écrire le mot'}</button>
               </div>
             </div>
           )}
@@ -195,11 +196,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   // « Mots » : combien de mots, et lesquels (avec les chapitres, c'est le choix des mots à réviser)
   const blocMots = (
       <section class="bloc reglages-bloc mots-bloc">
-        <h2>Mots</h2>
+        <h2>{ex.surQuestions ? 'Questions' : 'Mots'}</h2>
         <div class="reglages">
           <div class="reglage">
             <div class="segment" role="group" aria-label="Combien de mots ?">
-              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? `${n} mots` : 'Tous les mots'}>{n ? `${n} mots` : 'Tous'}</button>)}
+              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? nombre(n, unite) : `Tous les ${unite}s`}>{n ? nombre(n, unite) : 'Tous'}</button>)}
             </div>
           </div>
           <div class="reglage">
@@ -245,7 +246,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands' }[ex.id as string] ?? 'des mots'}).</p>}
+      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}).</p>}
 
       {/* grand écran : matière et réglages à gauche, exercice, chapitres et mots à droite ;
           téléphone : dans l'ordre de lecture (matière, chapitres, mots, exercice, réglages) */}
@@ -282,7 +283,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <h2>Exercice</h2>
         <div class="tuiles">
           {EXERCICES.map(e => {
-            const n = choisis.filter(e.accepte).length
+            const n = aReviser(voc, r, e).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
                 title={n === 0 ? `${e.description} (rien à réviser avec ce choix de matière et de chapitres)` : e.description}>

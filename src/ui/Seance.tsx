@@ -20,6 +20,7 @@ import { Dictee } from './exercices/Dictee'
 import { Conjugaison } from './exercices/Conjugaison'
 import { Interrogatif } from './exercices/Interrogatif'
 import { Primitifs } from './exercices/Primitifs'
+import { Questions } from './exercices/Questions'
 import { nombre } from '../lib/texte'
 
 export interface Bilan {
@@ -78,7 +79,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   }
   const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = true; compter(r) } }
   const ex = exercice(reglages.exercice)
-  const tous = voc.matieres.flatMap(m => m.mots)
+  // pour les propositions du choix parmi 4 : tous les mots, ou toutes les questions
+  const tous = voc.matieres.flatMap(m => (ex.surQuestions ? m.questions ?? [] : m.mots))
 
   // pause : Échap partout, Espace pour le défilement ; et automatiquement si on change d'onglet
   useEffect(() => {
@@ -93,14 +95,15 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   useEffect(() => { if (pause) taire() }, [pause])
   // les voix de toute la série, téléchargées dès le départ
   useEffect(() => { if (reglages.voix || ex.id === 'oral' || ex.id === 'dictee') precharger(serie.flatMap(c => [
-    question(c), reponse(c),
+    // une question de cours et sa réponse sont toutes deux en néerlandais
+    ...(c.mot.vraag ? [{ texte: c.mot.nl, langue: 'nl' as const }, { texte: c.mot.fr, langue: 'nl' as const }] : [question(c), reponse(c)]),
     ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: 'nl' as const })),
     // conjugaison : la lecture du temps choisi et ses questions
     ...(c.mot.verbe ? vocalesConjugaison(c.mot.verbe, reglages.temps) : []),
   ])) }, [])
 
   if (!file.length) {
-    return <div class="vide"><p>Aucun mot à réviser avec ces réglages.</p><button class="go" onClick={quitter}>Retour</button></div>
+    return <div class="vide"><p>{ex.surQuestions ? 'Aucune question' : 'Aucun mot'} à réviser avec ces réglages.</p><button class="go" onClick={quitter}>Retour</button></div>
   }
 
   const carte = file[i]
@@ -157,11 +160,12 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'conjugaison' && <Conjugaison key={i} {...props} />}
         {ex.id === 'interrogatif' && <Interrogatif key={i} {...props} />}
         {ex.id === 'primitifs' && <Primitifs key={i} {...props} />}
+        {ex.id === 'questions' && <Questions key={i} {...props} />}
       </main>
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
         <div class="bandeau-pause" role="status">
-          <span class="quoi-pause"><b>En pause</b> · {nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
+          <span class="quoi-pause"><b>En pause</b> · {ex.surQuestions ? nombre(i, 'question vue', 'questions vues') : nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
           <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
           <button class="second" onClick={quitter}>Arrêter</button>
         </div>
