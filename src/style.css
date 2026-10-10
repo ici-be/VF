@@ -556,6 +556,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 
 /* la description de l'exercice choisi, dans le bloc « Commencer » */
 .reprendre .description-exercice { margin: 4px 0 0; font-size: .9rem; color: var(--muted); max-width: 60ch; }
+.reprendre .description-exercice.alerte { color: var(--ko); }
 @media (min-width: 1000px) {
   /* de l'air entre exercice, chapitres et mots */
   .col-exercice { gap: 30px; }

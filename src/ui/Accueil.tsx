@@ -242,11 +242,13 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           <p class="detail">{resume(voc, r)}</p>
-          <p class="description-exercice">{ex.description}</p>
+          {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
+          {dispo === 0
+            ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
+            : <p class="description-exercice">{ex.description}</p>}
         </div>
         <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
-      {dispo === 0 && <p class="etat erreur">Aucun mot ne convient à cet exercice dans ce choix ({ex.nom} : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}).</p>}
 
       {/* grand écran : matière et réglages à gauche, exercice, chapitres et mots à droite ;
           téléphone : dans l'ordre de lecture (matière, chapitres, mots, exercice, réglages) */}
