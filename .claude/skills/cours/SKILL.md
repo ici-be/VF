@@ -89,11 +89,20 @@ Compter 1 à 2 questions par page de contenu (moins pour les pages d'exercices p
   La bonne réponse ne doit **jamais** se repérer à sa longueur ou à sa précision : raccourcir
   la réponse ou allonger les leurres pour qu'ils se ressemblent.
   Jamais « toutes les réponses » ni de piège sur un détail de formulation.
+- **Énumérations** : quand la réponse est une liste de 2 à 6 éléments courts que le cours
+  donne explicitement (les basiselementen d'une kaart, les cinq oceanen, les lokalisatiefactoren),
+  remplir **Éléments** : chaque élément en un à quatre mots, séparés par ` | `, avec ses
+  variantes acceptées séparées par ` / ` (`Stille Oceaan / Grote Oceaan`, `Stijgen / toenemen`),
+  sans article ni virgule. **Nombre** : combien en donner, si la question en demande moins que
+  le cours n'en cite (`Noem drie …` parmi cinq) ; sinon le nombre d'éléments. La Réponse reste
+  une phrase complète ; les Leurres sont inutiles (l'élève écrit chaque élément dans un champ).
+  Pas d'énumération pour des éléments longs (des phrases) : une question normale.
 - **Matière** : le nom exact de l'onglet des mots (`HW Aardrijkskunde`).
 - **Chapitre**, **Page** : comme pour les mots.
 
 Écrire les questions dans un second TSV à côté du PDF, nom suivi de ` - questions.tsv`, avec
-la ligne de titres `Matière	Chapitre	Page	Question	Réponse	Leurres`, dans l'ordre du cours.
+la ligne de titres `Matière	Chapitre	Page	Question	Réponse	Leurres	Éléments	Nombre`, dans
+l'ordre du cours. Viser environ une énumération pour quatre questions.
 Avant d'en écrire, lire l'onglet des questions (`python3 outils/cours.py lire Vragen`, s'il
 existe) pour ne pas reposer une question déjà là.
 

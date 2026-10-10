@@ -71,8 +71,17 @@ describe('lecture du tableau', () => {
     ] })!
     expect(q).toHaveLength(1)
     expect(q[0]).toMatchObject({ nl: 'Wat is migratie?', fr: 'De verplaatsing van mensen', chapitre: '1. Overbevolkte planeet', ajoute: '2026-10-10' })
-    expect(q[0].vraag).toEqual({ leurres: ['Een reis', 'Een verhuis binnen een stad'], page: '11' })
+    expect(q[0].vraag).toEqual({ leurres: ['Een reis', 'Een verhuis binnen een stad'], page: '11', elements: [], nombre: 0 })
     expect(questionsDepuisOnglet({ nom: 'A', lignes: [['Néerlandais', 'Français'], ['zee', 'la mer']] })).toBeNull()
+    // énumération : « Nombre » borné au nombre d'éléments, réponse rédigée d'après les éléments si vide
+    const titres = ['Matière', 'Question', 'Réponse', 'Éléments', 'Nombre']
+    const [e1, e2] = questionsDepuisOnglet({ nom: 'Vragen', lignes: [titres,
+      ['A', 'Noem drie oceanen', '', 'Atlantische Oceaan | Stille Oceaan / Grote Oceaan | Indische Oceaan | Noordelijke IJszee', '3'],
+      ['A', 'Wat zijn de basiselementen?', 'TOLES', 'Titel | Oriëntatie | Legende | Schaal', '9'],
+    ] })!
+    expect(e1.fr).toBe('Atlantische Oceaan, Stille Oceaan / Grote Oceaan, Indische Oceaan, Noordelijke IJszee')
+    expect(e1.vraag).toMatchObject({ nombre: 3 })
+    expect(e2.vraag).toMatchObject({ nombre: 4, elements: ['Titel', 'Oriëntatie', 'Legende', 'Schaal'] })
     expect(matiereDepuisOnglet({ nom: 'Vragen', lignes: [['Matière', 'Question', 'Réponse']] })).toBeNull()
   })
 })

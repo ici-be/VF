@@ -581,3 +581,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau.questions th:nth-child(3) { width: auto; }
   .tableau.questions .details { display: none; }
 }
+.enumeration { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 8px; }
+.enumeration label { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 2px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 6px 10px; }
+.enumeration label .k { flex: none; width: 28px; height: 28px; border-radius: 6px; background: var(--panel-2); display: grid; place-items: center; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.enumeration input { flex: 1 1 200px; min-width: 0; border: none; background: none; font-size: 1.1rem; padding: 8px 4px; outline: none; color: var(--fg); }
+.enumeration label:focus-within { border-color: var(--blue); }
+.enumeration label.ok { border-color: var(--ok); background: var(--ok-bg); }
+.enumeration label.ko { border-color: var(--ko); background: var(--ko-bg); }
+.enumeration label.presque { border-color: var(--mid); background: var(--mid-bg); }
+.enumeration .corrige { flex-basis: 100%; padding-left: 38px; font-size: .9rem; color: var(--muted); }

@@ -22,7 +22,9 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 
 Les **questions de cours** sont dans l'onglet « Vragen » (créé par `/cours`) : colonnes
 Matière (le nom exact de l'onglet des mots), Chapitre, Page, Question, Réponse, Leurres
-(trois mauvaises réponses séparées par `|`, pour le choix parmi 4) et Ajouté. Elles servent
+(trois mauvaises réponses séparées par `|`, pour le choix parmi 4), Éléments et Nombre
+(pour les énumérations : `Titel | Oriëntatie | Legende | Schaal`, variantes séparées par
+`/`, et combien en donner si la question en demande moins), et Ajouté. Elles servent
 à l'exercice « Questions de cours » et à l'onglet « Questions » de la liste des mots.
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.

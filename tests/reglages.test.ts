@@ -4,7 +4,7 @@ import { aReviser, cleChapitre, motsChoisis, questionsChoisies, type Reglages } 
 
 const mot = (nl: string, chapitre: string, vraag = false): Mot => ({
   id: nl, matiere: 'Aard', chapitre, nl, det: '', fr: nl, definition: '', exemple: '', remarque: '',
-  ...(vraag && { vraag: { leurres: [], page: '' } }),
+  ...(vraag && { vraag: { leurres: [], page: '', elements: [], nombre: 0 } }),
 })
 const voc: Vocabulaire = {
   matieres: [{ nom: 'Aard', chapitres: ['1', '2'], mots: [mot('zee', '1'), mot('berg', '2')], questions: [mot('Wat is migratie?', '1', true), mot('Wat is TOLES?', '2', true)] }],

@@ -23,13 +23,14 @@
  * Avec « dater », les mots déjà présents reçoivent aussi la date du jour s'ils n'en ont pas.
  *
  * Les questions de cours (lignes avec « question ») vont dans l'onglet « Vragen », créé au
- * premier envoi : une question est reconnue par sa matière et son texte.
+ * premier envoi : une question est reconnue par sa matière et son texte. Pour une question déjà
+ * là, l'envoi complète les cases vides (par exemple « Éléments » d'une énumération).
  * Ensuite l'onglet est trié : chapitres dans leur ordre actuel, et dans chaque chapitre
  * les mots dans l'ordre des pages (les mots sans page restent à la fin du chapitre,
  * dans leur ordre actuel). Avec « essai », rien n'est écrit : la réponse dit ce qui serait fait.
  */
 
-// mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; les quatre dernières pour l'onglet « Vragen »
+// mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; les six dernières pour l'onglet « Vragen »
 const COLONNES = {
   nl: ['néerlandais', 'nederlands', 'nl'],
   det: ['dét.', 'dét', 'det', 'déterminant', 'lidwoord', 'article'],
@@ -44,10 +45,14 @@ const COLONNES = {
   question: ['question', 'vraag'],
   reponse: ['réponse', 'reponse', 'antwoord'],
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
+  elements: ['éléments', 'elements', 'elementen'],
+  nombre: ['nombre', 'aantal'],
 }
 
 // l'onglet des questions de cours, créé au premier envoi de questions
-const TITRES_QUESTIONS = ['Matière', 'Chapitre', 'Page', 'Question', 'Réponse', 'Leurres', 'Ajouté']
+const TITRES_QUESTIONS = ['Matière', 'Chapitre', 'Page', 'Question', 'Réponse', 'Leurres', 'Éléments', 'Nombre', 'Ajouté']
+// champs d'une question qu'un nouvel envoi peut compléter s'ils sont vides
+const COMPLETABLES = ['reponse', 'leurres', 'elements', 'nombre', 'page']
 
 const aujourdhui = () => Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')
 
@@ -133,6 +138,11 @@ function recevoir(nomOnglet, lignes, essai, dater) {
   if (!essai) {
     col.page = colonne(feuille, titres, 'page', 'Page')
     col.ajoute = colonne(feuille, titres, 'ajoute', 'Ajouté')
+    // les énumérations, ajoutées après la création de l'onglet « Vragen »
+    if (questions && lignes.some(m => m.elements)) {
+      col.elements = colonne(feuille, titres, 'elements', 'Éléments')
+      col.nombre = colonne(feuille, titres, 'nombre', 'Nombre')
+    }
   }
   const largeur = titres.length
 
@@ -141,7 +151,7 @@ function recevoir(nomOnglet, lignes, essai, dater) {
   const index = new Map()   // « mot␟chapitre » (ou « matière␟question ») → numéro de ligne dans donnees
   donnees.forEach((l, i) => index.set(identite(l).map(norm).join('␟'), i))
 
-  const res = { ok: true, essai, ajoutes: [], pages: [], dejaLa: [], dates: [] }
+  const res = { ok: true, essai, ajoutes: [], pages: [], dejaLa: [], dates: [], completes: [] }
   const nouvelles = []
   for (const m of lignes) {
     const cle = identiteEnvoi(m).map(norm).join('␟')
@@ -152,6 +162,17 @@ function recevoir(nomOnglet, lignes, essai, dater) {
       if (dater && i >= 0 && (col.ajoute < 0 || !String(donnees[i][col.ajoute]).trim())) {
         res.dates.push(nom(m))
         if (!essai) feuille.getRange(i + 2, col.ajoute + 1).setNumberFormat('@').setValue(aujourdhui())
+      }
+      // une question déjà là : ses cases vides (éléments, leurres…) sont complétées, jamais écrasées
+      if (questions && i >= 0) {
+        const vides = COMPLETABLES.filter(k => m[k] != null && String(m[k]).trim() !== '' && (col[k] < 0 || !String(donnees[i][col[k]]).trim()))
+        if (vides.length) {
+          res.completes.push(nom(m))
+          if (!essai) for (const k of vides) feuille.getRange(i + 2, col[k] + 1).setValue(m[k])
+        } else {
+          res.dejaLa.push(nom(m))
+        }
+        continue
       }
       // (en essai, la colonne Page n'existe peut-être pas encore : elle serait vide)
       if (i >= 0 && m.page && (col.page < 0 || !String(donnees[i][col.page]).trim())) {

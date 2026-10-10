@@ -109,6 +109,43 @@ export function corriger(
   return { resultat: 'faux', message: '' }
 }
 
+export interface CorrectionListe {
+  resultat: Resultat
+  /** pour chaque champ : sa correction et l'élément qu'il a trouvé */
+  champs: (Correction & { element?: string })[]
+  /** les éléments que personne n'a trouvés */
+  manquants: string[]
+}
+
+/**
+ * Corrige une énumération (« Noem de vier basiselementen ») : chaque champ peut donner
+ * n'importe quel élément, dans n'importe quel ordre, mais chacun une seule fois. Juste si
+ * tous les champs sont justes, presque si la moitié au moins est trouvée.
+ */
+export function corrigerListe(reponses: string[], elements: string[]): CorrectionListe {
+  const champs: CorrectionListe['champs'] = reponses.map(() => ({ resultat: 'faux', message: '' }))
+  const pris = new Set<number>()
+  // d'abord les réponses exactes, puis les « presque » parmi les éléments restants
+  for (const voulu of ['juste', 'presque'] as const) {
+    reponses.forEach((r, i) => {
+      if (champs[i].element !== undefined || !r.trim()) return
+      const k = elements.findIndex((e, j) => !pris.has(j) && corriger(r, e, 'nl').resultat === voulu)
+      if (k < 0) return
+      pris.add(k)
+      champs[i] = { ...corriger(r, elements[k], 'nl'), element: elements[k] }
+    })
+  }
+  reponses.forEach((r, i) => {
+    if (champs[i].element !== undefined) return
+    if (!r.trim()) champs[i] = { resultat: 'faux', message: 'Pas de réponse.' }
+    // un élément déjà donné dans un autre champ
+    else if (elements.some(e => corriger(r, e, 'nl').resultat !== 'faux')) champs[i] = { resultat: 'faux', message: 'Déjà donné.' }
+  })
+  const trouves = champs.filter(c => c.resultat !== 'faux').length
+  const resultat: Resultat = champs.every(c => c.resultat === 'juste') ? 'juste' : trouves * 2 >= reponses.length ? 'presque' : 'faux'
+  return { resultat, champs, manquants: elements.filter((_, j) => !pris.has(j)) }
+}
+
 export interface Segment {
   texte: string
   /** 'ok' : lettre juste ; 'faux' : lettre en trop ou erronée ; 'manque' : lettre oubliée */

@@ -31,6 +31,10 @@ export interface Vraag {
   leurres: string[]
   /** page du cours, '' si inconnue */
   page: string
+  /** question à énumération (« Noem drie … ») : les éléments acceptés, chacun avec ses variantes « a / b » */
+  elements: string[]
+  /** combien d'éléments donner (≤ elements.length) ; 0 si ce n'est pas une énumération */
+  nombre: number
 }
 
 export interface Matiere {
@@ -116,6 +120,8 @@ const COLONNES_QUESTIONS = {
   question: ['question', 'vraag'],
   reponse: ['réponse', 'reponse', 'antwoord'],
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
+  elements: ['éléments', 'elements', 'elementen'],
+  nombre: ['nombre', 'aantal'],
   ajoute: COLONNES.ajoute,
 }
 
@@ -131,13 +137,17 @@ export function questionsDepuisOnglet(onglet: Onglet): Mot[] | null {
   const res: Mot[] = []
   for (const ligne of onglet.lignes.slice(entete + 1)) {
     const val = (k: keyof typeof COLONNES_QUESTIONS) => (col[k] >= 0 ? (ligne[col[k]] ?? '').trim() : '')
-    const q = val('question'), r = val('reponse'), matiere = val('matiere')
+    const elements = val('elements').split('|').map(x => x.trim()).filter(Boolean)
+    // une énumération sans réponse rédigée : la liste des éléments en tient lieu
+    const q = val('question'), r = val('reponse') || elements.join(', '), matiere = val('matiere')
     if (!q || !r || !matiere) continue
+    const n = parseInt(val('nombre'), 10)
+    const nombre = elements.length >= 2 ? Math.min(elements.length, n > 0 ? n : elements.length) : 0
     const ajoute = dateAjout(val('ajoute'))
     res.push({
       id: `${matiere}|?|${q}`, matiere, chapitre: val('chapitre') || SANS_CHAPITRE, nl: q, fr: r,
       det: '', definition: '', exemple: '', remarque: '',
-      vraag: { leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page') },
+      vraag: { leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page'), elements: nombre ? elements : [], nombre },
       ...(ajoute && { ajoute }),
     })
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { corriger, variantes } from '../src/lib/correction'
+import { corriger, corrigerListe, variantes } from '../src/lib/correction'
 
 const res = (r: string, a: string, l: 'fr' | 'nl', det = '', o = {}) => corriger(r, a, l, det, o).resultat
 
@@ -94,5 +94,33 @@ describe('différences lettre à lettre (dictée)', () => {
     expect(vue('gelooff', 'geloof')).toBe('geloof(f)')
     expect(vue('glof', 'geloof')).toBe('g[e]lo[o]f')
     expect(vue('Geloof', 'geloof')).toBe('Geloof')
+  })
+})
+
+describe('énumérations', () => {
+  const toles = ['Titel', 'Oriëntatie', 'Legende', 'Schaal']
+  it('accepte les éléments dans n’importe quel ordre, avec la tolérance de l’écrit', () => {
+    const c = corrigerListe(['schaal', 'de legende', 'Titel', 'orientatie'], toles)
+    expect(c.champs.map(x => x.resultat)).toEqual(['juste', 'juste', 'juste', 'presque'])
+    expect(c.resultat).toBe('presque')
+    expect(c.manquants).toEqual([])
+    expect(corrigerListe(['Schaal', 'Legende', 'Titel', 'Oriëntatie'], toles).resultat).toBe('juste')
+  })
+  it('ne compte pas deux fois le même élément, et dit ce qui manque', () => {
+    const c = corrigerListe(['Titel', 'titel', '', 'kleur'], toles)
+    expect(c.champs.map(x => x.message)).toEqual(['', 'Déjà donné.', 'Pas de réponse.', ''])
+    expect(c.resultat).toBe('faux')
+    expect(c.manquants).toEqual(['Oriëntatie', 'Legende', 'Schaal'])
+  })
+  it('« Noem drie » parmi plus d’éléments, avec des variantes', () => {
+    const oceanen = ['Atlantische Oceaan', 'Stille Oceaan / Grote Oceaan', 'Indische Oceaan', 'Noordelijke IJszee', 'Zuidelijke IJszee']
+    const c = corrigerListe(['grote oceaan', 'Indische Oceaan', 'Zuidelijke IJszee'], oceanen)
+    expect(c.resultat).toBe('juste')
+    expect(c.champs[0].element).toBe('Stille Oceaan / Grote Oceaan')
+    expect(c.manquants).toEqual(['Atlantische Oceaan', 'Noordelijke IJszee'])
+  })
+  it('« presque » quand au moins la moitié est trouvée', () => {
+    expect(corrigerListe(['Titel', 'Schaal', 'x', 'y'], toles).resultat).toBe('presque')
+    expect(corrigerListe(['Titel', 'x', 'y', 'z'], toles).resultat).toBe('faux')
   })
 })

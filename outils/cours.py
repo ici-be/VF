@@ -8,8 +8,8 @@
 
 Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
-- questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres
-  (leurres séparés par « | »), envoyées avec --onglet Vragen.
+- questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres, Éléments, Nombre
+  (leurres et éléments séparés par « | »), envoyées avec --onglet Vragen.
 L'URL et la clé restent dans ~/.config/vocabulaire-nl/envoi.json, hors du dépôt (public).
 """
 import argparse
@@ -32,6 +32,7 @@ TITRES = {
     'page': 'page', 'néerlandais': 'nl', 'dét.': 'det', 'français': 'fr', 'remarque': 'remarque',
     'définition': 'definition', 'exemple': 'exemple', 'chapitre': 'chapitre',
     'matière': 'matiere', 'question': 'question', 'réponse': 'reponse', 'leurres': 'leurres',
+    'éléments': 'elements', 'nombre': 'nombre',
 }
 
 
@@ -135,8 +136,9 @@ def envoyer(args):
     quoi = 'Serait fait' if args.essai else 'Fait'
     print(f'{quoi} dans « {args.onglet} »' + (' (nouvel onglet)' if res.get('nouvelOnglet') else '') + ' :')
     if questions:
-        print(f'  {len(res["ajoutes"])} questions ajoutées')
-        print(f'  {len(res["pages"]) + len(res["dejaLa"])} questions déjà présentes')
+        print(f'  {len(res["ajoutes"])} questions ajoutées : {", ".join(res["ajoutes"]) or "—"}')
+        print(f'  {len(res.get("completes", []))} questions déjà présentes, complétées : {", ".join(res.get("completes", [])) or "—"}')
+        print(f'  {len(res["dejaLa"])} questions déjà présentes, inchangées')
         return
     print(f'  {len(res["ajoutes"])} mots ajoutés : {", ".join(res["ajoutes"]) or "—"}')
     print(f'  {len(res["pages"])} mots déjà présents, page ajoutée')
