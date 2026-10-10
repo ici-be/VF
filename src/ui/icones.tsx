@@ -1,6 +1,6 @@
 // Une icône par exercice (Lucide : traits fins, mêmes sur tous les appareils).
 import {
-  BookOpen, GraduationCap, Headphones, History, Keyboard, ListChecks, MessageCircleQuestion,
+  BookOpen, GraduationCap, Hash, Headphones, History, Keyboard, ListChecks, MessageCircleQuestion,
   Mic, Puzzle, Table2, Tag, TextCursorInput, Timer,
 } from 'lucide-preact'
 import type { ExerciceId } from '../lib/reglages'
@@ -19,6 +19,7 @@ const ICONES: Record<ExerciceId, typeof Timer> = {
   motscroises: Puzzle,
   dehet: Tag,
   questions: GraduationCap,
+  getallen: Hash,
 }
 
 export function IconeExercice({ id, taille = 20 }: { id: ExerciceId; taille?: number }) {

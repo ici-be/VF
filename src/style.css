@@ -627,3 +627,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .enumeration .champ-corrige { flex: 1 1 200px; min-width: 0; font-size: 1.1rem; padding: 8px 4px; text-align: left; letter-spacing: normal; overflow-wrap: anywhere; }
 .enumeration .champ-corrige .tape-faux { color: var(--ko); text-decoration-thickness: 2px; }
 .enumeration .champ-corrige .attendu-champ { color: var(--ok); font-weight: 700; }
+
+/* ---------- nombres (Getallen) ---------- */
+.carte .mot.nombre { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.lettres-diff.petit { font-size: 1.15rem; letter-spacing: .02em; overflow-wrap: anywhere; }

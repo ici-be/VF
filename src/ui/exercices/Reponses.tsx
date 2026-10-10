@@ -84,9 +84,11 @@ interface PropsSaisie {
   /** affiché sous la correction (la dictée y montre les lettres fausses) */
   apres?: (texte: string, c: Correction) => ComponentChildren
   placeholder?: string
+  /** réponse en chiffres : clavier numérique, sans les boutons de lettres accentuées */
+  chiffres?: boolean
 }
 
-export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, annoncer, apres, placeholder }: PropsSaisie) {
+export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, annoncer, apres, placeholder, chiffres }: PropsSaisie) {
   const [texte, setTexte] = useState('')
   const [correction, setCorrection] = useState<Correction | null>(null)
   const champ = useRef<HTMLInputElement>(null)
@@ -116,9 +118,9 @@ export function Saisie({ langue, attendu, mot, pause, corriger, lire, suivant, a
           ref={champ} id="reponse" value={texte} readOnly={!!correction}
           onInput={e => setTexte((e.target as HTMLInputElement).value)}
           autocomplete="off" autocapitalize="off" spellcheck={false} lang={langue}
-          aria-label="Ta réponse" placeholder={placeholder}
+          aria-label="Ta réponse" placeholder={placeholder} inputMode={chiffres ? 'numeric' : undefined}
         />
-        {!correction && (
+        {!correction && !chiffres && (
           <div class="lettres">{LETTRES[langue].map(l => <button type="button" onClick={() => inserer(l)}>{l}</button>)}</div>
         )}
       </form>

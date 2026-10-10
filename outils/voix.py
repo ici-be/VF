@@ -136,6 +136,13 @@ def textes_conjugaison() -> set[tuple[str, str]]:
     return res
 
 
+def textes_getallen() -> set[tuple[str, str]]:
+    """Le chapitre Getallen (src/data/getallen.json) : les mots de base des nombres.
+    Les nombres tirés au hasard par l'exercice « Nombres » sont lus par la voix du navigateur."""
+    chemin = Path(__file__).resolve().parent.parent / 'src' / 'data' / 'getallen.json'
+    return {x for g in json.loads(chemin.read_text())['mots'] for x in (('nl', g['nl']), ('fr', g['fr']))}
+
+
 async def creer(langue: str, texte: str, fichier: Path, limite: asyncio.Semaphore) -> bool:
     async with limite:
         for essai in range(3):
@@ -154,7 +161,7 @@ async def creer(langue: str, texte: str, fichier: Path, limite: asyncio.Semaphor
 async def main() -> int:
     url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=xlsx'
     with urllib.request.urlopen(url, timeout=60) as r:
-        tous = textes(r.read()) | textes_conjugaison()
+        tous = textes(r.read()) | textes_conjugaison() | textes_getallen()
     DOSSIER.mkdir(parents=True, exist_ok=True)
     voulus = {empreinte(lg, t): (lg, t) for lg, t in tous}
     manquants = {h: v for h, v in voulus.items() if not (DOSSIER / f'{h}.mp3').exists()}

@@ -7,7 +7,7 @@ import { estPrimitif, type Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions' | 'getallen'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -26,7 +26,7 @@ export interface Exercice {
   jeu?: boolean
   /** encore en rodage : affiché « bêta » */
   beta?: boolean
-  /** seulement pour Nederlands (le chapitre Conjugaison) : caché si Nederlands n'est pas choisi */
+  /** seulement pour Nederlands (chapitres Conjugaison et Getallen) : caché si Nederlands n'est pas choisi */
   nederlands?: boolean
   /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
   surQuestions?: boolean
@@ -44,11 +44,12 @@ export const EXERCICES: Exercice[] = [
   { id: 'questions', nom: 'Questions de cours', description: 'Une question du cours : choisir la bonne réponse, ou y répondre dans sa tête puis vérifier.', avecSens: false, avecVitesse: false, avecRepondre: true, surQuestions: true, accepte: m => !!m.vraag },
   { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, jeu: true, accepte: m => lettresDe(m.nl) !== null },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
-  // à la fin : l'oral, encore en rodage, puis ce qui ne vaut que pour Nederlands (le chapitre Conjugaison)
+  // à la fin : l'oral, encore en rodage, puis ce qui ne vaut que pour Nederlands (chapitres Conjugaison et Getallen)
   { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, beta: true, accepte: () => true },
   { id: 'conjugaison', nom: 'Conjugaison', description: 'Le verbe à conjuguer à toutes les personnes (ik, jij, hij…), puis valider.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, nederlands: true, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
+  { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, accepte: m => !!m.getal },
 ]
 
 export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? EXERCICES[0]
@@ -118,6 +119,6 @@ export const questionsChoisies = (voc: Vocabulaire, r: Reglages) => motsChoisis(
 /** Ce que l'exercice peut réviser avec ce choix de matières et de chapitres : des mots ou des questions. */
 export const aReviser = (voc: Vocabulaire, r: Reglages, ex = exercice(r.exercice)) =>
   ex.nederlands
-    // les verbes du chapitre Conjugaison, même si d'autres chapitres de Nederlands sont cochés
+    // les verbes de Conjugaison, les nombres de Getallen, même si d'autres chapitres de Nederlands sont cochés
     ? voc.matieres.filter(m => r.matieres.includes(m.nom)).flatMap(m => m.mots).filter(ex.accepte)
     : motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)

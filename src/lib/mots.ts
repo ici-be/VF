@@ -4,6 +4,7 @@
 import { lireXlsx, type Onglet } from './xlsx'
 import { lire, ecrire } from './stockage'
 import { avecConjugaison } from './conjugaison'
+import { avecGetallen } from './getallen'
 
 export const SHEET_ID = '11jHRMPgM1A3N8eBCXocn-eqs52uqaJCVtbFNq2U0K8Y'
 export const SANS_CHAPITRE = 'Sans chapitre'
@@ -22,6 +23,8 @@ export interface Mot {
   ajoute?: string
   /** pour le chapitre Conjugaison : l'infinitif du verbe (voir conjugaison.ts) */
   verbe?: string
+  /** pour le chapitre Getallen : la valeur du mot (twintig → 20, voir getallen.ts) */
+  getal?: number
   /** question de cours : nl = la question, fr = la réponse (en néerlandais aussi) */
   vraag?: Vraag
 }
@@ -179,7 +182,7 @@ const CLE = 'vocabulaire'
 /** Dernière copie téléchargée (pour démarrer tout de suite, et hors ligne). */
 export function vocabulaireEnCache(): Vocabulaire | null {
   const v = lire<Vocabulaire | null>(CLE, null)
-  return v && avecConjugaison(v)
+  return v && avecGetallen(avecConjugaison(v))
 }
 
 /** Télécharge le tableau ; en cas d'échec, l'appelant garde la copie en cache. */
@@ -191,5 +194,5 @@ export async function telechargerVocabulaire(): Promise<Vocabulaire> {
   if (!rep.ok) throw new Error(`Le tableau n’a pas pu être lu (erreur ${rep.status}).`)
   const voc = vocabulaireDepuisXlsx(new Uint8Array(await rep.arrayBuffer()))
   ecrire(CLE, voc)
-  return avecConjugaison(voc)
+  return avecGetallen(avecConjugaison(voc))
 }

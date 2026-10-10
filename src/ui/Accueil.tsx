@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
   EXERCICES, aReviser, cleChapitre, exercice, motsChoisis, SEP,
-  type Ordre, type Reglages, type Sens,
+  type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence } from '../lib/apparence'
@@ -25,6 +25,9 @@ export const SENS: { id: Sens; nom: string }[] = [
   { id: 'fr-nl', nom: 'FR → NL' },
   { id: 'mix', nom: 'Mélangé' },
 ]
+/** les nombres : on passe des chiffres aux lettres néerlandaises, ou l'inverse */
+const SENS_NOMBRES: Record<Sens, string> = { 'nl-fr': 'Lettres → chiffres', 'fr-nl': 'Chiffres → lettres', mix: 'Mélangé' }
+const nomSens = (s: Sens, ex: ExerciceId) => (ex === 'getallen' ? SENS_NOMBRES[s] : SENS.find(x => x.id === s)!.nom)
 const NOMBRES = [10, 20, 30, 0]
 const ORDRES: { id: Ordre; nom: string; aide: string }[] = [
   { id: 'fragiles', nom: 'À revoir', aide: 'Les mots ratés ou pas encore sus d’abord' },
@@ -46,7 +49,7 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
+  return [ex.avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
     .filter(Boolean).join(' · ')
 }
 
@@ -83,10 +86,10 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const choisis = motsChoisis(voc, r)
   const dispo = aReviser(voc, r, ex).length
   const unite = ex.surQuestions ? 'question' : 'mot'
-  // la conjugaison n'existe que dans Nederlands : ses exercices n'apparaissent que si cette matière est choisie
-  const avecConjugaison = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe))
+  // la conjugaison et les nombres n'existent que dans Nederlands : leurs exercices n'apparaissent que si cette matière est choisie
+  const avecNederlands = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe || x.getal !== undefined))
   // un exercice de Nederlands choisi alors que Nederlands ne l'est plus : on passe au QCM
-  useEffect(() => { if (ex.nederlands && !avecConjugaison) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecConjugaison])
+  useEffect(() => { if (ex.nederlands && !avecNederlands) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands])
   const nbARevoir = motsARevoir(choisis).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
@@ -154,7 +157,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             <div class="reglage">
               <span class="lbl">Sens</span>
               <div class="segment">
-                {SENS.map(s => <button aria-pressed={r.sens === s.id} onClick={() => maj({ sens: s.id })}>{s.nom}</button>)}
+                {SENS.map(s => <button aria-pressed={r.sens === s.id} onClick={() => maj({ sens: s.id })}>{nomSens(s.id, ex.id)}</button>)}
               </div>
             </div>
           )}
@@ -246,7 +249,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
           {dispo === 0
-            ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
+            ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', getallen: 'la matière Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
             : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
         </div>
         <button class="go lancer" onClick={commencer} disabled={dispo === 0}>
@@ -292,7 +295,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc">
         <h2>Exercice</h2>
         <div class="tuiles">
-          {EXERCICES.filter(e => !e.nederlands || avecConjugaison).map(e => {
+          {EXERCICES.filter(e => !e.nederlands || avecNederlands).map(e => {
             const n = aReviser(voc, r, e).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}

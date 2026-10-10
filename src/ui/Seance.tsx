@@ -20,6 +20,7 @@ import { Conjugaison } from './exercices/Conjugaison'
 import { Interrogatif } from './exercices/Interrogatif'
 import { Primitifs } from './exercices/Primitifs'
 import { Questions } from './exercices/Questions'
+import { Getallen } from './exercices/Getallen'
 import { NomsCote } from './Matieres'
 import { nombre } from '../lib/texte'
 
@@ -161,6 +162,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'interrogatif' && <Interrogatif key={i} {...props} />}
         {ex.id === 'primitifs' && <Primitifs key={i} {...props} />}
         {ex.id === 'questions' && <Questions key={i} {...props} />}
+        {ex.id === 'getallen' && <Getallen key={i} {...props} />}
       </main>
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)

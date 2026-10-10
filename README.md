@@ -88,6 +88,17 @@ npm test                 # tests/conjugaisons.test.ts vérifie des formes connue
 python3 outils/voix.py   # voix des nouvelles formes (sinon GitHub le fait dans l'heure)
 ```
 
+## Le chapitre Getallen
+
+Lui non plus ne vient pas du tableau : `src/data/getallen.json` contient les mots de base
+des nombres (nul à twintig, les dizaines, honderd, duizend, miljoen), avec leurs pièges en
+remarque. L'appli l'ajoute comme chapitre « Getallen » à la matière Nederlands. L'exercice
+« Nombres » tire pour chaque mot un nombre où on l'entend (tachtig → 483, 85 120…), jusqu'à
+deux millions, à écrire en lettres ou en chiffres. L'orthographe suit la Taalunie
+(`src/lib/getallen.ts`) : tout attaché jusqu'à mille, une espace après duizend et autour de
+miljoen ; les espaces ne comptent pas à la correction, le tréma (tweeëntwintig) si. Ces
+nombres-là n'ont pas de mp3 : ils sont lus par la voix du navigateur.
+
 ## Les voix
 
 Les mots sont lus par des voix belges (edge-tts : `nl-BE-DenaNeural`, `fr-BE-CharlineNeural`),
