@@ -18,6 +18,7 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Remarque | le reste : pluriel, synonyme, contraire, forme… |
 | Chapitre | le chapitre (vide = « Sans chapitre ») |
 | Page | la page du cours (ignorée par l'appli ; sert à garder l'ordre du cours) |
+| Ajouté | la date d'ajout par `/cours` (AAAA-MM-JJ) : les mots de la date la plus récente sont les « Nouveaux » de l'appli |
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
@@ -33,8 +34,10 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
    Claude lit les pages, compare avec le tableau et propose les mots (gras, définitions,
    mots fréquents) avec chapitre et page ; la proposition est aussi enregistrée en `.tsv`
    à côté du PDF.
-3. Après relecture et accord, il les envoie : les nouveaux mots arrivent **en jaune** dans
-   l'onglet, trié par chapitre puis par page. Enlever le jaune une fois relus.
+3. Après relecture et accord, il les envoie : les nouveaux mots arrivent dans l'onglet avec
+   la date du jour (colonne « Ajouté »), et l'onglet est trié par chapitre puis par page.
+   Dans l'appli, la liste des mots les montre dans l'onglet **Nouveaux** (et un bouton
+   « Nouveaux » reste deux semaines sur l'accueil).
 
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.

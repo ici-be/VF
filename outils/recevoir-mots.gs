@@ -1,5 +1,5 @@
 /**
- * Reçoit les mots extraits d'un cours (envoyés par outils/envoyer-mots.py) et les
+ * Reçoit les mots extraits d'un cours (envoyés par outils/cours.py) et les
  * range dans le bon onglet du tableau.
  *
  * Installation (une seule fois) :
@@ -17,13 +17,13 @@
  *
  * Ce que fait un envoi, pour chaque ligne :
  *  - le mot est déjà dans ce chapitre → seule sa case « Page » est remplie si elle était vide ;
- *  - sinon → il est ajouté, surligné en jaune (à relire, puis enlever la couleur).
+ *  - sinon → il est ajouté, avec la date du jour dans « Ajouté » : l'appli montre les mots
+ *    du dernier envoi dans la liste des mots (onglet « Nouveaux »).
+ * Les colonnes « Page » et « Ajouté » sont créées au premier envoi dans un onglet.
  * Ensuite l'onglet est trié : chapitres dans leur ordre actuel, et dans chaque chapitre
  * les mots dans l'ordre des pages (les mots sans page restent à la fin du chapitre,
  * dans leur ordre actuel). Avec « essai », rien n'est écrit : la réponse dit ce qui serait fait.
  */
-
-const JAUNE = '#fff2cc'
 
 // mêmes noms de colonnes que l'appli (src/lib/mots.ts), plus « Page »
 const COLONNES = {
@@ -35,6 +35,40 @@ const COLONNES = {
   remarque: ['remarque', 'remarques', 'opmerking'],
   chapitre: ['chapitre', 'hoofdstuk'],
   page: ['page', 'pagina', 'blz', 'blz.'],
+  ajoute: ['ajouté', 'ajoute', 'ajouté le', 'toegevoegd'],
+}
+
+const aujourdhui = () => Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')
+
+/**
+ * À lancer une fois (▶ Exécuter) : les lignes surlignées en jaune par l'ancienne version
+ * perdent leur couleur et reçoivent la date du jour dans « Ajouté ».
+ */
+function jauneVersAjoute() {
+  for (const feuille of SpreadsheetApp.getActive().getSheets()) {
+    const n = feuille.getLastRow() - 1
+    if (n < 1) continue
+    const largeur = feuille.getLastColumn()
+    const fonds = feuille.getRange(2, 1, n, largeur).getBackgrounds()
+    const jaunes = fonds.map((l, i) => (l.some(c => c.toLowerCase() === '#fff2cc') ? i : -1)).filter(i => i >= 0)
+    if (!jaunes.length) continue
+    const titres = feuille.getRange(1, 1, 1, largeur).getValues()[0].map(norm)
+    const col = colonne(feuille, titres, 'ajoute', 'Ajouté')
+    for (const i of jaunes) {
+      feuille.getRange(i + 2, 1, 1, titres.length).setBackground(null)
+      feuille.getRange(i + 2, col + 1).setNumberFormat('@').setValue(aujourdhui())
+    }
+    Logger.log(`${feuille.getName()} : ${jaunes.length} lignes`)
+  }
+}
+
+/** Indice (0 = A) de la colonne, créée à droite avec ce titre si elle manque. */
+function colonne(feuille, titres, cle, titre) {
+  const i = titres.findIndex(t => COLONNES[cle].includes(t))
+  if (i >= 0) return i
+  feuille.getRange(1, titres.length + 1).setValue(titre)
+  titres.push(norm(titre))
+  return titres.length - 1
 }
 
 function installer() {
@@ -85,14 +119,13 @@ function recevoir(nomOnglet, lignes, essai) {
   const feuille = SpreadsheetApp.getActive().getSheetByName(nomOnglet)
   if (!feuille) throw new Error('onglet introuvable : ' + nomOnglet)
 
-  let titres = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(norm)
+  const titres = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(norm)
   const col = {}
   for (const cle in COLONNES) col[cle] = titres.findIndex(t => COLONNES[cle].includes(t))
   if (col.nl < 0 || col.fr < 0) throw new Error('colonnes « Néerlandais » et « Français » introuvables')
-  if (col.page < 0 && !essai) {
-    feuille.getRange(1, titres.length + 1).setValue('Page')
-    col.page = titres.length
-    titres.push('page')
+  if (!essai) {
+    col.page = colonne(feuille, titres, 'page', 'Page')
+    col.ajoute = colonne(feuille, titres, 'ajoute', 'Ajouté')
   }
   const largeur = titres.length
 
@@ -119,6 +152,7 @@ function recevoir(nomOnglet, lignes, essai) {
     }
     const l = new Array(largeur).fill('')
     for (const k in COLONNES) if (col[k] >= 0 && m[k] != null) l[col[k]] = m[k]
+    if (col.ajoute >= 0) l[col.ajoute] = aujourdhui()
     nouvelles.push(l)
     index.set(cle, -1)
     res.ajoutes.push(m.nl)
@@ -126,9 +160,10 @@ function recevoir(nomOnglet, lignes, essai) {
 
   if (essai) return res
   if (nouvelles.length) {
-    const r = feuille.getRange(feuille.getLastRow() + 1, 1, nouvelles.length, largeur)
-    r.setValues(nouvelles)
-    r.setBackground(JAUNE)
+    const debut = feuille.getLastRow() + 1
+    // en texte, sinon Sheets transforme la date en nombre
+    feuille.getRange(debut, col.ajoute + 1, nouvelles.length, 1).setNumberFormat('@')
+    feuille.getRange(debut, 1, nouvelles.length, largeur).setValues(nouvelles)
   }
   if (col.page >= 0 && col.chapitre >= 0) trierParPage(feuille, col, largeur)
   return res

@@ -87,6 +87,6 @@ python3 outils/cours.py envoyer "<fichier.tsv>" --onglet "<onglet>"
 ```
 
 Si `cours.py` dit « Pas encore configuré », renvoyer l'utilisateur au mode d'emploi en tête
-de `outils/recevoir-mots.gs`. Les nouveaux mots arrivent surlignés en jaune, l'onglet est trié
-par chapitre puis par page. Rappeler qu'il suffit d'enlever le jaune après relecture, et que
-les voix suivent dans l'heure.
+de `outils/recevoir-mots.gs`. Les nouveaux mots reçoivent la date du jour (colonne « Ajouté »),
+l'onglet est trié par chapitre puis par page. Rappeler que l'appli les montre dans la liste
+des mots, onglet « Nouveaux », et que les voix suivent dans l'heure.

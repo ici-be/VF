@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { lireXlsx } from '../src/lib/xlsx'
-import { matiereDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
+import { dateAjout, derniersAjouts, matiereDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
 
 // petit classeur .xlsx fabriqué à la main, avec la même structure que Google Sheets
 function classeur(): Uint8Array {
@@ -46,5 +46,21 @@ describe('lecture du tableau', () => {
   it('donne un identifiant unique aux doublons de chapitres différents', () => {
     const m = matiereDepuisOnglet({ nom: 'A', lignes: [['Néerlandais', 'Français', 'Chapitre'], ['rivier', 'la rivière', '1'], ['rivier', 'la rivière', '2']] })!
     expect(new Set(m.mots.map(x => x.id)).size).toBe(2)
+  })
+  it('lit la date d’ajout, en texte ou convertie en nombre par Sheets', () => {
+    expect(dateAjout('2026-10-10')).toBe('2026-10-10')
+    expect(dateAjout('46305')).toBe('2026-10-10')
+    expect(dateAjout('')).toBe('')
+    expect(dateAjout('3')).toBe('')
+  })
+  it('donne les mots du dernier envoi, toutes matières confondues', () => {
+    const titres = ['Néerlandais', 'Français', 'Chapitre', 'Ajouté']
+    const a = matiereDepuisOnglet({ nom: 'A', lignes: [titres, ['oud', 'vieux', '1', ''], ['zee', 'la mer', '1', '2026-10-10'], ['berg', 'la montagne', '1', '2026-09-01']] })!
+    const b = matiereDepuisOnglet({ nom: 'B', lignes: [titres, ['cel', 'la cellule', '1', '2026-10-10']] })!
+    const d = derniersAjouts({ matieres: [a, b], misAJour: 0 })
+    expect(d.date).toBe('2026-10-10')
+    expect(d.mots.map(m => m.nl)).toEqual(['zee', 'cel'])
+    expect(a.mots[0].ajoute).toBeUndefined()
+    expect(derniersAjouts({ matieres: [], misAJour: 0 })).toEqual({ date: '', mots: [] })
   })
 })

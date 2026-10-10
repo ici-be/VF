@@ -17,6 +17,8 @@ export interface Mot {
   definition: string
   exemple: string      // la partie à trouver est entre [crochets]
   remarque: string
+  /** date d'ajout par /cours (AAAA-MM-JJ), absente si inconnue */
+  ajoute?: string
   /** pour le chapitre Conjugaison : l'infinitif du verbe (voir conjugaison.ts) */
   verbe?: string
 }
@@ -32,7 +34,7 @@ export interface Vocabulaire {
   misAJour: number     // date du téléchargement (ms)
 }
 
-const COLONNES: Record<keyof Pick<Mot, 'nl' | 'det' | 'fr' | 'definition' | 'exemple' | 'remarque' | 'chapitre'>, string[]> = {
+const COLONNES: Record<keyof Pick<Mot, 'nl' | 'det' | 'fr' | 'definition' | 'exemple' | 'remarque' | 'chapitre' | 'ajoute'>, string[]> = {
   nl: ['néerlandais', 'nederlands', 'nl'],
   det: ['dét.', 'dét', 'det', 'déterminant', 'lidwoord', 'article'],
   fr: ['français', 'frans', 'fr'],
@@ -40,6 +42,14 @@ const COLONNES: Record<keyof Pick<Mot, 'nl' | 'det' | 'fr' | 'definition' | 'exe
   exemple: ['exemple', 'voorbeeld', 'phrase'],
   remarque: ['remarque', 'remarques', 'opmerking'],
   chapitre: ['chapitre', 'hoofdstuk'],
+  ajoute: ['ajouté', 'ajoute', 'ajouté le', 'toegevoegd'],
+}
+
+/** « 2026-10-10 », ou une date que Sheets a convertie en nombre (jours depuis le 30/12/1899) → AAAA-MM-JJ */
+export function dateAjout(v: string): string {
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10)
+  const n = Number(v)
+  return v && Number.isFinite(n) && n > 30000 ? new Date(Date.UTC(1899, 11, 30) + Math.floor(n) * 86_400_000).toISOString().slice(0, 10) : ''
 }
 
 const norm = (s: string) => s.trim().toLowerCase()
@@ -67,15 +77,24 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
     if (vus.has(id)) id += `|${chapitre}`
     vus.add(id)
     const det = norm(val('det'))
+    const ajoute = dateAjout(val('ajoute'))
     mots.push({
       id, matiere: onglet.nom, chapitre, nl, fr,
       det: det === 'de' || det === 'het' ? det : '',
       definition: val('definition'), exemple: val('exemple'), remarque: val('remarque'),
+      ...(ajoute && { ajoute }),
     })
   }
   // « Sans chapitre » toujours en dernier
   chapitres.sort((a, b) => Number(a === SANS_CHAPITRE) - Number(b === SANS_CHAPITRE))
   return mots.length ? { nom: onglet.nom, chapitres, mots } : null
+}
+
+/** Les mots du dernier envoi /cours (la date d'ajout la plus récente), toutes matières confondues. */
+export function derniersAjouts(voc: Vocabulaire): { date: string; mots: Mot[] } {
+  const tous = voc.matieres.flatMap(m => m.mots)
+  const date = tous.reduce((d, m) => (m.ajoute && m.ajoute > d ? m.ajoute : d), '')
+  return { date, mots: date ? tous.filter(m => m.ajoute === date) : [] }
 }
 
 export function vocabulaireDepuisXlsx(octets: Uint8Array): Vocabulaire {

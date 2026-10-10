@@ -128,7 +128,7 @@ def envoyer(args):
     res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai})
     quoi = 'Serait fait' if args.essai else 'Fait'
     print(f'{quoi} dans « {args.onglet} » :')
-    print(f'  {len(res["ajoutes"])} mots ajoutés (en jaune) : {", ".join(res["ajoutes"]) or "—"}')
+    print(f'  {len(res["ajoutes"])} mots ajoutés : {", ".join(res["ajoutes"]) or "—"}')
     print(f'  {len(res["pages"])} mots déjà présents, page ajoutée')
     print(f'  {len(res["dejaLa"])} mots déjà présents avec leur page')
     if not args.essai:

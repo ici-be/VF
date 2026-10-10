@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
-import type { Mot, Vocabulaire } from '../lib/mots'
+import { derniersAjouts, type Mot, type Vocabulaire } from '../lib/mots'
 import { exercice, motsChoisis, type Reglages } from '../lib/reglages'
 import { motsARevoir, type Suivi } from '../lib/progression'
 import { construireSerie, type Carte } from '../lib/seance'
@@ -12,7 +12,7 @@ import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 
-export type Vue = 'tous' | 'revoir' | 'primitifs'
+export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux'
 
 interface Props {
   voc: Vocabulaire
@@ -42,10 +42,13 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const suivis = new Map<string, Suivi>(aRevoir.map(x => [x.mot.id, x.suivi]))
   // les temps primitifs : les verbes les plus courants du choix, dans l'ordre de fréquence
   const verbesPrimitifs = choisis.filter(m => estPrimitif(m.verbe)).sort((a, b) => verbe(a.verbe!)!.rang - verbe(b.verbe!)!.rang)
-  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : choisis).filter(m =>
+  // les mots du dernier envoi /cours, toutes matières confondues (pas seulement celles choisies)
+  const nouveaux = derniersAjouts(voc)
+  const dateNouveaux = nouveaux.date && new Date(nouveaux.date + 'T12:00').toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+  let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : vue === 'nouveaux' ? nouveaux.mots : choisis).filter(m =>
     !q || [m.nl, m.fr, m.definition, m.remarque, m.exemple].some(t => simple(t).includes(q)))
   // « à revoir » : dans l'ordre de priorité, sans regroupement par chapitre
-  const trier = vue === 'tous' ? tri : null
+  const trier = vue === 'tous' ? tri : vue === 'nouveaux' ? 'chapitre' : null
   if (trier === 'chapitre') {
     // dans l'ordre des chapitres du tableau, même si les lignes y sont mélangées
     const rang = new Map(voc.matieres.flatMap((m, i) => m.chapitres.map((c, j) => [`${m.nom}|${c}`, i * 1000 + j] as const)))
@@ -64,6 +67,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
 
   const ex = exercice(reglages.exercice)
   const serieARevoir = construireSerie(aRevoir.map(x => x.mot), { ...reglages, nombre: 0, ordre: 'hasard' })
+  const serieNouveaux = construireSerie(nouveaux.mots, { ...reglages, nombre: 0, ordre: 'hasard' })
   const colonnes = vue === 'revoir' ? 4 : 3
 
   // titre de la page imprimée : « Biologie / Biologie — 1. De ecosystemen »
@@ -72,7 +76,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
     return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres: ch.length ? ch.join(', ') : 'tous les chapitres' }
   })
-  const titreImpression = `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
+  const titreImpression = vue === 'nouveaux'
+    ? `Nouveaux mots – ${dateNouveaux}`
+    : `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
   // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
   useEffect(() => {
     const avant = document.title
@@ -88,14 +94,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     <main class="page liste">
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
-        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : 'Vocabulaire néerlandais'}</h1>
-        {titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
+        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : 'Vocabulaire néerlandais'}</h1>
+        {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
         <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
       <div class="haut">
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
-          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : 'Liste des mots'}</h1>
+          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : 'Liste des mots'}</h1>
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</p>
@@ -106,6 +112,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         {verbesPrimitifs.length > 0 && (
           <button aria-pressed={vue === 'primitifs'} onClick={() => setVue('primitifs')}>Temps primitifs <span class="n">{verbesPrimitifs.length}</span></button>
         )}
+        {nouveaux.mots.length > 0 && (
+          <button aria-pressed={vue === 'nouveaux'} onClick={() => setVue('nouveaux')}>Nouveaux <span class="n">{nouveaux.mots.length}</span></button>
+        )}
       </div>
       {vue === 'revoir' && (
         <div class="bandeau">
@@ -115,6 +124,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
               ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur {aRevoir.length > 1 ? 'ces mots' : 'ce mot'} · {ex.nom} ▶</button>
               : <p class="astuce gauche">L’exercice « {ex.nom} » ne convient à aucun de ces mots : choisis-en un autre dans le menu.</p>
           )}
+        </div>
+      )}
+      {vue === 'nouveaux' && (
+        <div class="bandeau">
+          <p>{nombre(nouveaux.mots.length, 'mot')} {accord(nouveaux.mots.length, 'ajouté')} au tableau le {dateNouveaux}, toutes matières confondues, dans l’ordre du cours.</p>
+          {serieNouveaux.length
+            ? <button class="go" onClick={() => lancer(serieNouveaux)}>S’entraîner sur ces mots · {ex.nom} ▶</button>
+            : <p class="astuce gauche">L’exercice « {ex.nom} » ne convient à aucun de ces mots : choisis-en un autre dans le menu.</p>}
         </div>
       )}
       <div class="outils">

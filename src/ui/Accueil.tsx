@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import type { Vocabulaire } from '../lib/mots'
+import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
   EXERCICES, cleChapitre, exercice, motsChoisis, SEP,
   type Ordre, type Reglages, type Sens,
@@ -88,6 +88,9 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const choisis = motsChoisis(voc, r)
   const dispo = choisis.filter(ex.accepte).length
   const nbARevoir = motsARevoir(choisis).length
+  // le dernier envoi /cours reste signalé deux semaines sur l'accueil
+  const nouveaux = derniersAjouts(voc)
+  const nouveauxRecents = nouveaux.mots.length > 0 && Date.now() - new Date(nouveaux.date + 'T00:00').getTime() < 14 * 86_400_000
 
   // la mascotte d'une matière qu'on vient de choisir reçoit le flambeau : petit saut dans son médaillon
   const avant = useRef(r.matieres)
@@ -214,6 +217,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <header class="entete">
         <h1>Vocabulaire <span class="nl">NL</span></h1>
         {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
+        {nouveauxRecents && <button class="second" onClick={() => liste('nouveaux')}>Nouveaux ({nouveaux.mots.length})</button>}
         <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
       </header>
       <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
