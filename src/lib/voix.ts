@@ -5,8 +5,25 @@
 export const VOIX = { nl: 'nl-BE-DenaNeural', fr: 'fr-BE-CharlineNeural' } as const
 export const VITESSE = '-10%'
 
+/**
+ * Abréviations lues en entier (identiques à ABREVIATIONS dans outils/voix.py) :
+ * sinon la voix néerlandaise épelle « v.C. ». Ajouter ici, et dans voix.py, celles des prochains cours.
+ */
+const ABREVIATIONS: [RegExp, string][] = [
+  [/\bv\.\s?C(hr)?\./g, 'voor Christus'],
+  [/\bn\.\s?C(hr)?\./g, 'na Christus'],
+  [/\b(bv|bijv)\./g, 'bijvoorbeeld'],
+  [/\b[Vv]b\./g, 'voorbeeld'],
+  [/\benz\./g, 'enzovoort'],
+  [/\bd\.w\.z\./g, 'dat wil zeggen'],
+  [/\bm\.a\.w\./g, 'met andere woorden'],
+  [/\bo\.a\./g, 'onder andere'],
+  [/\bca\./g, 'circa'],
+]
+
 /** Le texte à lire : sans crochets ni précisions entre parenthèses (identique à outils/voix.py). */
 export function texteALire(t: string): string {
+  for (const [abr, mot] of ABREVIATIONS) t = t.replace(abr, mot)
   return t.normalize('NFC').replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
 }
 

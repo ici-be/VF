@@ -43,8 +43,24 @@ NS = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
 NS_REL = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 
 
+# Abréviations lues en entier (identiques à ABREVIATIONS dans src/lib/voix.ts)
+ABREVIATIONS = [
+    (r'\bv\.\s?C(hr)?\.', 'voor Christus'),
+    (r'\bn\.\s?C(hr)?\.', 'na Christus'),
+    (r'\b(bv|bijv)\.', 'bijvoorbeeld'),
+    (r'\b[Vv]b\.', 'voorbeeld'),
+    (r'\benz\.', 'enzovoort'),
+    (r'\bd\.w\.z\.', 'dat wil zeggen'),
+    (r'\bm\.a\.w\.', 'met andere woorden'),
+    (r'\bo\.a\.', 'onder andere'),
+    (r'\bca\.', 'circa'),
+]
+
+
 def texte_a_lire(t: str) -> str:
     """Identique à texteALire() dans src/lib/voix.ts."""
+    for abr, mot in ABREVIATIONS:
+        t = re.sub(abr, mot, t)
     t = unicodedata.normalize('NFC', t)
     t = re.sub(r'\([^)]*\)', ' ', t)
     t = re.sub(r'[\[\]]', '', t)
