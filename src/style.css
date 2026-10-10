@@ -485,7 +485,16 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .reprendre .scene-mini { display: none; }
   .page.accueil .reprendre { padding: 6px 18px 6px 8px; }
 }
-@media (max-width: 999px) { .reprendre .resume { padding-right: 64px; } }
+@media (max-width: 999px) { .reprendre .resume { padding-right: 74px; } }
+/* la mascotte du bloc « Commencer », un peu plus grande que celles du menu, et de l'air sous le bloc */
+.page.accueil .reprendre { margin-bottom: 5px; }
+.reprendre .scene-mascottes { width: 200px; height: 132px; }
+.reprendre .scene-mascottes .acteur { width: 88px; height: 110px; }
+.reprendre .scene-mascottes .acteur.plusieurs { width: 62px; height: 78px; }
+.reprendre .scene-mascottes .acteur.en-course { left: calc(50% - 44px); }
+.reprendre .scene-mini { width: 74px; height: 86px; }
+.reprendre .scene-mini .acteur { width: 54px; height: 68px; }
+.reprendre .scene-mini .acteur.plusieurs { width: 36px; height: 45px; }
 @media (prefers-reduced-motion: reduce) {
   .mascotte .corps, .mascotte .yeux, .mascotte .flamme, .court .jambe { animation: none !important; }
 }

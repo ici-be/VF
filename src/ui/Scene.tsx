@@ -28,26 +28,26 @@ function etincelle(scene: HTMLElement, x: number, y: number) {
     .finished.then(() => s.remove())
 }
 
-/** Passage de relais entre deux mascottes (distances pour une mascotte de 72 px de large). */
+/** Passage de relais entre deux mascottes (distances pour une mascotte de 88 px de large). */
 async function relais(scene: HTMLElement, ancien: HTMLElement, nouveau: HTMLElement) {
   // pendant la course, les deux mascottes sont placées librement (au centre, en bas)
   ancien.classList.add('en-course')
   nouveau.classList.add('en-course', 'court', 'sans-flambeau')
-  nouveau.style.transform = 'translateX(-155px)'
+  nouveau.style.transform = 'translateX(-170px)'
   scene.appendChild(nouveau)
   ancien.classList.add('vers-gauche')
   await Promise.all([
-    ancien.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(22px)' }], { duration: 420, easing: 'ease-out', fill: 'forwards' }).finished,
-    nouveau.animate([{ transform: 'translateX(-155px)' }, { transform: 'translateX(-23px)' }], { duration: 520, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' }).finished,
+    ancien.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(27px)' }], { duration: 420, easing: 'ease-out', fill: 'forwards' }).finished,
+    nouveau.animate([{ transform: 'translateX(-170px)' }, { transform: 'translateX(-28px)' }], { duration: 520, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' }).finished,
   ])
   ancien.classList.add('sans-flambeau')
   nouveau.classList.remove('sans-flambeau')
   etincelle(scene, scene.clientWidth / 2 - 2, scene.clientHeight - 64)
   ancien.classList.remove('vers-gauche')
   ancien.classList.add('court')
-  ancien.animate([{ transform: 'translateX(22px)' }, { transform: 'translateX(180px)' }], { duration: 600, easing: 'ease-in', fill: 'forwards' })
+  ancien.animate([{ transform: 'translateX(27px)' }, { transform: 'translateX(200px)' }], { duration: 600, easing: 'ease-in', fill: 'forwards' })
     .finished.then(() => ancien.remove())
-  await nouveau.animate([{ transform: 'translateX(-23px)' }, { transform: 'translateX(0)' }], { duration: 420, easing: 'ease-out', fill: 'forwards' }).finished
+  await nouveau.animate([{ transform: 'translateX(-28px)' }, { transform: 'translateX(0)' }], { duration: 420, easing: 'ease-out', fill: 'forwards' }).finished
   nouveau.getAnimations().forEach(a => a.cancel())
   nouveau.style.transform = ''
   nouveau.classList.remove('court', 'en-course')
