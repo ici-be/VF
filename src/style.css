@@ -54,7 +54,7 @@ button { cursor: pointer; }
 .entete { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .entete h1 { font: 800 2rem/1.05 var(--display); margin: 0; letter-spacing: -0.01em; }
 .entete h1 .nl { color: var(--accent); }
-/* le logo : les deux bulles de l'icône ; dessous le nom, un mot et sa traduction qui changent */
+/* le logo : les deux bulles de l'icône ; dessous le nom, un mot et sa traduction */
 .entete .logo { width: 56px; height: 56px; flex: none; }
 .logo .b-nl { fill: var(--blue); }
 .logo .b-fr { fill: var(--accent); }
@@ -62,8 +62,7 @@ button { cursor: pointer; }
 .logo .t-nl { fill: var(--blue-fg); }
 .logo .t-fr { fill: var(--accent-fg); }
 .entete .marque { flex: 1 1 200px; min-width: 0; }
-.duo { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 0; font-size: .92rem; font-weight: 700; transition: opacity .3s; }
-.duo.cache { opacity: 0; }
+.duo { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 0; font-size: .92rem; font-weight: 700; }
 .duo span { padding: 1px 10px; border-radius: 999px 999px 999px 4px; white-space: nowrap; }
 .duo .nl { background: var(--blue-bg); color: var(--blue); }
 .duo .fr { background: var(--accent-bg); color: var(--accent); border-radius: 999px 999px 4px 999px; }

@@ -1,8 +1,8 @@
 // Le haut de l'accueil : le logo (les deux bulles NL/FR de l'icône), le nom « Woordjes »
-// et, dessous, un mot des matières choisies avec sa traduction, qui change toutes les trois secondes.
-import { useEffect, useMemo, useState } from 'preact/hooks'
+// et, dessous, un mot des matières choisies avec sa traduction.
+import { useEffect, useState } from 'preact/hooks'
 import type { Mot } from '../lib/mots'
-import { melanger, nlComplet } from '../lib/seance'
+import { nlComplet } from '../lib/seance'
 
 export function Logo() {
   return (
@@ -20,32 +20,21 @@ export function Logo() {
 /** la première traduction, sans les précisions : « (se) souvenir (de), se rappeler » → « souvenir » */
 const premiereTraduction = (fr: string) => fr.replace(/\([^)]*\)/g, ' ').split(/[\/,;]/)[0].replace(/\s+/g, ' ').trim()
 
-const calme = () => matchMedia('(prefers-reduced-motion: reduce)').matches
-
-export function MotsQuiDefilent({ mots }: { mots: Mot[] }) {
-  // des mots courts (ils doivent tenir sur une ligne de téléphone), sans les formes conjuguées
-  const paires = useMemo(() => melanger(
-    mots.filter(m => !m.verbe)
-      .map(m => [nlComplet(m), premiereTraduction(m.fr)] as const)
-      .filter(([nl, fr]) => nl && fr && nl.length <= 18 && fr.length <= 20),
-  ).slice(0, 40), [mots])
-  const [i, setI] = useState(0)
-  const [cache, setCache] = useState(false)
+/** Un mot des matières choisies et sa traduction, tiré une fois : il ne change qu'au rechargement de la page. */
+export function MotExemple({ mots }: { mots: Mot[] }) {
+  const [paire, setPaire] = useState<readonly [string, string] | null>(null)
   useEffect(() => {
-    setI(0)
-    if (paires.length < 2 || calme()) return
-    let fondu: number
-    const minuterie = setInterval(() => {
-      setCache(true)
-      fondu = setTimeout(() => { setI(k => (k + 1) % paires.length); setCache(false) }, 300)
-    }, 3000)
-    return () => { clearInterval(minuterie); clearTimeout(fondu) }
-  }, [paires])
-  const p = paires[i]
-  if (!p) return null
+    if (paire) return
+    // un mot court (il doit tenir sur une ligne de téléphone), sans les formes conjuguées
+    const possibles = mots.filter(m => !m.verbe)
+      .map(m => [nlComplet(m), premiereTraduction(m.fr)] as const)
+      .filter(([nl, fr]) => nl && fr && nl.length <= 18 && fr.length <= 20)
+    if (possibles.length) setPaire(possibles[Math.floor(Math.random() * possibles.length)])
+  }, [mots])
+  if (!paire) return null
   return (
-    <p class={`duo ${cache ? 'cache' : ''}`} aria-hidden="true">
-      <span lang="nl" class="nl">{p[0]}</span><span class="fr">{p[1]}</span>
+    <p class="duo" aria-hidden="true">
+      <span lang="nl" class="nl">{paire[0]}</span><span class="fr">{paire[1]}</span>
     </p>
   )
 }
