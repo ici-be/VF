@@ -154,7 +154,7 @@ def textes_conjugaison() -> set[tuple[str, str]]:
 
 def textes_getallen() -> set[tuple[str, str]]:
     """Le chapitre Getallen (src/data/getallen.json) : les mots de base des nombres.
-    Les nombres tirés au hasard par l'exercice « Nombres » sont lus par la voix du navigateur."""
+    Les nombres tirés au hasard par l'exercice « Nombres » ne sont pas lus à voix haute."""
     chemin = Path(__file__).resolve().parent.parent / 'src' / 'data' / 'getallen.json'
     return {x for g in json.loads(chemin.read_text())['mots'] for x in (('nl', g['nl']), ('fr', g['fr']))}
 

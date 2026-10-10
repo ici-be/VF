@@ -97,7 +97,8 @@ remarque. L'appli l'ajoute comme chapitre « Getallen » à la matière Nederlan
 deux millions, à écrire en lettres ou en chiffres. L'orthographe suit la Taalunie
 (`src/lib/getallen.ts`) : tout attaché jusqu'à mille, une espace après duizend et autour de
 miljoen ; les espaces ne comptent pas à la correction, le tréma (tweeëntwintig) si. Ces
-nombres-là n'ont pas de mp3 : ils sont lus par la voix du navigateur.
+nombres-là ne sont pas lus à voix haute ; après une erreur en lettres, l'exercice montre
+le nombre décomposé et la règle.
 
 ## Les voix
 
