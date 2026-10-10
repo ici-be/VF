@@ -466,6 +466,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .mascotte .chapeau { transform-box: fill-box; transform-origin: 50% 100%; }
 .mascotte .loupe { transform-box: view-box; transform-origin: 37px 88px; }
 .mascotte .bulle text { font-family: var(--display); font-weight: 800; }
+.mascotte .fiole { transform-box: view-box; transform-origin: 36px 99px; }
+.mascotte .bulle .c { transform-box: fill-box; transform-origin: center; }
 .court .corps { animation: trot .16s ease-in-out infinite alternate; }
 .court .jambe.g { animation: pas .32s ease-in-out infinite alternate; }
 .court .jambe.d { animation: pas .32s ease-in-out infinite alternate-reverse; }

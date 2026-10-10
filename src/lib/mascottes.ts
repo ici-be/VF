@@ -174,12 +174,12 @@ const DESSINS: Record<Mascotte, string> = {
       ${ombrage('M62 63 Q70 64 76 70 Q80 96 74 110 Q68 113 62 114 Z')}
       <path d="M51 78 Q60 74 69 78 Q71 96 66 106 Q60 109 54 106 Q49 96 51 78 Z" fill="#cde8a6"/>
       ${brasGauche('#5aae52', '#4c9a48', 36, 90)}
-      <g transform="translate(36 90)">
+      <g class="fiole"><g transform="translate(36 90)">
         <path d="M-3.5 -20 L3.5 -20 L3.5 -10 L11 6 Q12 9 9 9 L-9 9 Q-12 9 -11 6 L-3.5 -10 Z" fill="#e8f3f6" fill-opacity=".9" ${t}/>
         <path d="M-6.2 -1 L6.2 -1 L11 6 Q12 9 9 9 L-9 9 Q-12 9 -11 6 Z" fill="#7cc576"/>
         <rect x="-4.5" y="-22.5" width="9" height="3" rx="1" fill="#c8d2d8" ${t} stroke-width="1.2"/>
         <circle cx="-2" cy="3" r="1.1" fill="#fff" opacity=".8"/><circle cx="3" cy="5" r=".8" fill="#fff" opacity=".8"/>
-      </g>
+      </g></g>
       ${bras('#5aae52', '#4c9a48')}
       <path d="M38 52 Q38 38 50 36 Q60 34 70 36 Q82 38 82 52 Q80 64 60 66 Q40 64 38 52 Z" fill="#5aae52" ${t}/>
       ${ombrage('M62 35 Q82 38 82 52 Q80 63 62 66 Z')}

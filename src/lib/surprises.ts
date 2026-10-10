@@ -3,7 +3,7 @@
 // Aussi dans les médaillons du menu des matières.
 // Raccourci : S pour une surprise au hasard (sur une mascotte visible au hasard), Maj+S pour passer
 // en revue celles de la mascotte du bloc « Commencer ».
-// Six surprises communes, et une propre à chaque mascotte.
+// Onze surprises communes (dont six avec le flambeau), et deux propres à chaque mascotte.
 import type { Mascotte } from './mascottes'
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -20,12 +20,13 @@ const attendre = (svg: SVGSVGElement, ms: number) => new Promise<void>(r => apre
 const anim = (el: Element | null, kf: Keyframe[], o: number | KeyframeAnimationOptions) =>
   el ? el.animate(kf, o).finished.then(() => {}, () => {}) : Promise.resolve()
 
-// un petit dessin par-dessus la mascotte (coordonnées du dessin : 120 × 150)
-function ajout(svg: SVGSVGElement, markup: string) {
+// un petit dessin par-dessus la mascotte (coordonnées du dessin : 120 × 150), ou dans `dans`, ou juste avant `avant`
+function ajout(svg: SVGSVGElement, markup: string, dans: Element = svg, avant: Element | null = null) {
   const g = document.createElementNS(NS, 'g')
   g.setAttribute('class', 'bulle')
   g.innerHTML = markup
-  svg.appendChild(g)
+  if (avant) avant.before(g)
+  else dans.appendChild(g)
   return g
 }
 interface Envol { dx?: number; dy?: number; duree?: number; delai?: number; echelle?: number }
@@ -41,11 +42,66 @@ function envol(svg: SVGSVGElement, markup: string, x: number, y: number, { dx = 
   })
 }
 const texte = (t: string, taille = 14, style = '') => `<text text-anchor="middle" font-size="${taille}" fill="currentColor" ${style}>${t}</text>`
-function etincelle(svg: SVGSVGElement, x: number, y: number) {
-  const g = ajout(svg, `<g transform="translate(${x} ${y})"><path class="f" d="M0 -9 L2.5 -2.5 L9 0 L2.5 2.5 L0 9 L-2.5 2.5 L-9 0 L-2.5 -2.5 Z" fill="#ffd23f" stroke="${TRAIT}" stroke-width="1.2" stroke-linejoin="round"/></g>`)
+function etincelle(svg: SVGSVGElement, x: number, y: number, taille = 1) {
+  const g = ajout(svg, `<g transform="translate(${x} ${y}) scale(${taille})"><path class="f" d="M0 -9 L2.5 -2.5 L9 0 L2.5 2.5 L0 9 L-2.5 2.5 L-9 0 L-2.5 -2.5 Z" fill="#ffd23f" stroke="${TRAIT}" stroke-width="1.2" stroke-linejoin="round"/></g>`)
   anim(g.querySelector('.f'), [{ transform: 'scale(.2) rotate(0)', opacity: 1 }, { transform: 'scale(1.4) rotate(90deg)', opacity: 0 }], { duration: 450, easing: 'ease-out' })
     .finally(() => g.remove())
 }
+
+// la bouche (ou le museau, ou la fente du heaume) de chaque mascotte
+const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5] }
+const bouche = (svg: SVGSVGElement) => BOUCHE[svg.dataset.mascotte as Mascotte] ?? [60, 55]
+
+/** Quelques ronds de fumée grise qui montent de (x, y). */
+function fumee(svg: SVGSVGElement, x: number, y: number, n = 3, delai = 0, taille = 3) {
+  for (let i = 0; i < n; i++) envol(svg, `<circle r="${taille + i * .8}" fill="#9aa3ae" opacity=".7"/>`, x, y, { dx: -6 + i * 6, dy: -20 - i * 6, duree: 1100, delai: delai + i * 130, echelle: 1.9 })
+}
+// une petite flamme, centrée sur sa base (0, 0)
+const FLAMMECHE = `<path d="M0 -12 C6 -6 5.5 -1 0 1 C-5.5 -1 -6 -6 0 -12 Z" fill="#f08c1a" stroke="${TRAIT}" stroke-width="1.1" stroke-linejoin="round"/><path d="M0 -6.5 C2.6 -3.6 2.3 -1 0 .2 C-2.3 -1 -2.6 -3.6 0 -6.5 Z" fill="#ffd66b"/>`
+/** Une flammèche qui s'allume en (x, y), crépite, puis s'éteint, entre `de` et `a` (ms). */
+function petitFeu(svg: SVGSVGElement, x: number, y: number, de: number, a: number, { dans = svg as Element, taille = 1 } = {}) {
+  const g = ajout(svg, `<g transform="translate(${x} ${y}) scale(${taille})"><g class="c" opacity="0">${FLAMMECHE}</g></g>`, dans)
+  const crepite: Keyframe[] = []
+  for (let t = .2; t < .85; t += .1) crepite.push({ transform: `scale(${1 + (Math.random() - .5) * .35}, ${1 + (Math.random() - .3) * .4}) rotate(${(Math.random() - .5) * 18}deg)`, opacity: 1, offset: t })
+  anim(g.querySelector('.c'), [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: .15 }, ...crepite, { transform: 'scale(1)', opacity: 1, offset: .9 }, { transform: 'scale(0)', opacity: 0 }], { duration: a - de, delay: de })
+    .finally(() => g.remove())
+}
+/** Des traits de souffle, de la bouche vers (vx, vy). */
+function souffle(svg: SVGSVGElement, delai: number, vx = 26, vy = -16) {
+  const [x, y] = bouche(svg)
+  for (let i = 0; i < 3; i++) apres(svg, delai + i * 110, () => {
+    const g = ajout(svg, `<path d="M0 0 q3 -2 6 0" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".6" transform="translate(${x + 5} ${y - 2 + (i - 1) * 3})"/>`)
+    anim(g, [{ transform: 'translate(0,0)', opacity: 0 }, { transform: `translate(${vx * .3}px,${vy * .3}px)`, opacity: 1, offset: .3 }, { transform: `translate(${vx}px,${vy}px)`, opacity: 0 }], { duration: 500, easing: 'ease-out' })
+      .finally(() => g.remove())
+  })
+}
+/** De la suie sur le visage, sous les yeux (qui restent visibles) ; s'efface d'elle-même. */
+function suie(svg: SVGSVGElement, delai: number, duree: number) {
+  apres(svg, delai, () => {
+    const yeux = svg.querySelector<SVGGElement>('.yeux')
+    if (!yeux) return
+    const b = yeux.getBBox(), cx = b.x + b.width / 2, cy = b.y + b.height / 2
+    const taches = [[-6, -1, 6, 4.5], [5, 1, 6.5, 5], [0, 6, 7, 3.5], [-3, -5, 5, 3], [8, -4, 3.5, 2.5], [-9, 4, 3, 2.5]]
+    const g = ajout(svg, taches.map(([x, y, rx, ry]) => `<ellipse cx="${cx + x}" cy="${cy + y}" rx="${rx}" ry="${ry}" fill="#2b2b2b"/>`).join(''), svg, yeux)
+    anim(g, [{ opacity: 0 }, { opacity: .72, offset: .05 }, { opacity: .72, offset: .85 }, { opacity: 0 }], duree).finally(() => g.remove())
+  })
+}
+/** Une explosion de petites boules de couleur en (x, y). */
+function eclat(svg: SVGSVGElement, x: number, y: number, couleurs: string[], rayon = 16, n = 12) {
+  const g = ajout(svg, `<g transform="translate(${x} ${y})">${tour(n, i => `<circle r="1.7" fill="${couleurs[i % couleurs.length]}" stroke="${TRAIT}" stroke-width=".4"/>`).join('')}<circle class="flash" r="4" fill="#fff6c8" opacity=".9"/></g>`)
+  const boules = [...g.querySelectorAll('circle:not(.flash)')].map((c, i) => {
+    const a = i / n * Math.PI * 2, r = rayon * (.8 + Math.random() * .4)
+    return anim(c, [{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * r * .8}px,${Math.sin(a) * r * .8}px) scale(1)`, opacity: 1, offset: .5 }, { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r + 6}px) scale(.4)`, opacity: 0 }], { duration: 950, easing: 'ease-out' })
+  })
+  anim(g.querySelector('.flash'), [{ transform: 'scale(.3)', opacity: .9 }, { transform: 'scale(2.2)', opacity: 0 }], 300)
+  Promise.all(boules).finally(() => g.remove())
+}
+/** Les images clés de « coups » brefs aux instants donnés (0..1), entre deux repos. */
+const coups = (instants: number[], au: string, repos = 'none', largeur = .06): Keyframe[] => [
+  { transform: repos, offset: 0 },
+  ...instants.flatMap(t => [{ transform: repos, offset: t - .02 }, { transform: au, offset: t }, { transform: repos, offset: t + largeur }]),
+  { transform: repos, offset: 1 },
+]
 
 const parties = (svg: SVGSVGElement) => ({
   perso: svg.querySelector('.perso'), corps: svg.querySelector('.corps'), yeux: svg.querySelector('.yeux'),
@@ -61,6 +117,8 @@ interface Surprise {
   flambeau?: boolean
   /** ce qui bouge sort du cadre d'un médaillon (la queue du renard) : seulement en pied */
   enPied?: boolean
+  /** les mascottes à qui cette surprise commune ne va pas */
+  sauf?: Mascotte[]
   jouer: (svg: SVGSVGElement) => Promise<void>
 }
 
@@ -203,6 +261,160 @@ export const SURPRISES: Surprise[] = [
     anim(p.corps, [{ transform: 'scale(1,1)' }, { transform: 'scale(1.06,.95)', offset: .3 }, { transform: 'scale(.98,1.02)', offset: .6 }, { transform: 'scale(1,1)' }], 500)
     await vol
   } },
+
+  // ---------- deuxième série (démo du 9 octobre) : surtout avec le feu du flambeau ----------
+
+  // la flamme s'agite de plus en plus, la mascotte la surveille… pouf ! visage noirci, deux clignements ahuris
+  { id: 'pouf', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3400
+    apres(svg, D * .38, () => { eclat(svg, 92, 28, ['#ffd23f', '#f08c1a', '#ffb347'], 18, 10); fumee(svg, 92, 30, 3, 100, 4) })
+    suie(svg, D * .39, D * .56)
+    apres(svg, D * .45, () => { const y = svg.querySelector<SVGGElement>('.yeux')?.getBBox().y ?? 40; fumee(svg, 58, y - 12, 3, 0, 2.2) })
+    apres(svg, D * .84, () => etincelle(svg, 92, 30))
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(2px,-1px)', offset: .06 }, { transform: 'translate(2px,-1px)', offset: .36 }, { transform: 'scaleY(.1)', offset: .39 }, { transform: 'scale(1.25)', offset: .46 }, { transform: 'scale(1.25)', offset: .58 }, { transform: 'scaleY(.1)', offset: .61 }, { transform: 'scale(1.25)', offset: .64 }, { transform: 'scale(1.25)', offset: .7 }, { transform: 'scaleY(.1)', offset: .73 }, { transform: 'none', offset: .77 }, { transform: 'none' }], D)
+    anim(p.perso, [{ transform: 'rotate(0)' }, { transform: 'rotate(0)', offset: .37 }, { transform: 'translateX(-4px) rotate(-8deg)', offset: .4 }, { transform: 'rotate(-2deg)', offset: .48 }, { transform: 'rotate(0)', offset: .56 }, { transform: 'rotate(0)' }], D)
+    await anim(p.flamme, [{ transform: 'scale(1)' }, { transform: 'scale(1.2,.9) rotate(8deg)', offset: .06 }, { transform: 'scale(.9,1.3) rotate(-10deg)', offset: .12 }, { transform: 'scale(1.3,1) rotate(6deg)', offset: .18 }, { transform: 'scale(.8,1.4) rotate(-12deg)', offset: .24 }, { transform: 'scale(1.5) rotate(4deg)', offset: .3 }, { transform: 'scale(1.9)', offset: .36 }, { transform: 'scale(0)', offset: .38 }, { transform: 'scale(0)', offset: .82 }, { transform: 'scale(1.3)', offset: .87 }, { transform: 'scale(1)' }], D)
+  } },
+
+  // la flamme souffle trois ronds de fumée ; le dernier, plus petit et plus rapide, passe à travers le précédent
+  { id: 'ronds', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3200
+    const rond = (delai: number, dx: number, duree: number, taille: number) => apres(svg, delai, () => {
+      const g = ajout(svg, `<g transform="translate(92 14)"><ellipse class="r" rx="${4 * taille}" ry="${1.8 * taille}" fill="none" stroke="#a7afba" stroke-width="1.6"/></g>`)
+      anim(g.querySelector('.r'), [{ transform: 'translate(0,0) scale(.6)', opacity: 0 }, { transform: 'translate(0,-4px) scale(1)', opacity: .95, offset: .12 }, { transform: `translate(${dx}px,-44px) scale(2.4)`, opacity: 0 }], { duration: duree, easing: 'ease-out' })
+        .finally(() => g.remove())
+    })
+    rond(D * .12, -10, 1700, 1)
+    rond(D * .36, -16, 1800, 1)
+    rond(D * .5, -16, 1100, .7)
+    anim(p.flamme, coups([.12, .36, .5], 'scale(1.2,.75)', 'scale(1)', .05), D)
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'scaleY(.45)', offset: .1 }, { transform: 'scaleY(.45)', offset: .85 }, { transform: 'none', offset: .9 }, { transform: 'none' }], D)
+    await anim(p.corps, [{ transform: 'scale(1,1)' }, { transform: 'scale(1.03,1.04)', offset: .1 }, { transform: 'scale(1.03,1.04)', offset: .85 }, { transform: 'scale(1,1)' }], D)
+  } },
+
+  // la flamme grossit et passe par toutes les couleurs en lançant des étincelles
+  { id: 'arcenciel', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3000
+    const [dehors, dedans] = p.flamme ? [...p.flamme.children] : []
+    anim(dehors, ['#f08c1a', '#3f8fe8', '#4fbf5a', '#a35ad8', '#e0507e', '#f08c1a'].map(fill => ({ fill })), D)
+    anim(dedans, ['#ffd66b', '#cfe6ff', '#e2ffd0', '#f0dcff', '#ffd6e2', '#ffd66b'].map(fill => ({ fill })), D)
+    ;[[.2, 104, 18], [.45, 80, 14], [.7, 102, 34]].forEach(([t, x, y]) => apres(svg, D * t, () => etincelle(svg, x, y, .7)))
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(2px,-1px) scale(1.3)', offset: .1 }, { transform: 'translate(2px,-1px) scale(1.3)', offset: .88 }, { transform: 'none' }], D)
+    await anim(p.flamme, [{ transform: 'scale(1)' }, { transform: 'scale(1.35)', offset: .1 }, { transform: 'scale(1.25,1.45)', offset: .5 }, { transform: 'scale(1.35)', offset: .88 }, { transform: 'scale(1)' }], D)
+  } },
+
+  // un bout de flamme, avec deux yeux, s'échappe et fait le tour de la mascotte, qui le suit du regard
+  { id: 'follet', flambeau: true, enPied: true, async jouer(svg) {
+    const p = parties(svg), D = 3800
+    const g = ajout(svg, `<g opacity="0">${FLAMMECHE}<circle cx="-1.5" cy="-4" r=".8" fill="${TRAIT}"/><circle cx="1.5" cy="-4" r=".8" fill="${TRAIT}"/></g>`)
+    const chemin = [[92, 22, 0], [78, 4, .12], [40, 8, .28], [14, 42, .42], [20, 92, .55], [104, 102, .7], [104, 62, .82], [92, 24, .94], [92, 26, 1]]
+    anim(g.firstElementChild, chemin.map(([x, y, offset], i) => ({ transform: `translate(${x}px,${y}px) scale(.75) rotate(${i % 2 ? 10 : -10}deg)`, opacity: i === 0 || i === chemin.length - 1 ? 0 : 1, offset, easing: 'ease-in-out' })), D)
+      .finally(() => g.remove())
+    anim(p.flamme, [{ transform: 'scale(1)' }, { transform: 'scale(.6)', offset: .08 }, { transform: 'scale(.6)', offset: .92 }, { transform: 'scale(1.15)', offset: .96 }, { transform: 'scale(1)' }], D)
+    await anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(1.5px,-2.5px)', offset: .12 }, { transform: 'translate(-1.5px,-2.5px)', offset: .28 }, { transform: 'translate(-2.6px,-1px)', offset: .42 }, { transform: 'translate(-2.6px,1.6px)', offset: .55 }, { transform: 'translate(2.6px,1.8px)', offset: .7 }, { transform: 'translate(2.6px,0)', offset: .82 }, { transform: 'translate(2px,-1.5px)', offset: .94 }, { transform: 'none' }], { duration: D, easing: 'ease-in-out' })
+  } },
+
+  // trois hoquets qui la font sursauter ; à chaque fois, la flamme fait un bond elle aussi
+  { id: 'hoquet', async jouer(svg) {
+    const p = parties(svg), D = 2800, t = [.12, .45, .78]
+    anim(p.flamme, coups(t, 'scale(1,1.6)', 'scale(1)'), D)
+    anim(p.yeux, coups(t, 'scale(1.35)'), D)
+    await anim(p.perso, coups(t, 'translateY(-7px) scale(.98,1.04)', 'translateY(0)'), D)
+  } },
+
+  // une bulle rose qui gonfle en deux fois, en louchant dessus… et qui éclate sur toute la figure
+  // (pas pour le chevalier : on ne fait pas de bulle à travers un heaume)
+  { id: 'chewing-gum', sauf: ['chevalier'], async jouer(svg) {
+    const p = parties(svg), D = 3400, [x, y] = bouche(svg)
+    if (!p.corps) return
+    const bulle = ajout(svg, `<g transform="translate(${x} ${y + 1})"><g class="b"><circle r="10" fill="#f59ac0" stroke="${TRAIT}" stroke-width="1.1"/><path d="M-5.5 -4 Q-3.5 -7 0 -7.5" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".8"/></g></g>`, p.corps)
+    anim(bulle.querySelector('.b'), [{ transform: 'scale(0)' }, { transform: 'scale(.4)', offset: .15 }, { transform: 'scale(.34)', offset: .22 }, { transform: 'scale(.72)', offset: .38 }, { transform: 'scale(.64)', offset: .44 }, { transform: 'scale(1.05)', offset: .6 }, { transform: 'scale(1.15)', offset: .64 }, { transform: 'scale(1.15)' }], D * .64)
+      .finally(() => bulle.remove())
+    apres(svg, D * .64, () => {
+      const taches = [[-7, -7, 5, 3.5], [7, -10, 4.5, 3], [0, 1, 7, 4], [-11, 1, 3, 2.5], [11, -1, 3.5, 3], [-3, -14, 3, 2]]
+      const g = ajout(svg, taches.map(([dx, dy, rx, ry]) => `<ellipse class="c" cx="${x + dx}" cy="${y + dy}" rx="${rx}" ry="${ry}" fill="#f59ac0" stroke="${TRAIT}" stroke-width=".7"/>`).join(''), p.corps!)
+      Promise.all([...g.querySelectorAll('.c')].map(c => anim(c, [{ transform: 'scale(0)' }, { transform: 'scale(1.2)', offset: .08 }, { transform: 'scale(1)', offset: .14 }, { transform: 'scale(1)', offset: .8 }, { transform: 'scale(0)' }], D * .36)))
+        .finally(() => g.remove())
+    })
+    await anim(p.yeux, [{ transform: 'none' }, { transform: 'translateY(1.5px)', offset: .12 }, { transform: 'translateY(1.5px)', offset: .62 }, { transform: 'scaleY(.1)', offset: .65 }, { transform: 'scaleY(.1)', offset: .7 }, { transform: 'scale(1.3)', offset: .73 }, { transform: 'scale(1.3)', offset: .86 }, { transform: 'none', offset: .9 }, { transform: 'none' }], D)
+  } },
+
+  // une guimauve sur une pique dore, brunit… et prend feu ; Reynaert souffle et la mange quand même, carbonisée
+  { id: 'guimauve', pour: 'renard', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 4600
+    const g = ajout(svg, `<g class="pique"><line x1="104" y1="27" x2="126" y2="46" stroke="${TRAIT}" stroke-width="2.8" stroke-linecap="round"/><line x1="104" y1="27" x2="126" y2="46" stroke="#b58a5a" stroke-width="1.4" stroke-linecap="round"/><rect class="guim" x="98.5" y="21.5" width="8.5" height="7.5" rx="2.8" fill="#fbf6ee" stroke="${TRAIT}" stroke-width="1"/></g>`)
+    anim(g.querySelector('.pique'), [{ transform: 'translate(26px,12px)', opacity: 0 }, { transform: 'translate(0,0)', opacity: 1, offset: .1 }, { transform: 'translate(0,0)', opacity: 1, offset: .74 }, { transform: 'translate(-42px,35px) rotate(-8deg)', opacity: 1, offset: .83 }, { transform: 'translate(-43px,36px) rotate(-8deg)', opacity: 0, offset: .85 }, { transform: 'translate(-43px,36px)', opacity: 0 }], D)
+      .finally(() => g.remove())
+    anim(g.querySelector('.guim'), [{ fill: '#fbf6ee' }, { fill: '#fbf6ee', offset: .1 }, { fill: '#ecc98f', offset: .3 }, { fill: '#c4874a', offset: .42 }, { fill: '#a8622e', offset: .5 }, { fill: '#a8622e', offset: .62 }, { fill: '#2b2219', offset: .66 }, { fill: '#2b2219' }], { duration: D, fill: 'forwards' })
+    petitFeu(svg, 102.7, 22.5, D * .5, D * .66, { taille: .8 })
+    fumee(svg, 103, 18, 3, D * .66, 2.5)
+    souffle(svg, D * .58, 34, -28)
+    envol(svg, texte('!', 22), 44, 14, { dx: 0, dy: -10, duree: 800, delai: D * .52, echelle: 1.1 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(2.4px,-1.5px)', offset: .12 }, { transform: 'translate(2.4px,-1.5px)', offset: .5 }, { transform: 'translate(2.4px,-1.5px) scale(1.35)', offset: .53 }, { transform: 'translate(2.4px,-1.5px) scale(1.35)', offset: .66 }, { transform: 'translate(1px,1px)', offset: .76 }, { transform: 'scaleY(.3)', offset: .86 }, { transform: 'scaleY(.3)', offset: .97 }, { transform: 'none' }], D)
+    await anim(p.corps, coups([.88, .92, .96], 'scale(1.05,.96)', 'scale(1,1)', .015), D)
+  } },
+
+  // une étincelle saute sur la bannière, qui prend feu au bout ; le chevalier la secoue dans tous les sens et l'éteint
+  { id: 'banniere-feu', pour: 'chevalier', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3800
+    const s = ajout(svg, `<circle r="1.7" fill="#ffd23f" stroke="${TRAIT}" stroke-width=".6"/>`)
+    anim(s.firstElementChild, [{ transform: 'translate(92px,18px)' }, { transform: 'translate(80px,3px)', offset: .35 }, { transform: 'translate(64px,6px)', offset: .65 }, { transform: 'translate(54px,22px)' }], { duration: D * .18, delay: D * .03 })
+      .finally(() => s.remove())
+    petitFeu(svg, 52, 23, D * .21, D * .68)
+    const noir = ajout(svg, `<path d="M46 20.5 L56 23 L46 28 Z" fill="#2b2219"/>`)
+    anim(noir, [{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: .75, offset: .5 }, { opacity: .75, offset: .9 }, { opacity: 0 }], D).finally(() => noir.remove())
+    fumee(svg, 52, 20, 3, D * .68, 2.6)
+    envol(svg, texte('!', 22), 72, 12, { dx: 0, dy: -10, duree: 800, delai: D * .28, echelle: 1.1 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-2px,-1.5px)', offset: .25 }, { transform: 'translate(-2px,-1.5px) scale(1.3)', offset: .3 }, { transform: 'translate(-2px,-1.5px) scale(1.3)', offset: .7 }, { transform: 'scaleY(.3)', offset: .76 }, { transform: 'scaleY(.3)', offset: .9 }, { transform: 'none' }], D)
+    anim(svg.querySelector('.drapeau'), [{ transform: 'none' }, { transform: 'none', offset: .4 }, ...tour(9, i => ({ transform: `scaleX(${i % 2 ? .8 : 1.1}) skewY(${i % 2 ? -14 : 14}deg)`, offset: .42 + i * .03 })), { transform: 'none', offset: .72 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'rotate(0)' }, { transform: 'rotate(0)', offset: .4 }, ...tour(9, i => ({ transform: `translateY(${i % 2 ? -3 : 0}px) rotate(${i % 2 ? 4 : -4}deg)`, offset: .42 + i * .03 })), { transform: 'rotate(0)', offset: .72 }, { transform: 'scale(1.02,.97)', offset: .8 }, { transform: 'rotate(0)' }], D)
+  } },
+
+  // la flamme se penche vers la plume du chapeau, qui s'enflamme ; Colomb bondit, le chapeau s'envole et retombe, plume noircie
+  { id: 'plume', pour: 'colomb', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3600, chapeau = svg.querySelector('.chapeau')
+    if (!chapeau) return
+    petitFeu(svg, 84, 13, D * .22, D * .62, { dans: chapeau, taille: .8 })
+    const noir = ajout(svg, `<path d="M79 15 Q82.5 12 86 14.6 Q83 15.6 81 17.6 Z" fill="#2b2219"/>`, chapeau)
+    anim(noir, [{ opacity: 0 }, { opacity: 0, offset: .4 }, { opacity: .8, offset: .62 }, { opacity: .8, offset: .9 }, { opacity: 0 }], D).finally(() => noir.remove())
+    fumee(svg, 84, 0, 3, D * .62, 2.4)
+    envol(svg, texte('!', 22), 38, 16, { dx: 0, dy: -10, duree: 800, delai: D * .34, echelle: 1.1 })
+    anim(p.flamme, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-32deg) scale(1.25)', offset: .14 }, { transform: 'rotate(-28deg) scale(1.3)', offset: .22 }, { transform: 'rotate(0) scale(1)', offset: .3 }, { transform: 'rotate(0) scale(1)' }], D)
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(1.5px,-2.6px)', offset: .3 }, { transform: 'translate(1.5px,-2.6px) scale(1.35)', offset: .36 }, { transform: 'translate(1.5px,-2.6px) scale(1.35)', offset: .7 }, { transform: 'scaleY(.3)', offset: .8 }, { transform: 'scaleY(.3)', offset: .92 }, { transform: 'none' }], D)
+    anim(chapeau, [{ transform: 'none' }, { transform: 'none', offset: .48 }, { transform: 'translate(-3px,-26px) rotate(-18deg)', offset: .6, easing: 'ease-in' }, { transform: 'translate(0,1px) rotate(3deg)', offset: .74 }, { transform: 'translate(0,-2px) rotate(-2deg)', offset: .79 }, { transform: 'none', offset: .84 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .44 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .48 }, { transform: 'translateY(-12px)', offset: .56 }, { transform: 'translateY(0) scale(1.04,.94)', offset: .66 }, { transform: 'translateY(0)', offset: .72 }, { transform: 'translateY(0)' }], D)
+  } },
+
+  // un rayon de soleil traverse la loupe et se concentre au sol : fumée, petite flamme… écrasée d'un coup de talon
+  { id: 'loupe-feu', pour: 'detective', enPied: true, async jouer(svg) {
+    const p = parties(svg), D = 4000
+    const rayon = ajout(svg, `<path d="M6 -14 L44 -14 L33 66 L19 66 Z" fill="#ffd84d" opacity=".28"/><path d="M19 74 L33 74 L51 139 Z" fill="#ffd84d" opacity=".5"/>`, svg, p.perso)
+    anim(rayon, [{ opacity: 0 }, { opacity: 1, offset: .12 }, { opacity: 1, offset: .52 }, { opacity: 0, offset: .6 }, { opacity: 0 }], D).finally(() => rayon.remove())
+    const point = ajout(svg, `<circle cx="51" cy="139" r="2.4" fill="#fff3b0" stroke="#f08c1a" stroke-width=".6"/>`)
+    anim(point, [{ opacity: 0 }, { opacity: 0, offset: .14 }, { opacity: 1, offset: .26 }, { opacity: 1, offset: .55 }, { opacity: 0, offset: .6 }, { opacity: 0 }], D).finally(() => point.remove())
+    fumee(svg, 51, 136, 3, D * .24, 1.8)
+    petitFeu(svg, 51, 139, D * .38, D * .66, { taille: .75 })
+    fumee(svg, 51, 136, 3, D * .66, 3.2)
+    envol(svg, texte('!', 22), 40, 14, { dx: 0, dy: -10, duree: 800, delai: D * .42, echelle: 1.1 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-1px,2px)', offset: .26 }, { transform: 'translate(-1px,2px) scale(1.3)', offset: .42 }, { transform: 'translate(-1px,2px) scale(1.3)', offset: .64 }, { transform: 'scaleY(.35)', offset: .74 }, { transform: 'scaleY(.35)', offset: .9 }, { transform: 'none' }], D)
+    anim(p.jg, [{ transform: 'none' }, { transform: 'none', offset: .54 }, { transform: 'translateY(-9px)', offset: .61, easing: 'ease-in' }, { transform: 'translateY(0)', offset: .65 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'scale(1,1)' }, { transform: 'scale(1,1)', offset: .54 }, { transform: 'rotate(3deg)', offset: .61 }, { transform: 'scale(1.04,.95)', offset: .66 }, { transform: 'scale(1,1)', offset: .72 }, { transform: 'scale(1,1)' }], D)
+  } },
+
+  // la fiole bouillonne de plus en plus, tremble… et explose en un nuage de couleurs ; la grenouille en ressort noircie
+  { id: 'potion', pour: 'grenouille', async jouer(svg) {
+    const p = parties(svg), D = 3800
+    for (let i = 0; i < 9; i++) envol(svg, `<circle r="${1.2 + Math.random()}" fill="#9ad88f" stroke="${TRAIT}" stroke-width=".5"/>`, 35 + Math.random() * 3, 67, { dx: (Math.random() - .5) * 10, dy: -14 - Math.random() * 10, duree: 700, delai: D * (.02 + i * .05) * (1 - i * .03), echelle: 1.2 })
+    anim(svg.querySelector('.fiole'), [{ transform: 'rotate(0)' }, { transform: 'rotate(0)', offset: .2 }, ...tour(10, i => ({ transform: `rotate(${(i % 2 ? -1 : 1) * (3 + i * .6)}deg)`, offset: .22 + i * .026 })), { transform: 'rotate(0)', offset: .5 }, { transform: 'rotate(0)' }], D)
+    apres(svg, D * .5, () => {
+      const nuage = ajout(svg, [[36, 62, 9, '#c48cff'], [26, 54, 7, '#7cc576'], [46, 52, 8, '#5ab0ff'], [34, 46, 7, '#ffd23f'], [52, 64, 6, '#e0607e'], [20, 66, 6, '#ff9a3c']].map(([x, y, r, c]) => `<circle class="c" cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="${TRAIT}" stroke-width=".8"/>`).join(''))
+      Promise.all([...nuage.querySelectorAll('.c')].map((c, i) => anim(c, [{ transform: 'scale(0)', opacity: 1 }, { transform: 'scale(1.15)', opacity: 1, offset: .2 }, { transform: 'scale(1.3) translateY(-4px)', opacity: .8, offset: .6 }, { transform: 'scale(1.5) translateY(-10px)', opacity: 0 }], { duration: 1300, delay: i * 40, easing: 'ease-out' })))
+        .finally(() => nuage.remove())
+    })
+    suie(svg, D * .52, D * .44)
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-2px,1.5px)', offset: .1 }, { transform: 'translate(-2px,1.5px) scale(1.2)', offset: .48 }, { transform: 'scaleY(.1)', offset: .51 }, { transform: 'scale(1.25)', offset: .6 }, { transform: 'scale(1.25)', offset: .7 }, { transform: 'scaleY(.1)', offset: .73 }, { transform: 'scale(1.2)', offset: .76 }, { transform: 'scale(1.2)', offset: .86 }, { transform: 'none', offset: .9 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'rotate(0)' }, { transform: 'rotate(0)', offset: .49 }, { transform: 'translateX(3px) rotate(7deg)', offset: .52 }, { transform: 'rotate(2deg)', offset: .6 }, { transform: 'rotate(0)', offset: .7 }, { transform: 'rotate(0)' }], D)
+  } },
 ]
 
 /** Joue une surprise sur le dessin (s'il n'est pas déjà occupé). */
@@ -225,7 +437,7 @@ export function interrompre(svg: SVGSVGElement) {
   delete svg.dataset.surprise
 }
 
-// la surprise : une fois sur trois celle de la mascotte, sinon une commune ; jamais deux fois la même de suite
+// la surprise : une fois sur trois une des siennes, sinon une commune ; jamais deux fois la même de suite
 let derniere = ''
 /** La mascotte tient-elle son flambeau ? (dans un médaillon du menu, pas toujours) */
 export const tientLeFlambeau = (svg: SVGSVGElement) => {
@@ -234,10 +446,10 @@ export const tientLeFlambeau = (svg: SVGSVGElement) => {
 }
 
 export function choisirSurprise(m: Mascotte, hasard = Math.random, avecFlambeau = true, medaillon = false): Surprise {
-  const ok = (s: Surprise) => s.id !== derniere && (avecFlambeau || !s.flambeau) && !(medaillon && s.enPied)
-  const propre = SURPRISES.find(s => s.pour === m && ok(s))
+  const ok = (s: Surprise) => s.id !== derniere && (avecFlambeau || !s.flambeau) && !(medaillon && s.enPied) && !s.sauf?.includes(m)
+  const propres = SURPRISES.filter(s => s.pour === m && ok(s))
   const communes = SURPRISES.filter(s => !s.pour && ok(s))
-  const s = propre && hasard() < 1 / 3 ? propre : communes[Math.floor(hasard() * communes.length)]
+  const s = propres.length && hasard() < 1 / 3 ? propres[Math.floor(hasard() * propres.length)] : communes[Math.floor(hasard() * communes.length)]
   derniere = s.id
   return s
 }
@@ -274,8 +486,8 @@ function declencher(dansLOrdre: boolean) {
   if (svg.dataset.saute) return
   let s: Surprise
   if (dansLOrdre) {
-    // les surprises possibles pour cette mascotte : les communes, puis la sienne
-    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && (!x.flambeau || tientLeFlambeau(svg)))
+    // les surprises possibles pour cette mascotte : les communes, puis les siennes
+    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && !x.sauf?.includes(m) && (!x.flambeau || tientLeFlambeau(svg)))
     revue = (revue + 1) % possibles.length
     s = possibles[revue]
   } else {
