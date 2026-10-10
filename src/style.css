@@ -573,7 +573,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .reprendre .description-exercice.alerte { color: var(--ko); }
 /* les matières choisies : chacune dans sa couleur ; plusieurs : une par ligne */
 .reprendre .nom-matiere b { font-weight: 800; color: var(--bord, var(--fg)); }
-.reprendre .nom-matiere .chapitres-choisis { color: var(--muted); }
+.reprendre .nom-matiere .chapitres-choisis { color: var(--muted); margin-left: .45em; }
 .reprendre .detail:not(.plusieurs) .reste::before { content: " · "; }
 .reprendre .detail.plusieurs .nom-matiere, .reprendre .detail.plusieurs .reste { display: block; }
 .reprendre .detail.plusieurs .reste { margin-top: 2px; }

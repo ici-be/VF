@@ -56,16 +56,17 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
     .filter(Boolean).join(' · ')
 }
 
-/** Les matières choisies, chacune dans sa couleur, avec ses chapitres s'ils sont restreints. */
-function NomsMatieres({ r }: { r: Reglages }) {
+/** Les matières choisies, chacune dans sa couleur, avec ses chapitres s'ils sont restreints (dans l'ordre du tableau). */
+function NomsMatieres({ voc, r }: { voc: Vocabulaire; r: Reglages }) {
   return (
     <>
       {r.matieres.map(m => {
         const a = apparence(m)
-        const ch = r.chapitres.filter(c => c.startsWith(m + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
+        const ordre = voc.matieres.find(x => x.nom === m)?.chapitres ?? []
+        const ch = ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
         return (
           <span class={`nom-matiere ${a.mascotte ? `teinte-${a.mascotte}` : ''}`}>
-            <b>{a.titre}</b>{ch.length > 0 && <span class="chapitres-choisis"> ({ch.join(', ')})</span>}
+            <b>{a.titre}</b>{ch.length > 0 && <span class="chapitres-choisis">{ch.join(', ')}</span>}
           </span>
         )
       })}
@@ -261,7 +262,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
           {/* une matière : sur la ligne du résumé ; plusieurs : une par ligne, sans la description */}
-          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres r={r} /><span class="reste">{resume(voc, r)}</span></p>
+          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /><span class="reste">{resume(voc, r)}</span></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
