@@ -35,7 +35,7 @@ export function Fin({ bilan, reglages, rejouer, accueil }: Props) {
     <main class="scene">
       <div class="carte">
         {mascotte && <div class="mascotte-fin" ref={scene} aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgMascotte(mascotte) }} />}
-        {bilan.notee && <p class={`note-serie ${niveauNote(sur20)}`}>{note(sur20)}</p>}
+        {bilan.notee && reglages.notes && <p class={`note-serie ${niveauNote(sur20)}`}>{note(sur20)}</p>}
         <p class="mot">{bilan.notee ? bravo : 'Série terminée'}</p>
         <p class="astuce">{exercice(reglages.exercice).nom} · {nombre(bilan.serie.length, questions ? 'question' : 'mot')}</p>
       </div>

@@ -32,8 +32,9 @@ const ORDRES: { id: Ordre; nom: string; aide: string }[] = [
 ]
 
 /** La note de maîtrise d'un groupe de mots, s'il a déjà été travaillé. */
-function Note({ mots }: { mots: Mot[] }) {
-  const n = mots.some(m => suivi(m.id)) ? noteSur20(mots) : null
+function Note({ mots, r }: { mots: Mot[]; r: Reglages }) {
+  // les notes ne s'affichent que si on l'a demandé dans les réglages
+  const n = r.notes && mots.some(m => suivi(m.id)) ? noteSur20(mots) : null
   return n === null ? null : (
     <span class={`note ${niveauNote(n)}`} title="Ce que tu sais déjà : un mot compte comme su après 3 bonnes réponses sans erreur">{note(n)}</span>
   )
@@ -130,7 +131,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   return (
                     <button class="puce" aria-pressed={coches.includes(cle)} onClick={() => basculerChapitre(cle)}>
                       {nomChapitre(c)} <span class="n">{m.mots.filter(x => x.chapitre === c).length}</span>
-                      <Note mots={m.mots.filter(x => x.chapitre === c)} />
+                      <Note mots={m.mots.filter(x => x.chapitre === c)} r={r} />
                     </button>
                   )
                 })}
@@ -172,13 +173,14 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           )}
           {ex.avecVitesse && (
             <div class="reglage">
-              <label for="delai">Temps pour réfléchir <span class="valeur">{r.delai} s</span></label>
+              <label for="delai">Réflexion <span class="valeur">{r.delai} s</span></label>
               <input id="delai" type="range" min="1" max="15" step="1" value={r.delai}
                 onInput={e => maj({ delai: Number((e.target as HTMLInputElement).value) })} />
             </div>
           )}
           <div class="reglage">
             <label class="case"><input id="voix" type="checkbox" checked={r.voix} onChange={e => maj({ voix: (e.target as HTMLInputElement).checked })} /> Lire les mots à voix haute</label>
+            <label class="case"><input id="notes" type="checkbox" checked={r.notes} onChange={e => maj({ notes: (e.target as HTMLInputElement).checked })} /> Afficher les notes sur 20</label>
             {(r.exercice === 'ecrit' || r.exercice === 'dictee' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
               <label class="case"><input id="article" type="checkbox" checked={r.exigerArticle} onChange={e => maj({ exigerArticle: (e.target as HTMLInputElement).checked })} /> Exiger l’article (de / het)</label>
             )}
@@ -264,7 +266,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   {a.mascotte
                     ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
                     : <span class="ico" aria-hidden="true">{a.icone}</span>}
-                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} /></span></span>
+                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} r={r} /></span></span>
                   <span class="n">{m.mots.length}</span>
                 </button>
                 {!choisie

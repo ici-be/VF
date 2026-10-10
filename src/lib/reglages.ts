@@ -67,6 +67,8 @@ export interface Reglages {
   repondre: Repondre
   /** conjugaison : le temps, ou « mix » pour les mélanger */
   temps: Temps | 'mix'
+  /** afficher les notes sur 20 (matières, chapitres, fin de série) */
+  notes: boolean
 }
 
 export const SEP = '␟'
@@ -74,7 +76,7 @@ export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP 
 
 const DEFAUT: Reglages = {
   matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
-  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present',
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', notes: false,
 }
 
 /** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */
