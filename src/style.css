@@ -392,7 +392,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .accueil-corps, .col-choix, .col-exercice { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 @media (min-width: 1000px) {
   .page.accueil { max-width: 1240px; }
-  .accueil-corps { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .accueil-corps { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 32px; align-items: start; }
   .col-choix .matieres { grid-template-columns: 1fr; gap: 8px; }
   .col-choix .matiere-choix { padding-block: 8px; }
   .col-exercice .tuiles { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
