@@ -126,3 +126,30 @@ export function nombreAvec(getal: number, hasard = Math.random): number {
   // un million et quelques
   return 1_000_000 + (hasard() < 0.5 ? groupe() * 1000 + entre(0, 999) : entre(0, 999) * 1000 + groupe())
 }
+
+// ------------------------------------------------------------ explication
+/** 1 à 999 décomposé : « vijfhonderd + achtenzestig (acht + en + zestig) ». */
+function decomposer999(n: number): string {
+  const c = Math.floor(n / 100), r = n % 100
+  const morceaux: string[] = []
+  if (c) morceaux.push((c > 1 ? jusqua99(c) : '') + 'honderd')
+  if (r) {
+    const u = r % 10
+    morceaux.push(r > 20 && u ? `${jusqua99(r)} (${UNITES[u]} + ${UNITES[u].endsWith('e') ? 'ën' : 'en'} + ${DIZAINES[Math.floor(r / 10)]})` : jusqua99(r))
+  }
+  return morceaux.join(' + ')
+}
+
+/**
+ * Le nombre découpé comme on l'écrit : les millions, les milliers, le reste.
+ * 568 086 → [568 000 : vijfhonderdachtenzestigduizend…, 86 : zesentachtig (zes + en + tachtig)]
+ */
+export function explication(n: number): { chiffres: string; lettres: string; detail: string }[] {
+  if (n === 0) return [{ chiffres: '0', lettres: 'nul', detail: '' }]
+  const mi = Math.floor(n / 1_000_000), k = Math.floor(n / 1000) % 1000, r = n % 1000
+  const res: { chiffres: string; lettres: string; detail: string }[] = []
+  if (mi) res.push({ chiffres: enChiffres(mi * 1_000_000), lettres: `${jusqua999(mi)} miljoen`, detail: mi === 1 ? 'avec een, et miljoen séparé' : `${decomposer999(mi)}, puis miljoen séparé` })
+  if (k) res.push({ chiffres: enChiffres(k * 1000), lettres: (k > 1 ? jusqua999(k) : '') + 'duizend', detail: k === 1 ? 'duizend seul, sans een' : `${decomposer999(k)} + duizend, attachés` })
+  if (r) res.push({ chiffres: enChiffres(r), lettres: jusqua999(r), detail: decomposer999(r) })
+  return res
+}

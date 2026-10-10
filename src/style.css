@@ -631,3 +631,9 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* ---------- nombres (Getallen) ---------- */
 .carte .mot.nombre { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
 .lettres-diff.petit { font-size: 1.15rem; letter-spacing: .02em; overflow-wrap: anywhere; }
+.regle-nombres { text-align: left; gap: 6px; }
+.regle-nombres table { border-collapse: collapse; margin: 2px 0 6px; }
+.regle-nombres td { padding: 3px 10px 3px 0; vertical-align: top; overflow-wrap: anywhere; }
+.regle-nombres td.chiffres { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.regle-nombres td small { display: block; color: var(--muted); }
+.regle-nombres ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 3px; }

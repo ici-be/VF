@@ -54,3 +54,13 @@ describe('nombreAvec', () => {
     }
   })
 })
+
+describe('explication', () => {
+  it('découpe le nombre comme on l’écrit', async () => {
+    const { explication } = await import('../src/lib/getallen')
+    expect(explication(568_086).map(p => p.lettres)).toEqual(['vijfhonderdachtenzestigduizend', 'zesentachtig'])
+    expect(explication(568_086)[1].detail).toBe('zesentachtig (zes + en + tachtig)')
+    expect(explication(1_022_000).map(p => p.lettres)).toEqual(['een miljoen', 'tweeëntwintigduizend'])
+    expect(explication(1_022_000)[1].detail).toContain('twee + ën + twintig')
+  })
+})
