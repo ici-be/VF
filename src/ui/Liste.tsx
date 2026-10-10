@@ -104,7 +104,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
           <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : 'Liste des mots'}</h1>
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
-        <p class="etat">{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</p>
+        <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <>{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</>}</p>
       </div>
       <div class="segment">
         <button aria-pressed={vue === 'tous'} onClick={() => setVue('tous')}>Tous les mots <span class="n">{choisis.length}</span></button>
