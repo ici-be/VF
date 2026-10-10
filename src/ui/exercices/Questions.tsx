@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { leurres, melanger } from '../../lib/seance'
-import { corrigerListe, type CorrectionListe } from '../../lib/correction'
+import { corriger, corrigerListe, differences, type CorrectionListe } from '../../lib/correction'
 import { nomChapitre } from '../Accueil'
 import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Langue } from './commun'
@@ -88,6 +88,33 @@ function DansMaTete({ reponse, pause, lire, suivant, annoncer }: {
 
 const CLASSE = { juste: 'ok', presque: 'presque', faux: 'ko' }
 
+// Ce que montre un champ après correction : la réponse tapée si elle est juste, sinon la
+// correction écrite dans le champ même (lettres en trop barrées, attendu en vert).
+function ChampCorrige({ tape, champ, attendu }: {
+  tape: string
+  champ: CorrectionListe['champs'][number]
+  /** l'élément à montrer dans un champ faux ou vide (un de ceux qui manquent) */
+  attendu?: string
+}) {
+  if (champ.resultat === 'juste') return <span class="champ-corrige">{tape}</span>
+  if (champ.resultat === 'presque' && champ.element) {
+    // la variante (« Stille Oceaan / Grote Oceaan ») que l'élève visait
+    const variantes = champ.element.split(/\s*\/\s*/)
+    const v = variantes.find(x => corriger(tape, x, 'nl').resultat !== 'faux') ?? variantes[0]
+    return (
+      <span class="champ-corrige lettres-diff" aria-label={`Ta réponse : ${tape}. Attendu : ${v}`}>
+        {differences(tape.trim(), v).map(seg => <span class={seg.etat}>{seg.texte}</span>)}
+      </span>
+    )
+  }
+  return (
+    <span class="champ-corrige" aria-label={tape.trim() ? `Ta réponse : ${tape}. Attendu : ${attendu ?? ''}` : `Attendu : ${attendu ?? ''}`}>
+      {tape.trim() && <><s class="tape-faux">{tape.trim()}</s> </>}
+      {attendu && <span class="attendu-champ">{attendu}</span>}
+    </span>
+  )
+}
+
 function Enumeration({ elements, nombre, pause, lire, suivant, annoncer }: {
   elements: string[]
   nombre: number
@@ -115,6 +142,16 @@ function Enumeration({ elements, nombre, pause, lire, suivant, annoncer }: {
     else valider()
   }
 
+  // les éléments manquants vont, dans l'ordre, dans les champs faux ou vides ; le reste (quand
+  // on n'en demandait que quelques-uns) est cité sous les champs
+  const places: (string | undefined)[] = []
+  let reste: string[] = []
+  if (c) {
+    const manquants = [...c.manquants]
+    c.champs.forEach((ch, i) => { places[i] = ch.resultat === 'faux' ? manquants.shift() : undefined })
+    reste = manquants
+  }
+
   return (
     <>
       <p class="astuce">{nombre < elements.length ? `Donne-en ${nombre} (n’importe lesquels, dans n’importe quel ordre).` : `${nombre} réponses, dans n’importe quel ordre.`}</p>
@@ -122,22 +159,23 @@ function Enumeration({ elements, nombre, pause, lire, suivant, annoncer }: {
         {textes.map((t, i) => (
           <label class={c ? CLASSE[c.champs[i].resultat] : ''}>
             <span class="k">{i + 1}</span>
-            <input
-              ref={el => { champs.current[i] = el }} value={t} readOnly={!!c} lang="nl"
-              autocomplete="off" autocapitalize="off" spellcheck={false} aria-label={`Réponse ${i + 1}`}
-              onInput={e => { const v = (e.target as HTMLInputElement).value; setTextes(ts => ts.map((x, j) => (j === i ? v : x))) }}
-              onKeyDown={e => { if (e.key === 'Enter' && !c) { e.preventDefault(); entree(i) } }}
-            />
-            {c && c.champs[i].resultat === 'presque' && <span class="corrige">{c.champs[i].element}</span>}
-            {c && c.champs[i].message && c.champs[i].resultat === 'faux' && <span class="corrige">{c.champs[i].message}</span>}
+            {c
+              ? <ChampCorrige tape={t} champ={c.champs[i]} attendu={places[i]} />
+              : <input
+                  ref={el => { champs.current[i] = el }} value={t} lang="nl"
+                  autocomplete="off" autocapitalize="off" spellcheck={false} aria-label={`Réponse ${i + 1}`}
+                  onInput={e => { const v = (e.target as HTMLInputElement).value; setTextes(ts => ts.map((x, j) => (j === i ? v : x))) }}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); entree(i) } }}
+                />}
+            {c && c.champs[i].resultat === 'faux' && t.trim() && c.champs[i].message && <span class="corrige">{c.champs[i].message}</span>}
           </label>
         ))}
       </div>
       {c && (
         <div class={`verdict ${c.resultat}`} role="status">
           <b>{{ juste: 'Juste !', presque: 'Presque !', faux: 'Raté' }[c.resultat]}</b>
-          {c.manquants.length > 0 && (
-            <span class="attendu">{nombre < elements.length ? 'Tu pouvais aussi citer' : 'Il manquait'} : <strong>{c.manquants.join(' · ')}</strong></span>
+          {reste.length > 0 && (
+            <span class="attendu">Tu pouvais aussi citer : <strong>{reste.join(' · ')}</strong></span>
           )}
         </div>
       )}

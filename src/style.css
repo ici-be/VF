@@ -624,3 +624,6 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .enumeration label.ko { border-color: var(--ko); background: var(--ko-bg); }
 .enumeration label.presque { border-color: var(--mid); background: var(--mid-bg); }
 .enumeration .corrige { flex-basis: 100%; padding-left: 38px; font-size: .9rem; color: var(--muted); }
+.enumeration .champ-corrige { flex: 1 1 200px; min-width: 0; font-size: 1.1rem; padding: 8px 4px; text-align: left; letter-spacing: normal; overflow-wrap: anywhere; }
+.enumeration .champ-corrige .tape-faux { color: var(--ko); text-decoration-thickness: 2px; }
+.enumeration .champ-corrige .attendu-champ { color: var(--ok); font-weight: 700; }
