@@ -47,7 +47,7 @@ export function choixMatieres(r: Reglages): string {
   }).join(' + ')
 }
 
-/** « NL → FR · 20 mots » : le reste du résumé, après les matières */
+/** « NL → FR · 20 mots », sous « Commencer » */
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
@@ -261,14 +261,17 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <Scene matieres={r.matieres} petit />
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
-          {/* une matière : sur la ligne du résumé ; plusieurs : une par ligne, sans la description */}
-          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /><span class="reste">{resume(voc, r)}</span></p>
+          {/* plusieurs matières : une par ligne, sans la description ; le sens et le nombre sont dans le bouton */}
+          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
             : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
         </div>
-        <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
+        <button class="go lancer" onClick={commencer} disabled={dispo === 0}>
+          <span>Commencer ▶</span>
+          <span class="sous-bouton">{resume(voc, r)}</span>
+        </button>
       </section>
 
       {/* grand écran : matière et réglages à gauche, exercice, chapitres et mots à droite ;
