@@ -20,6 +20,7 @@
  *  - sinon → il est ajouté, avec la date du jour dans « Ajouté » : l'appli montre les mots
  *    du dernier envoi dans la liste des mots (onglet « Nouveaux »).
  * Les colonnes « Page » et « Ajouté » sont créées au premier envoi dans un onglet.
+ * Avec « dater », les mots déjà présents reçoivent aussi la date du jour s'ils n'en ont pas.
  * Ensuite l'onglet est trié : chapitres dans leur ordre actuel, et dans chaque chapitre
  * les mots dans l'ordre des pages (les mots sans page restent à la fin du chapitre,
  * dans leur ordre actuel). Avec « essai », rien n'est écrit : la réponse dit ce qui serait fait.
@@ -39,28 +40,6 @@ const COLONNES = {
 }
 
 const aujourdhui = () => Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')
-
-/**
- * À lancer une fois (▶ Exécuter) : les lignes surlignées en jaune par l'ancienne version
- * perdent leur couleur et reçoivent la date du jour dans « Ajouté ».
- */
-function jauneVersAjoute() {
-  for (const feuille of SpreadsheetApp.getActive().getSheets()) {
-    const n = feuille.getLastRow() - 1
-    if (n < 1) continue
-    const largeur = feuille.getLastColumn()
-    const fonds = feuille.getRange(2, 1, n, largeur).getBackgrounds()
-    const jaunes = fonds.map((l, i) => (l.some(c => c.toLowerCase() === '#fff2cc') ? i : -1)).filter(i => i >= 0)
-    if (!jaunes.length) continue
-    const titres = feuille.getRange(1, 1, 1, largeur).getValues()[0].map(norm)
-    const col = colonne(feuille, titres, 'ajoute', 'Ajouté')
-    for (const i of jaunes) {
-      feuille.getRange(i + 2, 1, 1, titres.length).setBackground(null)
-      feuille.getRange(i + 2, col + 1).setNumberFormat('@').setValue(aujourdhui())
-    }
-    Logger.log(`${feuille.getName()} : ${jaunes.length} lignes`)
-  }
-}
 
 /** Indice (0 = A) de la colonne, créée à droite avec ce titre si elle manque. */
 function colonne(feuille, titres, cle, titre) {
@@ -91,7 +70,7 @@ function doPost(e) {
     const verrou = LockService.getScriptLock()
     verrou.waitLock(30000)
     try {
-      return recevoir(req.onglet, req.lignes || [], !!req.essai)
+      return recevoir(req.onglet, req.lignes || [], !!req.essai, !!req.dater)
     } finally {
       verrou.releaseLock()
     }
@@ -115,7 +94,7 @@ function verifierCle(cle) {
 
 const norm = s => String(s == null ? '' : s).trim().toLowerCase()
 
-function recevoir(nomOnglet, lignes, essai) {
+function recevoir(nomOnglet, lignes, essai, dater) {
   const feuille = SpreadsheetApp.getActive().getSheetByName(nomOnglet)
   if (!feuille) throw new Error('onglet introuvable : ' + nomOnglet)
 
@@ -134,13 +113,18 @@ function recevoir(nomOnglet, lignes, essai) {
   const index = new Map()   // « mot␟chapitre » → numéro de ligne dans donnees
   donnees.forEach((l, i) => index.set(norm(l[col.nl]) + '␟' + norm(l[col.chapitre]), i))
 
-  const res = { ok: true, essai, ajoutes: [], pages: [], dejaLa: [] }
+  const res = { ok: true, essai, ajoutes: [], pages: [], dejaLa: [], dates: [] }
   const nouvelles = []
   for (const m of lignes) {
     const cle = norm(m.nl) + '␟' + norm(m.chapitre)
     if (!norm(m.nl) || !norm(m.fr)) continue
     if (index.has(cle)) {
       const i = index.get(cle)   // -1 : mot en double dans l'envoi lui-même
+      // « dater » : les mots déjà là reçoivent aussi la date du jour (s'ils n'en ont pas)
+      if (dater && i >= 0 && (col.ajoute < 0 || !String(donnees[i][col.ajoute]).trim())) {
+        res.dates.push(m.nl)
+        if (!essai) feuille.getRange(i + 2, col.ajoute + 1).setNumberFormat('@').setValue(aujourdhui())
+      }
       // (en essai, la colonne Page n'existe peut-être pas encore : elle serait vide)
       if (i >= 0 && m.page && (col.page < 0 || !String(donnees[i][col.page]).trim())) {
         res.pages.push(m.nl)

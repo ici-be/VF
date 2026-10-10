@@ -4,7 +4,7 @@
     python3 outils/cours.py configurer URL CLE         # une fois : URL et clé de recevoir-mots.gs
     python3 outils/cours.py tester                     # vérifie la connexion
     python3 outils/cours.py lire "HW Aardrijkskunde"   # les mots de l'onglet, en TSV
-    python3 outils/cours.py envoyer mots.tsv --onglet "HW Aardrijkskunde" [--essai]
+    python3 outils/cours.py envoyer mots.tsv --onglet "HW Aardrijkskunde" [--essai] [--dater]
 
 Le fichier envoyé est un TSV avec une ligne de titres :
 Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre.
@@ -125,12 +125,14 @@ def envoyer(args):
     for l in lignes:
         if l.get('page', '').isdigit():
             l['page'] = int(l['page'])
-    res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai})
+    res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai, 'dater': args.dater})
     quoi = 'Serait fait' if args.essai else 'Fait'
     print(f'{quoi} dans « {args.onglet} » :')
     print(f'  {len(res["ajoutes"])} mots ajoutés : {", ".join(res["ajoutes"]) or "—"}')
     print(f'  {len(res["pages"])} mots déjà présents, page ajoutée')
     print(f'  {len(res["dejaLa"])} mots déjà présents avec leur page')
+    if args.dater:
+        print(f'  {len(res.get("dates", []))} mots déjà présents datés d\'aujourd\'hui')
     if not args.essai:
         print('  onglet trié par chapitre puis par page')
 
@@ -150,6 +152,7 @@ def main():
     s.add_argument('fichier')
     s.add_argument('--onglet', required=True)
     s.add_argument('--essai', action='store_true', help='ne rien écrire, dire ce qui serait fait')
+    s.add_argument('--dater', action='store_true', help='dater aussi d\'aujourd\'hui les mots déjà présents sans date')
     s.set_defaults(f=envoyer)
     args = p.parse_args()
     args.f(args)
