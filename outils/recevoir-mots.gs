@@ -9,8 +9,8 @@
  *     Le journal affiche la clé secrète.
  *  3. Déployer → Nouveau déploiement → type « Application Web » ;
  *     Exécuter en tant que : Moi ; Qui a accès : Tout le monde. Copier l'URL.
- *  4. Sur le laptop : python3 outils/envoyer-mots.py --configurer
- *     (il demande l'URL et la clé, et les garde hors du dépôt).
+ *  4. Sur le laptop : python3 outils/cours.py configurer <URL> <clé>
+ *     (les garde hors du dépôt, dans ~/.config/vocabulaire-nl/).
  *
  * Après une modification de ce code : Déployer → Gérer les déploiements → ✎ →
  * Version : Nouvelle version (l'URL reste la même).

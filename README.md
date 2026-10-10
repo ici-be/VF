@@ -37,7 +37,7 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
    l'onglet, trié par chapitre puis par page. Enlever le jaune une fois relus.
 
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
-`python3 outils/cours.py configurer`.
+`python3 outils/cours.py configurer <URL> <clé>`.
 
 ## Installer
 

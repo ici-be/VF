@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fait le lien entre les cours scannés et le tableau Google Sheets (voir la commande /cours).
 
-    python3 outils/cours.py configurer                 # une fois : URL et clé de recevoir-mots.gs
+    python3 outils/cours.py configurer URL CLE         # une fois : URL et clé de recevoir-mots.gs
     python3 outils/cours.py tester                     # vérifie la connexion
     python3 outils/cours.py lire "HW Aardrijkskunde"   # les mots de l'onglet, en TSV
     python3 outils/cours.py envoyer mots.tsv --onglet "HW Aardrijkskunde" [--essai]
@@ -38,9 +38,9 @@ def config() -> dict:
     return json.loads(CONFIG.read_text())
 
 
-def configurer(_):
-    url = input('URL de l\'application Web (…/exec) : ').strip()
-    cle = input('Clé secrète (journal de la fonction installer) : ').strip()
+def configurer(args):
+    url = args.url or input('URL de l\'application Web (…/exec) : ').strip()
+    cle = args.cle or input('Clé secrète (journal de la fonction installer) : ').strip()
     CONFIG.parent.mkdir(parents=True, exist_ok=True)
     CONFIG.write_text(json.dumps({'url': url, 'cle': cle}) + '\n')
     CONFIG.chmod(0o600)
@@ -138,7 +138,10 @@ def envoyer(args):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sous = p.add_subparsers(required=True)
-    sous.add_parser('configurer').set_defaults(f=configurer)
+    s = sous.add_parser('configurer')
+    s.add_argument('url', nargs='?')
+    s.add_argument('cle', nargs='?')
+    s.set_defaults(f=configurer)
     sous.add_parser('tester').set_defaults(f=tester)
     s = sous.add_parser('lire')
     s.add_argument('onglet')
