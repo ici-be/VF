@@ -82,6 +82,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const choisis = motsChoisis(voc, r)
   const dispo = aReviser(voc, r, ex).length
   const unite = ex.surQuestions ? 'question' : 'mot'
+  // la conjugaison n'existe que dans Nederlands : ses exercices n'apparaissent que si cette matière est choisie
+  const avecConjugaison = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe))
   const nbARevoir = motsARevoir(choisis).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
@@ -284,7 +286,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc">
         <h2>Exercice</h2>
         <div class="tuiles">
-          {EXERCICES.map(e => {
+          {EXERCICES.filter(e => !e.nederlands || avecConjugaison).map(e => {
             const n = aReviser(voc, r, e).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}
