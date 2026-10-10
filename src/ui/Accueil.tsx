@@ -143,9 +143,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <h2>Chapitres</h2>
         {voc.matieres.filter(m => r.matieres.includes(m.nom)).map(m => {
           const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
+          const a = apparence(m.nom)
+          // les chapitres d'une matière dans sa couleur (celle de sa carte dans « Matière »)
           return (
-            <div>
-              {r.matieres.length > 1 && <p class="sous">{apparence(m.nom).icone} {apparence(m.nom).titre}</p>}
+            <div class={`chapitres-matiere ${a.mascotte ? `teinte-${a.mascotte}` : ''}`}>
+              {r.matieres.length > 1 && <p class="sous">{a.titre}</p>}
               <div class="puces">
                 <button class="puce" aria-pressed={coches.length === 0} onClick={() => tousChapitres(m.nom)}>Tous</button>
                 {m.chapitres.map(c => {
