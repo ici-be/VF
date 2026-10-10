@@ -14,6 +14,7 @@ import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
+import { Logo, MotsQuiDefilent } from './Marque'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -215,7 +216,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
     <main class="page accueil">
       <div class="haut">
       <header class="entete">
-        <h1>Vocabulaire <span class="nl">NL</span></h1>
+        <Logo />
+        <div class="marque">
+          <h1>Woord<span class="nl">jes</span></h1>
+          <MotsQuiDefilent mots={choisis} />
+        </div>
         {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
         {nouveauxRecents && <button class="second" onClick={() => liste('nouveaux')}>Nouveaux ({nouveaux.mots.length})</button>}
         <button class="second" onClick={() => liste('tous')}>Liste des mots</button>

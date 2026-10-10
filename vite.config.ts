@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'Vocabulaire NL',
-        short_name: 'Vocabulaire',
+        name: 'Woordjes',
+        short_name: 'Woordjes',
         description: 'Réviser le vocabulaire néerlandais et les cours d’immersion',
         lang: 'fr',
         theme_color: '#1f5fbf',

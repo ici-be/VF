@@ -8,8 +8,10 @@
   --line: #d9dfe8;
   --accent: #e2681f;       /* orange */
   --accent-fg: #ffffff;
+  --accent-bg: #fdeadd;
   --blue: #1f5fbf;
   --blue-bg: #e3ecfa;
+  --blue-fg: #ffffff;
   --ok: #18804a;
   --ok-bg: #e0f3e8;
   --mid: #9a5b00;
@@ -25,14 +27,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --line: #2b3646;
-    --accent: #ff8a45; --accent-fg: #1a0e05; --blue: #8db6ff; --blue-bg: #1c2b45;
+    --accent: #ff8a45; --accent-fg: #1a0e05; --accent-bg: #3a2414; --blue: #8db6ff; --blue-bg: #1c2b45; --blue-fg: #0d1626;
     --ok: #74d6a0; --ok-bg: #143323; --mid: #ffc46b; --mid-bg: #3a2c12; --ko: #ff8f82; --ko-bg: #3d1a17;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --line: #2b3646;
-  --accent: #ff8a45; --accent-fg: #1a0e05; --blue: #8db6ff; --blue-bg: #1c2b45;
+  --accent: #ff8a45; --accent-fg: #1a0e05; --accent-bg: #3a2414; --blue: #8db6ff; --blue-bg: #1c2b45; --blue-fg: #0d1626;
   --ok: #74d6a0; --ok-bg: #143323; --mid: #ffc46b; --mid-bg: #3a2c12; --ko: #ff8f82; --ko-bg: #3d1a17;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%); color-scheme: dark;
 }
@@ -50,8 +52,21 @@ button { cursor: pointer; }
 
 /* ---------- en-tête ---------- */
 .entete { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.entete h1 { font: 800 1.7rem/1.1 var(--display); margin: 0; flex: 1; letter-spacing: -0.01em; }
+.entete h1 { font: 800 2rem/1.05 var(--display); margin: 0; letter-spacing: -0.01em; }
 .entete h1 .nl { color: var(--accent); }
+/* le logo : les deux bulles de l'icône ; dessous le nom, un mot et sa traduction qui changent */
+.entete .logo { width: 56px; height: 56px; flex: none; }
+.logo .b-nl { fill: var(--blue); }
+.logo .b-fr { fill: var(--accent); }
+.logo text { font: 800 96px var(--display); }
+.logo .t-nl { fill: var(--blue-fg); }
+.logo .t-fr { fill: var(--accent-fg); }
+.entete .marque { flex: 1 1 200px; min-width: 0; }
+.duo { display: flex; flex-wrap: wrap; gap: 6px; margin: 5px 0 0; font-size: .92rem; font-weight: 700; transition: opacity .3s; }
+.duo.cache { opacity: 0; }
+.duo span { padding: 1px 10px; border-radius: 999px 999px 999px 4px; white-space: nowrap; }
+.duo .nl { background: var(--blue-bg); color: var(--blue); }
+.duo .fr { background: var(--accent-bg); color: var(--accent); border-radius: 999px 999px 4px 999px; }
 .haut { display: flex; flex-direction: column; gap: 4px; }
 .etat { font-size: .85rem; color: var(--muted); display: flex; gap: 8px; align-items: center; margin: 0; }
 .etat.erreur { color: var(--ko); }

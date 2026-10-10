@@ -1,4 +1,4 @@
-# Vocabulaire NL
+# Woordjes
 
 Application de révision du vocabulaire néerlandais et des cours d'immersion
 (histoire, géographie, biologie…). Les mots viennent du tableau Google Sheets :
