@@ -568,6 +568,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* la description de l'exercice choisi, dans le bloc « Commencer » */
 .reprendre .description-exercice { margin: 4px 0 0; font-size: .9rem; color: var(--muted); max-width: 60ch; }
 .reprendre .description-exercice.alerte { color: var(--ko); }
+/* les matières choisies : chacune dans sa couleur ; plusieurs : une par ligne */
+.reprendre .nom-matiere b { font-weight: 800; color: var(--bord, var(--fg)); }
+.reprendre .nom-matiere .chapitres-choisis { color: var(--muted); }
+.reprendre .detail:not(.plusieurs) .reste::before { content: " · "; }
+.reprendre .detail.plusieurs .nom-matiere, .reprendre .detail.plusieurs .reste { display: block; }
+.reprendre .detail.plusieurs .reste { margin-top: 2px; }
 @media (min-width: 1000px) {
   /* de l'air entre exercice, chapitres et mots */
   .col-exercice { gap: 30px; }

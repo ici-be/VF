@@ -47,13 +47,30 @@ export function choixMatieres(r: Reglages): string {
   }).join(' + ')
 }
 
-/** « NW Biologie (1. De ecosystemen) · NL → FR · 20 mots » */
+/** « NL → FR · 20 mots » : le reste du résumé, après les matières */
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [choixMatieres(r), ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
+  return [ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
     .filter(Boolean).join(' · ')
+}
+
+/** Les matières choisies, chacune dans sa couleur, avec ses chapitres s'ils sont restreints. */
+function NomsMatieres({ r }: { r: Reglages }) {
+  return (
+    <>
+      {r.matieres.map(m => {
+        const a = apparence(m)
+        const ch = r.chapitres.filter(c => c.startsWith(m + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
+        return (
+          <span class={`nom-matiere ${a.mascotte ? `teinte-${a.mascotte}` : ''}`}>
+            <b>{a.titre}</b>{ch.length > 0 && <span class="chapitres-choisis"> ({ch.join(', ')})</span>}
+          </span>
+        )
+      })}
+    </>
+  )
 }
 
 function dateCourte(ms: number): string {
@@ -241,11 +258,12 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <Scene matieres={r.matieres} petit />
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
-          <p class="detail">{resume(voc, r)}</p>
+          {/* une matière : sur la ligne du résumé ; plusieurs : une par ligne, sans la description */}
+          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres r={r} /><span class="reste">{resume(voc, r)}</span></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
-            : <p class="description-exercice">{ex.description}</p>}
+            : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
         </div>
         <button class="go" onClick={commencer} disabled={dispo === 0}>Commencer ▶</button>
       </section>
