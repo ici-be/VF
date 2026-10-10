@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
-import { apparence } from '../lib/apparence'
 import { IconeExercice } from './icones'
 import { question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
@@ -21,6 +20,7 @@ import { Conjugaison } from './exercices/Conjugaison'
 import { Interrogatif } from './exercices/Interrogatif'
 import { Primitifs } from './exercices/Primitifs'
 import { Questions } from './exercices/Questions'
+import { NomsCote } from './Matieres'
 import { nombre } from '../lib/texte'
 
 export interface Bilan {
@@ -141,7 +141,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     <>
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
-        <span class="quoi"><IconeExercice id={ex.id} taille={16} />{ex.nom}{ex.beta ? ' (bêta)' : ''} · {[...new Set(serie.map(c => c.mot.matiere))].map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        <span class="quoi"><IconeExercice id={ex.id} taille={16} />{ex.nom}{ex.beta ? ' (bêta)' : ''} · <NomsCote noms={voc.matieres.map(m => m.nom).filter(n => serie.some(c => c.mot.matiere === n))} /></span>
         {combo >= 3 && <span key={combo} class={`combo ${combo % 5 === 0 ? 'palier' : ''}`} title="Bonnes réponses d’affilée">🔥 ×{combo}</span>}
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>

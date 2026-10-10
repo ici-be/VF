@@ -5,7 +5,8 @@ import { motsARevoir, type Suivi } from '../lib/progression'
 import { construireSerie, type Carte } from '../lib/seance'
 import { sansAccents } from '../lib/correction'
 import { parler } from '../lib/voix'
-import { choixMatieres, nomChapitre } from './Accueil'
+import { nomChapitre } from './Accueil'
+import { NomMatiere, NomsMatieres } from './Matieres'
 import { SEP } from '../lib/reglages'
 import { nombre } from '../lib/texte'
 import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
@@ -58,11 +59,11 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   if (trier === 'nl') mots = [...mots].sort((a, b) => cmp(a.nl, b.nl))
   if (trier === 'fr') mots = [...mots].sort((a, b) => cmp(a.fr.replace(/^(le |la |les |l')/i, ''), b.fr.replace(/^(le |la |les |l')/i, '')))
 
-  const lignes: (Mot | { groupe: string; matiere: string })[] = []
+  const lignes: (Mot | { groupe: string; matiere: string; chapitre: string })[] = []
   let groupe = ''
   for (const m of mots) {
     const g = `${apparence(m.matiere).titre} · ${nomChapitre(m.chapitre)}`
-    if (trier === 'chapitre' && g !== groupe) { lignes.push({ groupe: g, matiere: m.matiere }); groupe = g }
+    if (trier === 'chapitre' && g !== groupe) { lignes.push({ groupe: g, matiere: m.matiere, chapitre: m.chapitre }); groupe = g }
     lignes.push(m)
   }
 
@@ -105,7 +106,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
           <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
-        <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <>{choixMatieres(reglages)} · la matière et les chapitres se choisissent dans le menu.</>}</p>
+        <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <span><NomsMatieres voc={voc} r={reglages} /> · la matière et les chapitres se choisissent dans le menu.</span>}</p>
       </div>
       <div class="segment">
         <button aria-pressed={vue === 'tous'} onClick={() => setVue('tous')}>Tous les mots <span class="n">{choisis.length}</span></button>
@@ -175,7 +176,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
               <thead><tr><th></th>{vue === 'questions' ? <><th>Vraag</th><th>Antwoord</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{vue === 'questions' ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
                 {lignes.map(l => 'groupe' in l
-                  ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><span class="ico-matiere">{apparence(l.matiere).icone} </span>{l.groupe}</td></tr>
+                  ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
                   : (
                     <tr>
                       <td class="det">{l.det}</td>

@@ -16,7 +16,8 @@ import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
 
-export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
+export { nomChapitre } from './Matieres'
+import { nomChapitre, NomsMatieres } from './Matieres'
 
 export const SENS: { id: Sens; nom: string }[] = [
   { id: 'nl-fr', nom: 'NL → FR' },
@@ -38,15 +39,6 @@ function Note({ mots }: { mots: Mot[] }) {
   )
 }
 
-/** « NW Biologie (1. De ecosystemen) + HW Geschiedenis » */
-export function choixMatieres(r: Reglages): string {
-  return r.matieres.map(m => {
-    const ch = r.chapitres.filter(c => c.startsWith(m + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
-    const a = apparence(m)
-    return `${a.icone} ${a.titre}` + (ch.length ? ` (${ch.join(', ')})` : '')
-  }).join(' + ')
-}
-
 /** « NL → FR · 20 mots », sous « Commencer » */
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
@@ -54,24 +46,6 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
   return [ex.avecSens ? SENS.find(s => s.id === r.sens)!.nom : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
     .filter(Boolean).join(' · ')
-}
-
-/** Les matières choisies, chacune dans sa couleur, avec ses chapitres s'ils sont restreints (dans l'ordre du tableau). */
-function NomsMatieres({ voc, r }: { voc: Vocabulaire; r: Reglages }) {
-  return (
-    <>
-      {r.matieres.map(m => {
-        const a = apparence(m)
-        const ordre = voc.matieres.find(x => x.nom === m)?.chapitres ?? []
-        const ch = ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
-        return (
-          <span class={`nom-matiere ${a.mascotte ? `teinte-${a.mascotte}` : ''}`}>
-            <b>{a.titre}</b>{ch.length > 0 && <span class="chapitres-choisis">{ch.join(', ')}</span>}
-          </span>
-        )
-      })}
-    </>
-  )
 }
 
 function dateCourte(ms: number): string {

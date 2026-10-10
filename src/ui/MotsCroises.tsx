@@ -6,10 +6,10 @@ import { noter } from '../lib/progression'
 import { nlComplet } from '../lib/seance'
 import { parler, taire } from '../lib/voix'
 import { confettis } from '../lib/confettis'
-import { apparence } from '../lib/apparence'
 import { nombre } from '../lib/texte'
 import { simplifier } from '../lib/correction'
 import { IconeExercice } from './icones'
+import { NomsCote } from './Matieres'
 
 // Mots croisés : les mots néerlandais du choix, la traduction française en
 // définition. Un mot trouvé s'allume en vert (et il est lu à voix haute).
@@ -161,7 +161,8 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
   const vertes = new Set(trouves.flatMap(cases))
   const numeros = new Map(grille.mots.map(m => [cle(m.ligne, m.colonne), m.numero]))
   const secondes = Math.round((Date.now() - debut.current) / 1000)
-  const matieres = [...new Set(grille.mots.map(m => m.donnee.matiere))]
+  // dans l'ordre du menu (pas dans celui de la grille)
+  const matieres = reglages.matieres.filter(n => grille.mots.some(m => m.donnee.matiere === n))
 
   const indices = (sens: MG['sens']) => grille.mots.filter(m => m.sens === sens).map(m => (
     <li class={`${m === actif ? 'actif' : ''} ${trouve(m) ? 'trouve' : ''}`} data-cases={cases(m).join(' ')}>
@@ -183,7 +184,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
       <div class="haut-jeu">
       <div class="barre">
         <button class="icone" onClick={quitter} aria-label="Quitter le jeu" title="Quitter">✕</button>
-        <span class="quoi"><IconeExercice id="motscroises" taille={16} />Mots croisés · {matieres.map(n => `${apparence(n).icone} ${apparence(n).titre}`).join(' + ')}</span>
+        <span class="quoi"><IconeExercice id="motscroises" taille={16} />Mots croisés · <NomsCote noms={matieres} /></span>
         <span class="compte" title="Mots trouvés">{trouves.length} / {grille.mots.length}</span>
       </div>
       {/* la définition du mot en cours reste visible, même avec le clavier du téléphone ouvert */}

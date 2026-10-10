@@ -342,7 +342,6 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau tr { break-inside: avoid; }
   .tableau tr.chap td { background: none; color: #000; font-size: 9.5pt; padding-top: 2.5mm; border-bottom: 1pt solid #000; }
   .tableau tr.chap { break-after: avoid; }
-  .tableau .ico-matiere { display: none; }
   .tableau tr.chap.seul { display: none; }          /* un seul chapitre : déjà dans le titre */
   .tableau th:first-child, .tableau td.det { width: 6mm; color: #555; padding-right: 0; }
   .tableau th:nth-child(2), .tableau td.nl { width: 24%; white-space: normal; }
@@ -572,8 +571,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .reprendre .description-exercice { margin: 4px 0 0; font-size: .9rem; color: var(--muted); max-width: 60ch; }
 .reprendre .description-exercice.alerte { color: var(--ko); }
 /* les matières choisies : chacune dans sa couleur ; plusieurs : une par ligne */
-.reprendre .nom-matiere b { font-weight: 800; color: var(--bord, var(--fg)); }
-.reprendre .nom-matiere .chapitres-choisis { color: var(--muted); margin-left: .45em; }
+/* le nom d'une matière, partout : en gras dans la couleur de sa carte (src/ui/Matieres.tsx) */
+.nom-matiere-coul { font-weight: 800; color: var(--bord, var(--fg)); }
+.nom-matiere .chapitres-choisis { color: var(--muted); margin-left: .45em; }
+.etat .nom-matiere + .nom-matiere::before { content: " · "; }
 .reprendre .detail.plusieurs .nom-matiere { display: block; }
 /* le bouton : « Commencer ▶ », et dessous en petit le sens et le nombre de mots */
 .reprendre .go.lancer { flex-direction: column; gap: 1px; padding-block: 9px; }
