@@ -575,9 +575,22 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .nom-matiere .chapitres-choisis { color: var(--muted); margin-left: .45em; }
 .etat .nom-matiere + .nom-matiere::before { content: " · "; }
 .reprendre .detail.plusieurs .nom-matiere { display: block; }
-/* le bouton : « Commencer ▶ », et dessous en petit le sens et le nombre de mots */
-.reprendre .go.lancer { flex-direction: column; gap: 1px; padding-block: 9px; }
-.reprendre .go.lancer .sous-bouton { font-size: .82rem; font-weight: 600; opacity: .88; white-space: nowrap; }
+/* le bouton : « Commencer », dessous en petit le sens et le nombre de mots, et une flèche dans un rond */
+.reprendre .go.lancer {
+  gap: 16px; padding: 9px 10px 9px 22px; border-radius: 16px; text-align: left;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, #fff), var(--accent) 70%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%), 0 8px 18px -8px color-mix(in srgb, var(--accent) 75%, transparent);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.reprendre .go.lancer:not(:disabled):hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%), 0 12px 22px -8px color-mix(in srgb, var(--accent) 85%, transparent); }
+.reprendre .go.lancer:not(:disabled):active { transform: translateY(0); }
+.reprendre .go.lancer:disabled { box-shadow: none; }
+.reprendre .go.lancer .textes { display: flex; flex-direction: column; gap: 1px; }
+.reprendre .go.lancer .titre-bouton { font: 800 1.12rem/1.15 var(--display); letter-spacing: .01em; }
+.reprendre .go.lancer .sous-bouton { font-size: .8rem; font-weight: 600; opacity: .9; white-space: nowrap; }
+.reprendre .go.lancer .fleche { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgb(255 255 255 / 22%); transition: transform .15s ease; }
+.reprendre .go.lancer:not(:disabled):hover .fleche { transform: translateX(2px); }
+@media (max-width: 999px) { .reprendre .go.lancer { justify-content: space-between; } }
 @media (min-width: 1000px) {
   /* de l'air entre exercice, chapitres et mots */
   .col-exercice { gap: 30px; }

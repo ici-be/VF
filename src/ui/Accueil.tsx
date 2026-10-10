@@ -12,6 +12,7 @@ import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
+import { ArrowRight } from 'lucide-preact'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
@@ -249,8 +250,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
             : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
         </div>
         <button class="go lancer" onClick={commencer} disabled={dispo === 0}>
-          <span>Commencer ▶</span>
-          <span class="sous-bouton">{resume(voc, r)}</span>
+          <span class="textes">
+            <span class="titre-bouton">Commencer</span>
+            <span class="sous-bouton">{resume(voc, r)}</span>
+          </span>
+          <span class="fleche" aria-hidden="true"><ArrowRight size={20} strokeWidth={2.4} /></span>
         </button>
       </section>
 
