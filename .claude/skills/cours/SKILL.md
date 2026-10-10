@@ -131,4 +131,21 @@ Si `cours.py` dit « Pas encore configuré », renvoyer l'utilisateur au mode d'
 de `outils/recevoir-mots.gs`. Les nouveaux mots reçoivent la date du jour (colonne « Ajouté »),
 l'onglet est trié par chapitre puis par page. Rappeler que l'appli les montre dans la liste
 des mots, onglet « Nouveaux », que les questions sont dans l'exercice « Questions de cours »
-(et la liste des mots, onglet « Questions »), et que les voix suivent dans l'heure.
+(et la liste des mots, onglet « Questions »).
+
+## 7. Voix
+
+Ne pas attendre la tâche horaire de GitHub (elle saute souvent) : créer les voix tout de suite.
+
+```sh
+python3 outils/voix.py      # relancer tant qu'il reste des « échec » (403 : trop de demandes d'un coup)
+git add public/audio
+git commit -m "Voix des nouveaux mots du tableau (<onglet> : <chapitre>)"
+git pull --rebase origin main && git push origin HEAD:main
+```
+
+Le push relance la publication (onglet *Actions* → *Publier*, quelques minutes) : la suivre
+avec l'API GitHub (`curl -s https://api.github.com/repos/ici-be/VF/actions/runs?per_page=1`)
+jusqu'à `completed success`, puis dire à l'utilisateur que les voix sont en ligne (recharger
+l'appli). Si `voix.py` échoue entièrement, le dire : les mots restent lus par la voix du
+navigateur en attendant la tâche horaire.
