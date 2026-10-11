@@ -231,8 +231,24 @@ export function vocabulaireDepuisXlsx(octets: Uint8Array): Vocabulaire {
       m.chapitres.splice(i < 0 ? m.chapitres.length : i, 0, q.chapitre)
     }
   }
+  // les matières en français : espaces insécables de la typographie française (à l'affichage seulement :
+  // les identifiants sont déjà faits, et la voix lit ces espaces comme les autres)
+  for (const m of matieres) {
+    if (langueMatiere(m.nom) !== 'fr') continue
+    for (const x of [...m.mots, ...(m.questions ?? [])]) {
+      x.nl = typoFr(x.nl); x.fr = typoFr(x.fr); x.definition = typoFr(x.definition); x.exemple = typoFr(x.exemple); x.remarque = typoFr(x.remarque)
+      if (x.vraag) { x.vraag.leurres = x.vraag.leurres.map(typoFr); x.vraag.elements = x.vraag.elements.map(typoFr) }
+    }
+  }
   return { matieres, misAJour: Date.now() }
 }
+
+/**
+ * Typographie française : espace insécable après « et avant », espace fine insécable avant ? ! ;
+ * (seulement à la place d'une espace déjà là ; « : » reste tel quel, c'est aussi la division).
+ */
+export const typoFr = (s: string) =>
+  s.replace(/«\s+/g, '«\u00a0').replace(/\s+»/g, '\u00a0»').replace(/\s+([?!;])/g, '\u202f$1')
 
 const CLE = 'vocabulaire'
 

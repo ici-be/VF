@@ -2,7 +2,8 @@
 import { describe, expect, it } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { apparence, langueMatiere } from '../src/lib/apparence'
-import { contenu, matiereDepuisOnglet, vocabulaireDepuisXlsx } from '../src/lib/mots'
+import { contenu, matiereDepuisOnglet, typoFr, vocabulaireDepuisXlsx } from '../src/lib/mots'
+import { empreinte } from '../src/lib/voix'
 import { aReviser, exercice, type Reglages } from '../src/lib/reglages'
 import { construireSerie, question, reponse } from '../src/lib/seance'
 import { decouper, indexer } from '../src/lib/glossaire'
@@ -33,6 +34,7 @@ const voc = vocabulaireDepuisXlsx(classeur({
   'Vragen': [['Matière', 'Chapitre', 'Question', 'Réponse'],
     ['Religion', '1. La Bible', 'Combien de livres compte la Bible ?', '73'],
     ['Français', '1. Figures de style', 'Qu’est-ce qu’une antithèse ?', 'Deux idées opposées rapprochées'],
+    ['Français', '1. Figures de style', '« bien, mal » sont des adverbes de ___.', 'manière'],
     ['HW Geschiedenis', '1. Tijd', 'Wat is een eeuw?', 'Een periode van 100 jaar']],
 }))
 const matiere = (nom: string) => voc.matieres.find(m => m.nom === nom)!
@@ -69,7 +71,7 @@ describe('matières en français', () => {
     expect(pour('dehet')).toEqual([])
     expect(pour('definitions')).toEqual(['métaphore', 'comparaison', 'terme'])
     expect(pour('defilement')).toEqual(['eeuw', 'métaphore', 'comparaison', 'terme'])
-    expect(pour('questions')).toHaveLength(2)
+    expect(pour('questions')).toHaveLength(3)
   })
   it('en français : le mot puis sa définition, lus en français', () => {
     const [c] = construireSerie([matiere('Français').mots[0]], reglages({ exercice: 'defilement', sens: 'fr-nl' }))
@@ -81,5 +83,14 @@ describe('matières en français', () => {
     const index = indexer(voc.matieres.flatMap(m => m.mots))
     expect(decouper(index, 'Een eeuw, une métaphore').filter(s => typeof s !== 'string').map(s => (s as { texte: string }).texte)).toEqual(['eeuw'])
   })
+  it('typographie française : espaces insécables, sans changer l’identifiant ni la voix', async () => {
+    expect(typoFr('« bien, mal » sont des adverbes de ___ ?')).toBe('«\u00a0bien, mal\u00a0» sont des adverbes de ___\u202f?')
+    expect(typoFr('28 + 12 : 4')).toBe('28 + 12 : 4')
+    expect(typoFr('«bien»')).toBe('«bien»')
+    const q = matiere('Français').questions!.find(x => x.fr === 'manière')!
+    expect(q.nl).toBe('«\u00a0bien, mal\u00a0» sont des adverbes de ___.')
+    expect(q.id).toBe('Français|?|« bien, mal » sont des adverbes de ___.')
+    expect(await empreinte('fr', q.nl)).toBe(await empreinte('fr', '« bien, mal » sont des adverbes de ___.'))
+    expect(matiere('HW Geschiedenis').questions![0].nl).toBe('Wat is een eeuw?')
+  })
 })
-

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { leurres, melanger } from '../../lib/seance'
-import { corriger, corrigerListe, differences, type CorrectionListe } from '../../lib/correction'
+import { corriger, corrigerListe, differences, type CorrectionListe, type Resultat } from '../../lib/correction'
 import { nomChapitre } from '../Accueil'
 import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Langue } from './commun'
@@ -26,6 +26,8 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
   }, [])
   // la phrase complétée en néerlandais (pour l'entendre en entier) ; en français, seulement le mot qui manque
   const premiere = m.fr.split(/\s*\/\s*/)[0]
+  // une phrase à compléter, une fois validée : la bonne réponse prend la place du « ? »
+  const [repondu, setRepondu] = useState<Resultat | null>(null)
   const lireReponse = () => dire(reglages, trou ? (langue === 'fr' ? premiere : m.nl.replace(TROU, premiere)) : m.fr, langue)
 
   useEffect(() => { dire(reglages, m.nl, langue) }, [])
@@ -34,11 +36,11 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
     <>
       <div class="carte">
         <Langue l={langue} />
-        <p class="mot petit">{trou ? <PhraseATrou phrase={m.nl} matiere={m.matiere} /> : <Glose texte={m.nl} matiere={m.matiere} />}</p>
+        <p class="mot petit">{trou ? <PhraseATrou phrase={m.nl} matiere={m.matiere} reponse={repondu ? { texte: premiere, resultat: repondu } : undefined} /> : <Glose texte={m.nl} matiere={m.matiere} />}</p>
         <p class="astuce">{nomChapitre(m.chapitre)}{vraag.page && ` · p. ${vraag.page}`}{vraag.interro && <> · <span class="tag-interro">{vraag.interro}</span></>}</p>
       </div>
       {trou
-        ? <Saisie langue={langue} attendu={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer}
+        ? <Saisie langue={langue} attendu={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={r => { setRepondu(r); annoncer(r) }}
             corriger={t => corriger(t, m.fr, langue)} placeholder="Le mot qui manque" />
         : vraag.nombre > 0
         ? <Enumeration langue={langue} elements={vraag.elements} nombre={vraag.nombre} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />
@@ -50,9 +52,17 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
 }
 
 /** La phrase avec son trou bien visible. */
-export function PhraseATrou({ phrase, matiere }: { phrase: string; matiere?: string }) {
+export function PhraseATrou({ phrase, matiere, reponse }: { phrase: string; matiere?: string; reponse?: { texte: string; resultat: Resultat } }) {
   const [avant, ...apres] = phrase.split(TROU)
-  return <><Glose texte={avant} matiere={matiere} /><span class="trou" aria-label="mot qui manque">?</span><Glose texte={apres.join('…')} matiere={matiere} /></>
+  return (
+    <>
+      <Glose texte={avant} matiere={matiere} />
+      {reponse
+        ? <span class={`trou-corrige ${reponse.resultat}`}>{reponse.texte}</span>
+        : <span class="trou" aria-label="mot qui manque">?</span>}
+      <Glose texte={apres.join('…')} matiere={matiere} />
+    </>
+  )
 }
 
 const AUTO = [
