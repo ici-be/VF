@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import { question, reponse } from '../../lib/seance'
 import type { PropsExercice } from '../Seance'
 import { attendre, dire, Infos, Langue } from './commun'
@@ -9,16 +9,24 @@ export function Defilement({ carte, reglages, setReglages, pause, suivant }: Pro
   const [etape, setEtape] = useState<'question' | 'reponse'>('question')
   const q = question(carte), rep = reponse(carte)
   const delai = reglages.delai
+  // ce qui a déjà été lu à voix haute : changer la durée relance l'attente, pas la voix
+  // (après une pause, l'étape en cours est relue)
+  const lu = useRef('')
 
   useEffect(() => {
-    if (pause) return
+    if (pause) { lu.current = ''; return }
     let annule = false
+    const lire = (texte: string, langue: typeof q.langue) => {
+      if (lu.current === etape) return Promise.resolve()
+      lu.current = etape
+      return dire(reglages, texte, langue)
+    }
     ;(async () => {
       if (etape === 'question') {
-        await Promise.all([dire(reglages, q.texte, q.langue), attendre(delai * 1000)])
+        await Promise.all([lire(q.texte, q.langue), attendre(delai * 1000)])
         if (!annule) setEtape('reponse')
       } else {
-        await Promise.all([dire(reglages, rep.texte, rep.langue), attendre(Math.max(2000, delai * 500))])
+        await Promise.all([lire(rep.texte, rep.langue), attendre(Math.max(2000, delai * 500))])
         if (!annule) suivant(null)
       }
     })()
