@@ -57,6 +57,15 @@ ABREVIATIONS = [
 ]
 
 
+def nombre(v: str) -> str:
+    """Une cellule nombre : « 1945.0 » (export de Google) → « 1945 », comme nombre() dans src/lib/xlsx.ts."""
+    try:
+        n = round(float(v), 9)
+    except ValueError:
+        return v
+    return str(int(n)) if n.is_integer() else repr(n)
+
+
 def texte_a_lire(t: str) -> str:
     """Identique à texteALire() dans src/lib/voix.ts."""
     for abr, mot in ABREVIATIONS:
@@ -99,7 +108,7 @@ def lire_onglets(octets: bytes):
                 elif c.get('t') == 'inlineStr':
                     ligne[col - 1] = ''.join(t.text or '' for t in c.iter(NS + 't'))
                 else:
-                    ligne[col - 1] = v.text if v is not None and v.text else ''
+                    ligne[col - 1] = nombre(v.text) if v is not None and v.text else ''
             lignes.append([ligne.get(i, '') for i in range(max(ligne, default=-1) + 1)])
         yield feuille.get('name'), lignes
 

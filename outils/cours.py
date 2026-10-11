@@ -73,6 +73,15 @@ def tester(_):
     print('Connexion OK. Onglets :', ', '.join(res['onglets']))
 
 
+def nombre(v: str) -> str:
+    """Une cellule nombre : « 1945.0 » (export de Google) → « 1945 », comme nombre() dans src/lib/xlsx.ts."""
+    try:
+        n = round(float(v), 9)
+    except ValueError:
+        return v
+    return str(int(n)) if n.is_integer() else repr(n)
+
+
 def onglets_xlsx(octets: bytes) -> dict[str, list[list[str]]]:
     """Onglets du classeur → lignes de cellules (texte), sans dépendance externe."""
     z = zipfile.ZipFile(io.BytesIO(octets))
@@ -96,7 +105,7 @@ def onglets_xlsx(octets: bytes) -> dict[str, list[list[str]]]:
                 elif 't="inlineStr"' in attrs:
                     val = texte(contenu)
                 else:
-                    val = html.unescape(v.group(1)) if v else ''
+                    val = nombre(html.unescape(v.group(1))) if v else ''
                 col = 0
                 for ch in ref:
                     col = col * 26 + ord(ch) - 64
