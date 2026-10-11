@@ -34,6 +34,10 @@
  * Ensuite l'onglet est trié : chapitres dans leur ordre actuel, et dans chaque chapitre
  * les mots dans l'ordre des pages (les mots sans page restent à la fin du chapitre,
  * dans leur ordre actuel). Avec « essai », rien n'est écrit : la réponse dit ce qui serait fait.
+ *
+ * Signalements : le bouton drapeau de l'appli envoie l'action « signaler », la seule possible
+ * sans clé (une ligne dans l'onglet « Signalements », créé au premier). La commande /signalements
+ * corrige ensuite le tableau avec « modifier » et marque les lignes avec « traiter » (avec clé).
  */
 
 // mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; de « matiere » à « nombre » pour l'onglet « Vragen »
@@ -94,15 +98,106 @@ function doGet(e) {
 function doPost(e) {
   return repondre(() => {
     const req = JSON.parse(e.postData.contents)
-    verifierCle(req.cle)
+    // la seule action sans clé : un signalement envoyé par l'appli (voir signaler)
+    if (req.action !== 'signaler') verifierCle(req.cle)
     const verrou = LockService.getScriptLock()
     verrou.waitLock(30000)
     try {
+      if (req.action === 'signaler') return signaler(req)
+      if (req.action === 'modifier') return modifier(req.modifications || [], !!req.essai)
+      if (req.action === 'traiter') return traiter(req.ids || [], String(req.note || ''))
       return recevoir(req.onglet, req.lignes || [], !!req.essai, !!req.dater, !!req.creer)
     } finally {
       verrou.releaseLock()
     }
   })
+}
+
+// ---------- signalements (bouton drapeau de l'appli) ----------
+
+const ONGLET_SIGNALEMENTS = 'Signalements'
+const TITRES_SIGNALEMENTS = ['Date', 'Matière', 'Chapitre', 'Page', 'Élément', 'Réponse attendue', 'Exercice', 'Résultat', 'Raisons', 'Commentaire', 'ID', 'Appareil', 'Traité']
+const LONGUEUR_MAX = 600
+
+/**
+ * Ajoute un signalement : ouvert à tous (l'appli est publique), donc limité. Rien d'autre
+ * n'est possible sans clé : une ligne de plus dans l'onglet « Signalements », textes coupés,
+ * dix par minute et par appareil, soixante par minute en tout, et un même signalement (ID) une seule fois.
+ */
+function signaler(req) {
+  const texte = v => String(v == null ? '' : v).replace(/[\t\r\n]+/g, ' ').trim().slice(0, LONGUEUR_MAX)
+  const id = texte(req.id).slice(0, 64), appareil = texte(req.appareil).slice(0, 64)
+  if (!id || !appareil || !texte(req.element)) throw new Error('signalement incomplet')
+  const cache = CacheService.getScriptCache()
+  const compter = (cle, max) => {
+    const n = Number(cache.get(cle) || 0) + 1
+    if (n > max) throw new Error('trop de signalements, réessayer dans une minute')
+    cache.put(cle, String(n), 60)
+  }
+  compter('sig-tous', 60)
+  compter('sig-' + appareil, 10)
+  const classeur = SpreadsheetApp.getActive()
+  let feuille = classeur.getSheetByName(ONGLET_SIGNALEMENTS)
+  if (!feuille) {
+    feuille = classeur.insertSheet(ONGLET_SIGNALEMENTS)
+    feuille.getRange(1, 1, 1, TITRES_SIGNALEMENTS.length).setValues([TITRES_SIGNALEMENTS]).setFontWeight('bold')
+    feuille.setFrozenRows(1)
+  }
+  // déjà reçu (l'appli renvoie ce qui n'a pas eu de réponse) : rien à faire
+  const colId = TITRES_SIGNALEMENTS.indexOf('ID') + 1
+  const n = feuille.getLastRow() - 1
+  if (n > 0 && feuille.getRange(2, colId, n, 1).getValues().some(l => String(l[0]) === id)) return { ok: true, deja: true }
+  const ligne = [aujourdhui() + ' ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'HH:mm'),
+    texte(req.matiere), texte(req.chapitre), texte(req.page), texte(req.element), texte(req.reponse), texte(req.exercice),
+    texte(req.resultat), texte(req.raisons), texte(req.commentaire), id, appareil, '']
+  // en texte : Sheets ne transforme ni la date ni les nombres
+  feuille.getRange(feuille.getLastRow() + 1, 1, 1, ligne.length).setNumberFormat('@').setValues([ligne])
+  return { ok: true }
+}
+
+/** Marque des signalements comme traités (colonne « Traité » : date et note). */
+function traiter(ids, note) {
+  const feuille = SpreadsheetApp.getActive().getSheetByName(ONGLET_SIGNALEMENTS)
+  if (!feuille) throw new Error('pas encore de signalements')
+  const n = feuille.getLastRow() - 1
+  const colId = TITRES_SIGNALEMENTS.indexOf('ID'), colTraite = TITRES_SIGNALEMENTS.indexOf('Traité')
+  const donnees = n > 0 ? feuille.getRange(2, 1, n, TITRES_SIGNALEMENTS.length).getValues() : []
+  const faits = []
+  donnees.forEach((l, i) => {
+    if (!ids.includes(String(l[colId]))) return
+    feuille.getRange(i + 2, colTraite + 1).setNumberFormat('@').setValue((aujourdhui() + ' ' + note).trim())
+    faits.push(String(l[colId]))
+  })
+  return { ok: true, traites: faits }
+}
+
+/**
+ * Corrige des cases déjà remplies (après un signalement) : chaque modification désigne une ligne
+ * (onglet de mots : nl et chapitre ; « Vragen » : matière et question), la colonne (clé de COLONNES)
+ * et la nouvelle valeur. Avec « essai », rien n'est écrit : la réponse dit l'ancienne valeur.
+ */
+function modifier(modifications, essai) {
+  const res = { ok: true, essai, faites: [], introuvables: [] }
+  for (const m of modifications) {
+    const feuille = SpreadsheetApp.getActive().getSheetByName(m.onglet)
+    if (!feuille) { res.introuvables.push(m); continue }
+    const titres = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(norm)
+    const col = {}
+    for (const cle in COLONNES) col[cle] = titres.findIndex(t => COLONNES[cle].includes(t))
+    const questions = col.question >= 0
+    // la colonne « Définition » tient lieu de « Français » dans un onglet en français
+    const champ = !questions && m.champ === 'fr' && col.fr < 0 ? 'definition' : m.champ
+    if (!(champ in col) || col[champ] < 0) { res.introuvables.push(m); continue }
+    const n = feuille.getLastRow() - 1
+    const donnees = n > 0 ? feuille.getRange(2, 1, n, titres.length).getValues() : []
+    const i = donnees.findIndex(l => questions
+      ? norm(l[col.matiere]) === norm(m.matiere) && norm(l[col.question]) === norm(m.question)
+      : norm(l[col.nl]) === norm(m.nl) && (col.chapitre < 0 || !m.chapitre || norm(l[col.chapitre]) === norm(m.chapitre)))
+    if (i < 0) { res.introuvables.push(m); continue }
+    res.faites.push({ ...m, avant: String(donnees[i][col[champ]]) })
+    if (!essai) feuille.getRange(i + 2, col[champ] + 1).setValue(m.valeur)
+  }
+  return res
 }
 
 function repondre(f) {

@@ -91,6 +91,16 @@ elle apparaît dans **À revoir**, qui montre les mots et les questions de cours
 l'élève avait écrit, et un bouton pour s'entraîner sur les questions ratées. Ni nom ni note
 ne vont dans le tableau.
 
+## Signaler une erreur
+
+Un petit drapeau gris (dans la barre d'un exercice, et au survol d'une ligne de la liste des mots)
+ouvre une fenêtre pour signaler une question ou un mot qui paraît faux : raisons à cocher et
+commentaire facultatif. Le signalement arrive dans l'onglet **« Signalements »** du tableau (sans
+réseau, il attend sur l'appareil). Le script du tableau n'accepte sans clé que cette action-là,
+limitée (textes coupés, dix par minute et par appareil). Dans Claude Code, `/signalements` les
+vérifie dans le cours, propose les corrections, les applique après accord
+(`cours.py corriger`) et marque les signalements traités (`cours.py traiter`).
+
 ## Partager des réglages
 
 L'icône 🔗 discrète à côté du nom de l'exercice, sur l'accueil, copie un **permalien** :

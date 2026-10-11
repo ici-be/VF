@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
+import { BoutonSignaler, FenetreSignalement } from './Signaler'
 import { langueDe } from '../lib/apparence'
 import { IconeExercice } from './icones'
 import { question, reponse, type Carte } from '../lib/seance'
@@ -69,6 +70,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   const [i, setI] = useState(0)
   const [resultats, setResultats] = useState<Map<string, Resultat>>(new Map())
   const [pause, setPause] = useState(false)
+  // la fenêtre « Signaler une erreur » ouverte : l'exercice attend (sans le bandeau de pause)
+  const [aSignaler, setASignaler] = useState(false)
   // bonnes réponses d'affilée (« presque » compte) ; une erreur remet à zéro
   const [combo, setCombo] = useState(0)
   const meilleurCombo = useRef(0)
@@ -94,6 +97,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   // pause : Échap partout, Espace pour le défilement ; et automatiquement si on change d'onglet
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
+      if (document.querySelector('dialog[open]')) return   // Échap ferme la fenêtre de signalement
       if (e.key === 'Escape' || (e.key === ' ' && ex.id === 'defilement')) { e.preventDefault(); setPause(p => !p) }
     }
     const cache = () => { if (document.hidden) setPause(true) }
@@ -143,7 +147,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     })
   }
 
-  const props: PropsExercice = { carte, tous, reglages, setReglages, pause, suivant, annoncer }
+  const props: PropsExercice = { carte, tous, reglages, setReglages, pause: pause || aSignaler, suivant, annoncer }
   const justes = [...resultats.values()].filter(v => v !== 'faux').length
 
   return (
@@ -154,6 +158,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {combo >= 3 && <span key={combo} class={`combo ${combo % 5 === 0 ? 'palier' : ''}`} title="Bonnes réponses d’affilée">🔥 ×{combo}</span>}
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
+        {carte && carte.mot.getal === undefined && <BoutonSignaler onClick={() => setASignaler(true)} />}
         <button class="icone" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
       </div>
       <div class="progres"><div style={{ width: `${(i / file.length) * 100}%` }} /></div>
@@ -172,6 +177,9 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'questions' && <Questions key={i} {...props} />}
         {ex.id === 'getallen' && <Getallen key={i} {...props} />}
       </main>
+      {aSignaler && carte && (
+        <FenetreSignalement mot={carte.mot} exercice={ex.nom} resultat={resultats.get(carte.mot.id) ?? annonce.current ?? undefined} fermer={() => setASignaler(false)} />
+      )}
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
         <div class="bandeau-pause" role="status">

@@ -5,6 +5,9 @@
     python3 outils/cours.py tester                     # vérifie la connexion
     python3 outils/cours.py lire "HW Aardrijkskunde"   # les mots de l'onglet, en TSV
     python3 outils/cours.py envoyer mots.tsv --onglet "HW Aardrijkskunde" [--essai] [--dater]
+    python3 outils/cours.py lire Signalements          # les signalements du bouton drapeau
+    python3 outils/cours.py corriger corrections.tsv [--essai]
+    python3 outils/cours.py traiter ID1 ID2 --note "réponse corrigée"
 
 Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
@@ -170,6 +173,34 @@ def envoyer(args):
         print('  onglet trié par chapitre puis par page')
 
 
+def corriger(args):
+    """Corrige des cases déjà remplies (après un signalement), d'après un TSV :
+    Onglet, Matière, Question (pour « Vragen »), Mot, Chapitre (pour un onglet de mots),
+    Colonne (titre : Français, Réponse, Leurres…), Valeur (la nouvelle)."""
+    with open(args.fichier, newline='', encoding='utf-8') as f:
+        lecteur = csv.DictReader(f, delimiter='\t')
+        mods = []
+        for l in lecteur:
+            l = {k.strip().lower(): (v or '').strip() for k, v in l.items() if k}
+            champ = TITRES.get(l.get('colonne', '').lower())
+            if not champ:
+                sys.exit(f'Colonne inconnue : {l.get("colonne")!r} (titres possibles : {", ".join(TITRES)})')
+            mods.append({'onglet': l['onglet'], 'matiere': l.get('matière', ''), 'question': l.get('question', ''),
+                         'nl': l.get('mot', ''), 'chapitre': l.get('chapitre', ''), 'champ': champ, 'valeur': l.get('valeur', '')})
+    res = appeler({'action': 'modifier', 'modifications': mods, 'essai': args.essai})
+    print(('Serait corrigé' if args.essai else 'Corrigé') + ' :')
+    for m in res['faites']:
+        print(f'  [{m["onglet"]}] {m["question"] or m["nl"]} — {m["champ"]} : « {m["avant"]} » → « {m["valeur"]} »')
+    for m in res['introuvables']:
+        print(f'  INTROUVABLE [{m["onglet"]}] {m["question"] or m["nl"]} — {m["champ"]}')
+
+
+def traiter(args):
+    """Marque des signalements comme traités (colonne « Traité » de l'onglet Signalements)."""
+    res = appeler({'action': 'traiter', 'ids': args.ids, 'note': args.note})
+    print(f'{len(res["traites"])} signalement(s) marqué(s) traité(s) sur {len(args.ids)}')
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sous = p.add_subparsers(required=True)
@@ -188,6 +219,14 @@ def main():
     s.add_argument('--dater', action='store_true', help='dater aussi d\'aujourd\'hui les mots déjà présents sans date')
     s.add_argument('--creer', action='store_true', help='créer l\'onglet s\'il n\'existe pas (matière en français : Mot, Définition…)')
     s.set_defaults(f=envoyer)
+    s = sous.add_parser('corriger', help='corriger des cases déjà remplies (après un signalement)')
+    s.add_argument('fichier')
+    s.add_argument('--essai', action='store_true', help='ne rien écrire, montrer ce qui serait corrigé')
+    s.set_defaults(f=corriger)
+    s = sous.add_parser('traiter', help='marquer des signalements comme traités')
+    s.add_argument('ids', nargs='+')
+    s.add_argument('--note', default='', help='ce qui a été fait (« réponse corrigée », « pas d’erreur »…)')
+    s.set_defaults(f=traiter)
     args = p.parse_args()
     args.f(args)
 

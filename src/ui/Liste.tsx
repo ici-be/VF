@@ -15,6 +15,7 @@ import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 import { FeuilleInterro } from './FeuilleInterro'
 import { Glose } from './Glose'
+import { BoutonSignaler, FenetreSignalement } from './Signaler'
 import { PhraseATrou } from './exercices/Questions'
 import { TROU } from '../lib/mots'
 
@@ -42,6 +43,8 @@ const cmp = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'b
 
 export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuestions }: Props) {
   const [cherche, setCherche] = useState('')
+  // le mot ou la question signalé (fenêtre « Signaler une erreur » ouverte)
+  const [aSignaler, setASignaler] = useState<Mot | null>(null)
   const [tri, setTri] = useState<Tri>('chapitre')
   const [vue, setVue] = useState<Vue>(vueInitiale === 'interro' ? 'questions' : vueInitiale)
   // imprimer la feuille d'interro (questions + lignes, réponses à part) plutôt que la liste
@@ -220,6 +223,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                         {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
                         {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
                         <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, langueDe(l))} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
+                        {l.getal === undefined && <BoutonSignaler classe="signaler-ligne" onClick={() => setASignaler(l)} />}
                       </td>
                       <td>
                         {l.fr}
@@ -241,6 +245,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
             </table>
           </div>
         )}
+      {aSignaler && <FenetreSignalement mot={aSignaler} fermer={() => setASignaler(null)} />}
       {vue === 'questions' && feuille && <FeuilleInterro questions={mots} titre="Questions de cours" sujets={titreMatieres} />}
     </main>
   )

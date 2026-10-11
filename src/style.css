@@ -712,3 +712,25 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   background: var(--fg); color: var(--bg); font: 700 .85rem/1.3 var(--body); text-align: center; white-space: normal; letter-spacing: 0;
 }
 @media print { .glose { text-decoration: none; } .glose::after { display: none; } }
+
+/* ---------- signaler une erreur (drapeau) ---------- */
+.bouton-signaler { color: var(--muted); opacity: .55; }
+.bouton-signaler:hover, .bouton-signaler:focus-visible { opacity: 1; color: var(--ko); }
+.barre .bouton-signaler { border-color: transparent; background: none; box-shadow: none; }
+.signaler-ligne { border: 0; background: none; padding: 2px 4px; margin-left: 2px; vertical-align: middle; cursor: pointer; opacity: 0; }
+.tableau tr:hover .signaler-ligne, .signaler-ligne:focus-visible { opacity: .55; }
+@media (hover: none) { .signaler-ligne { opacity: .35; } }
+.fenetre-signalement { border: 0; border-radius: 16px; padding: 20px; width: min(440px, calc(100vw - 32px)); background: var(--panel); color: var(--fg); box-shadow: 0 10px 40px rgb(20 30 50 / 25%); }
+.fenetre-signalement::backdrop { background: rgb(20 30 50 / 35%); }
+.fenetre-signalement .titre { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font: 800 1.15rem var(--display); color: var(--ko); }
+.fenetre-signalement .signale { display: flex; flex-direction: column; gap: 2px; background: var(--panel-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.fenetre-signalement .signale .element { font-weight: 700; }
+.fenetre-signalement .signale .reponse { color: var(--muted); }
+.fenetre-signalement .signale .ou { font-size: .8rem; color: var(--muted); }
+.fenetre-signalement fieldset { border: 0; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
+.fenetre-signalement legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
+.fenetre-signalement textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--fg); resize: vertical; }
+.fenetre-signalement .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.fenetre-signalement .merci { text-align: center; }
+.fenetre-signalement .merci .titre { justify-content: center; color: var(--ok); }
+@media print { .bouton-signaler, .fenetre-signalement { display: none !important; } }

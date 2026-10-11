@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
 import { appliquerRates } from '../lib/progression'
 import { glossaire } from '../lib/glossaire'
+import { surveillerEnvois } from '../lib/signalements'
 import { aReviser, chargerReglages, enregistrerReglages, reglagesDuLien, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
@@ -54,6 +55,8 @@ export function App() {
     }
   }
   useEffect(() => { actualiser() }, [])
+  // les signalements restés sur l'appareil (pas de réseau) partent dès que possible
+  useEffect(() => { surveillerEnvois() }, [])
 
   // le geste « retour » du téléphone (ou le bouton ← du navigateur) ramène à l'accueil au lieu
   // de quitter le site : hors de l'accueil, une entrée est ajoutée à l'historique ; le retour la
