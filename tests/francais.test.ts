@@ -86,6 +86,7 @@ describe('matières en français', () => {
   it('typographie française : espaces insécables, sans changer l’identifiant ni la voix', async () => {
     expect(typoFr('« bien, mal » sont des adverbes de ___ ?')).toBe('«\u00a0bien, mal\u00a0» sont des adverbes de ___\u202f?')
     expect(typoFr('28 + 12 : 4')).toBe('28 + 12 : 4')
+    expect(typoFr('Ex. : le double de 7')).toBe('Ex.\u202f: le double de 7')
     expect(typoFr('«bien»')).toBe('«bien»')
     const q = matiere('Français').questions!.find(x => x.fr === 'manière')!
     expect(q.nl).toBe('«\u00a0bien, mal\u00a0» sont des adverbes de ___.')

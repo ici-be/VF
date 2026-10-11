@@ -244,11 +244,11 @@ export function vocabulaireDepuisXlsx(octets: Uint8Array): Vocabulaire {
 }
 
 /**
- * Typographie française : espace insécable après « et avant », espace fine insécable avant ? ! ;
- * (seulement à la place d'une espace déjà là ; « : » reste tel quel, c'est aussi la division).
+ * Typographie française : espace insécable après « et avant », espace fine insécable avant ? ! ; :
+ * (seulement à la place d'une espace déjà là ; « 60 : 2 », une division, garde son espace).
  */
 export const typoFr = (s: string) =>
-  s.replace(/«\s+/g, '«\u00a0').replace(/\s+»/g, '\u00a0»').replace(/\s+([?!;])/g, '\u202f$1')
+  s.replace(/«\s+/g, '«\u00a0').replace(/\s+»/g, '\u00a0»').replace(/\s+([?!;])/g, '\u202f$1').replace(/(?<=[^\d\s])\s+:/g, '\u202f:')
 
 const CLE = 'vocabulaire'
 
