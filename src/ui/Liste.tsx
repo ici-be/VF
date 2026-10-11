@@ -55,7 +55,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
   const questionsRatees = aRevoir.map(x => x.mot).filter(m => m.vraag)
   // « mots », « questions » ou « mots et questions »
   const quoiRate = [motsRates.length && 'mot', questionsRatees.length && 'question'].filter(Boolean) as string[]
-  const ratesNom = (pluriel: boolean) => quoiRate.length ? quoiRate.map(x => pluriel ? x + 's' : x).join(' et ') : 'mots'
+  const ratesNom = quoiRate.length ? quoiRate.map(x => x + 's').join(' et ') : 'mots'
+  // rien que des questions : le tableau des questions (Vraag, Antwoord), et les accords au féminin
+  const enQuestions = vue === 'questions' || (vue === 'revoir' && questionsRatees.length > 0 && !motsRates.length)
+  const e = enQuestions ? 'e' : ''
   // les temps primitifs : les verbes les plus courants du choix, dans l'ordre de fréquence
   const verbesPrimitifs = choisis.filter(m => estPrimitif(m.verbe)).sort((a, b) => verbe(a.verbe!)!.rang - verbe(b.verbe!)!.rang)
   // les mots du dernier envoi /cours, toutes matières confondues (pas seulement celles choisies)
@@ -149,7 +152,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       </div>
       {vue === 'revoir' && (
         <div class="bandeau">
-          <p>{aRevoir.length > 1 ? `Les ${aRevoir.length} ${ratesNom(true)} ratés` : aRevoir.length === 1 ? `${questionsRatees.length ? 'La question ratée' : 'Le mot raté'}` : 'Les mots ratés'} ces 30 derniers jours (à l’appli ou à une interro en classe) et pas encore {accord(aRevoir.length, questionsRatees.length && !motsRates.length ? 'rattrapée' : 'rattrapé')}, les plus souvent ratés d’abord (30 au maximum). {questionsRatees.length && !motsRates.length ? 'Une question' : 'Un mot'} sort de la liste quand il est réussi plusieurs fois de suite.</p>
+          <p>{aRevoir.length > 1 ? `Les ${aRevoir.length} ${ratesNom} raté${e}s` : aRevoir.length === 1 ? (enQuestions ? 'La question ratée' : 'Le mot raté') : 'Les mots ratés'} ces 30 derniers jours (à l’appli ou à une interro en classe) et pas encore {accord(aRevoir.length, `rattrapé${e}`)}, les plus souvent raté{e}s d’abord (30 au maximum). Ce qui est réussi plusieurs fois de suite sort de la liste.</p>
           {motsRates.length > 0 && (
             serieARevoir.length
               ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur {motsRates.length > 1 ? 'ces mots' : 'ce mot'} · {ex.nom} ▶</button>
@@ -169,7 +172,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
         </div>
       )}
       <div class="outils">
-        <input type="search" id="cherche" placeholder="Chercher un mot…" value={cherche} onInput={e => setCherche((e.target as HTMLInputElement).value)} />
+        <input type="search" id="cherche" placeholder={enQuestions ? 'Chercher une question…' : 'Chercher un mot…'} value={cherche} onInput={e => setCherche((e.target as HTMLInputElement).value)} />
         {vue === 'tous' && (
           <div class="segment">
             <button aria-pressed={tri === 'chapitre'} onClick={() => setTri('chapitre')}>Par chapitre</button>
@@ -200,16 +203,16 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       {vue === 'primitifs' ? null : mots.length === 0
         ? <p class="vide">{vue === 'revoir' && !q ? 'Rien de raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
         : (
-          <div class={`tableau ${vue === 'questions' ? 'questions' : ''}`}>
+          <div class={`tableau ${enQuestions ? 'questions' : ''}`}>
             <table>
-              <thead><tr><th></th>{vue === 'questions' ? <><th>Vraag</th><th>Antwoord</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{vue === 'questions' ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
+              <thead><tr><th></th>{enQuestions ? <><th>Vraag</th><th>Antwoord</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
                 {lignes.map(l => 'groupe' in l
                   ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
                   : (
                     <tr>
                       <td class="det">{l.det}</td>
-                      <td class="nl">
+                      <td class={`nl ${l.vraag ? 'vraag' : ''}`}>
                         {l.vraag && TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} /> : l.nl}
                         {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
                         <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, 'nl')} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>

@@ -264,7 +264,10 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .bandeau { background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
 .bandeau p { margin: 0; flex: 1 1 320px; color: var(--muted); font-size: .92rem; }
 .tableau td.rate { white-space: nowrap; font-weight: 700; color: var(--ko); font-variant-numeric: tabular-nums; }
-.tableau td.rate .extra { font-weight: 400; }
+.tableau td.rate .extra { font-weight: 400; white-space: normal; }
+/* une question (mélangée aux mots dans « À revoir ») passe à la ligne ; ce que l'élève avait écrit à l'interro aussi */
+.tableau td.nl.vraag { white-space: normal; }
+.tableau td.rate .interro-rate { display: block; }
 .segment .n { font-size: .78rem; color: var(--muted); font-weight: 400; margin-left: 4px; font-variant-numeric: tabular-nums; }
 .entete .revoir { border-color: var(--ko); color: var(--ko); }
 
@@ -687,6 +690,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .trou { display: inline-block; min-width: 4.5em; margin: 0 .2em; padding: 0 .3em; border-bottom: 3px solid var(--accent); color: var(--accent); text-align: center; line-height: 1.1; }
 .tag-interro { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--mid-bg); color: var(--fg); font-size: .75rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }
 .astuce .tag-interro { margin-left: 0; }
+@media (max-width: 560px) { .tableau .tag-interro { white-space: normal; } .tableau td.rate .interro-rate { overflow-wrap: anywhere; } }
 @media print {
   .tag-interro { background: none; border: .5pt solid #000; font-size: 7pt; }
   .feuille-interro .blanc { display: inline-block; width: 45mm; border-bottom: .6pt solid #000; margin: 0 1mm; }
