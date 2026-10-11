@@ -5,6 +5,7 @@ import { masquer } from '../../lib/trous'
 import type { PropsExercice } from '../Seance'
 import { dire, Langue } from './commun'
 import { Choix, Saisie } from './Reponses'
+import { Glose } from '../Glose'
 
 // La définition (sans le mot qu'elle définit), il faut trouver le mot néerlandais.
 export function Definitions({ carte, tous, reglages, pause, suivant, annoncer }: PropsExercice) {
@@ -26,7 +27,8 @@ export function Definitions({ carte, tous, reglages, pause, suivant, annoncer }:
     <>
       <div class="carte">
         <Langue l="nl" />
-        <p class="mot petit">{definition}</p>
+        {/* jamais la traduction du mot à trouver */}
+        <p class="mot petit"><Glose texte={definition} matiere={m.matiere} exclure={[m.nl]} /></p>
         <p class="astuce">Quel mot correspond à cette définition ?</p>
       </div>
       {reglages.repondre === 'choix'

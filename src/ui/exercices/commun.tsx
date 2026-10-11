@@ -1,4 +1,5 @@
 import { useEffect } from 'preact/hooks'
+import { Glose } from '../Glose'
 import type { Mot } from '../../lib/mots'
 import type { Correction } from '../../lib/correction'
 import { parler } from '../../lib/voix'
@@ -19,7 +20,7 @@ export function Infos({ mot }: { mot: Mot }) {
   if (!mot.definition && !mot.remarque && !mot.exemple) return null
   return (
     <div class="info">
-      {mot.definition && <span><b>Définition :</b> {mot.definition}</span>}
+      {mot.definition && <span><b>Définition :</b> <Glose texte={mot.definition} matiere={mot.matiere} exclure={[mot.nl]} /></span>}
       {mot.exemple && <span><b>Exemple :</b> {mot.exemple.replace(/[\[\]]/g, '')}</span>}
       {mot.remarque && <span><b>Remarque :</b> {mot.remarque}</span>}
     </div>

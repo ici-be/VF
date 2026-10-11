@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
 import { appliquerRates } from '../lib/progression'
+import { glossaire } from '../lib/glossaire'
 import { aReviser, chargerReglages, enregistrerReglages, reglagesDuLien, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
@@ -34,6 +35,9 @@ export function App() {
   const [chargement, setChargement] = useState<Chargement>({ etat: 'chargement' })
   const [reglages, setReglagesBruts] = useState<Reglages>(() => chargerReglages(voc))
   const [ecran, setEcran] = useState<Ecran>({ nom: 'accueil' })
+
+  // les traductions montrées au survol des mots néerlandais (questions, définitions)
+  if (voc) glossaire(voc)
 
   const setReglages = (r: Reglages) => { setReglagesBruts(r); enregistrerReglages(r) }
 

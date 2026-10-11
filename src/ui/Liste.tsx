@@ -13,6 +13,7 @@ import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 import { FeuilleInterro } from './FeuilleInterro'
+import { Glose } from './Glose'
 import { PhraseATrou } from './exercices/Questions'
 import { TROU } from '../lib/mots'
 
@@ -213,7 +214,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                     <tr>
                       <td class="det">{l.det}</td>
                       <td class={`nl ${l.vraag ? 'vraag' : ''}`}>
-                        {l.vraag && TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} /> : l.nl}
+                        {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
                         {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
                         <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, 'nl')} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
                       </td>
@@ -245,7 +246,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
 function Details({ m }: { m: Mot }) {
   return (
     <>
-      {m.definition && <span class="extra"><i>Définition :</i> {m.definition}</span>}
+      {m.definition && <span class="extra"><i>Définition :</i> <Glose texte={m.definition} matiere={m.matiere} exclure={[m.nl]} /></span>}
       {m.exemple && <span class="extra"><i>Exemple :</i> {m.exemple.replace(/[\[\]]/g, '')}</span>}
       {m.remarque && <span class="extra"><i>Remarque :</i> {m.remarque}</span>}
     </>

@@ -55,6 +55,14 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.
 
+## Traductions au survol
+
+Dans les questions de cours et les définitions (exercices et liste), les mots néerlandais qui
+sont dans le tableau sont soulignés d'un pointillé discret : au survol (ou en touchant le mot
+sur téléphone), leur traduction s'affiche. Les expressions de plusieurs mots passent d'abord
+(« klassieke oudheid »), les pluriels simples sont reconnus (« eeuwen », « dynastieën »), et le
+mot à trouver n'est jamais traduit.
+
 ## Ajouter une interro
 
 Dans Claude Code, `/interro` suivi du PDF d'une interro corrigée scannée : les questions sont
