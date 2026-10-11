@@ -217,8 +217,8 @@ const DESSINS: Record<Mascotte, string> = {
       <rect x="56" y="52" width="8" height="10" rx="2" fill="${peau}" ${t}/>
       <ellipse class="crane" cx="60" cy="44" rx="13" ry="14" fill="${peau}" ${t}/>
       ${ombrage('M62 30 Q73 32 73 44 Q73 57 62 58 Z')}
-      <path d="M48 47 Q46.5 37 51 33.5 M69 33.5 Q73.5 37 72 47" stroke="${TRAIT}" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <path d="M48 47 Q46.5 37 51 33.5 M69 33.5 Q73.5 37 72 47" stroke="#8a6040" stroke-width="4.4" fill="none" stroke-linecap="round"/>
+      <path d="M48.2 42.5 Q47.6 37.5 50.5 35 M69.5 35 Q72.4 37.5 71.8 42.5" stroke="${TRAIT}" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M48.2 42.5 Q47.6 37.5 50.5 35 M69.5 35 Q72.4 37.5 71.8 42.5" stroke="#8a6040" stroke-width="3.6" fill="none" stroke-linecap="round"/>
       <circle cx="52" cy="50" r="2.6" fill="#e58f7e" opacity=".55"/><circle cx="68" cy="50" r="2.6" fill="#e58f7e" opacity=".55"/>
       <g class="yeux"><path d="M52.5 45 Q55 42.5 57.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M62.5 45 Q65 42.5 67.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/></g>
       <path d="M55 51 Q60 55.5 65 51" stroke="${TRAIT}" stroke-width="1.6" fill="#b44a3a" stroke-linecap="round"/>
