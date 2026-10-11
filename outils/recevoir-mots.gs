@@ -20,6 +20,8 @@
  *  - sinon → il est ajouté, avec la date du jour dans « Ajouté » : l'appli montre les mots
  *    du dernier envoi dans la liste des mots (onglet « Nouveaux »).
  * Les colonnes « Page » et « Ajouté » sont créées au premier envoi dans un onglet.
+ * Une matière en français (Français, Religion) a les colonnes « Mot » et « Définition » (la
+ * définition tient lieu de traduction) ; avec « creer », son onglet est créé s'il n'existe pas.
  * Avec « dater », les mots déjà présents reçoivent aussi la date du jour s'ils n'en ont pas.
  *
  * Les questions de cours (lignes avec « question ») vont dans l'onglet « Vragen », créé au
@@ -36,7 +38,8 @@
 
 // mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; de « matiere » à « nombre » pour l'onglet « Vragen »
 const COLONNES = {
-  nl: ['néerlandais', 'nederlands', 'nl'],
+  // « Mot » : l'onglet d'une matière en français (Français, Religion), dont la définition tient lieu de traduction
+  nl: ['néerlandais', 'nederlands', 'nl', 'mot', 'terme', 'notion', 'mot-clé'],
   det: ['dét.', 'dét', 'det', 'déterminant', 'lidwoord', 'article'],
   fr: ['français', 'frans', 'fr'],
   definition: ['définition', 'definition', 'definitie'],
@@ -57,6 +60,8 @@ const COLONNES = {
 
 // l'onglet des questions de cours, créé au premier envoi de questions
 const TITRES_QUESTIONS = ['Matière', 'Chapitre', 'Page', 'Question', 'Réponse', 'Leurres', 'Éléments', 'Nombre', 'Ajouté']
+// l'onglet des mots d'une matière en français, créé au premier envoi avec « creer »
+const TITRES_MOTS_FR = ['Chapitre', 'Page', 'Mot', 'Définition', 'Exemple', 'Remarque', 'Ajouté']
 // champs d'une question qu'un nouvel envoi peut compléter s'ils sont vides
 const COMPLETABLES = ['reponse', 'leurres', 'elements', 'nombre', 'page', 'interro', 'rate']
 // pour un mot déjà là : de quelle interro il vient, et ce que l'élève y avait écrit
@@ -93,7 +98,7 @@ function doPost(e) {
     const verrou = LockService.getScriptLock()
     verrou.waitLock(30000)
     try {
-      return recevoir(req.onglet, req.lignes || [], !!req.essai, !!req.dater)
+      return recevoir(req.onglet, req.lignes || [], !!req.essai, !!req.dater, !!req.creer)
     } finally {
       verrou.releaseLock()
     }
@@ -117,16 +122,17 @@ function verifierCle(cle) {
 
 const norm = s => String(s == null ? '' : s).trim().toLowerCase()
 
-function recevoir(nomOnglet, lignes, essai, dater) {
+function recevoir(nomOnglet, lignes, essai, dater, creer) {
   const envoiQuestions = lignes.some(m => m.question)
   let feuille = SpreadsheetApp.getActive().getSheetByName(nomOnglet)
-  if (!feuille && !envoiQuestions) throw new Error('onglet introuvable : ' + nomOnglet)
+  if (!feuille && !envoiQuestions && !creer) throw new Error('onglet introuvable : ' + nomOnglet + ' (avec --creer, il est créé)')
   if (!feuille && essai) {
-    return { ok: true, essai, nouvelOnglet: true, ajoutes: lignes.map(m => m.question), pages: [], dejaLa: [], dates: [] }
+    return { ok: true, essai, nouvelOnglet: true, ajoutes: lignes.map(m => m.question || m.nl), pages: [], dejaLa: [], dates: [], completes: [] }
   }
   if (!feuille) {
+    const t = envoiQuestions ? TITRES_QUESTIONS : TITRES_MOTS_FR
     feuille = SpreadsheetApp.getActive().insertSheet(nomOnglet)
-    feuille.getRange(1, 1, 1, TITRES_QUESTIONS.length).setValues([TITRES_QUESTIONS]).setFontWeight('bold')
+    feuille.getRange(1, 1, 1, t.length).setValues([t]).setFontWeight('bold')
     feuille.setFrozenRows(1)
   }
 
@@ -136,8 +142,10 @@ function recevoir(nomOnglet, lignes, essai, dater) {
   // deux sortes d'onglets : les mots d'une matière, ou les questions de cours
   const questions = col.question >= 0
   if (questions !== envoiQuestions) throw new Error(`« ${nomOnglet} » n'est pas un onglet de ${envoiQuestions ? 'questions' : 'mots'}`)
-  if (questions ? col.reponse < 0 || col.matiere < 0 : col.nl < 0 || col.fr < 0) {
-    throw new Error(questions ? 'colonnes « Matière » et « Réponse » introuvables' : 'colonnes « Néerlandais » et « Français » introuvables')
+  // une matière en français : pas de colonne « Français », la définition en tient lieu
+  const sansTraduction = !questions && col.fr < 0 && col.definition >= 0
+  if (questions ? col.reponse < 0 || col.matiere < 0 : col.nl < 0 || (col.fr < 0 && !sansTraduction)) {
+    throw new Error(questions ? 'colonnes « Matière » et « Réponse » introuvables' : 'colonnes « Néerlandais » et « Français » (ou « Mot » et « Définition ») introuvables')
   }
   // ce qui identifie une ligne : le mot dans son chapitre, ou la question dans sa matière
   const identite = questions ? l => [l[col.matiere], l[col.question]] : l => [l[col.nl], l[col.chapitre]]
@@ -166,7 +174,7 @@ function recevoir(nomOnglet, lignes, essai, dater) {
   const nouvelles = []
   for (const m of lignes) {
     const cle = identiteEnvoi(m).map(norm).join('␟')
-    if (questions ? !norm(m.question) || !norm(m.reponse) : !norm(m.nl) || !norm(m.fr)) continue
+    if (questions ? !norm(m.question) || !norm(m.reponse) : !norm(m.nl) || !norm(sansTraduction ? m.definition : m.fr)) continue
     if (index.has(cle)) {
       const i = index.get(cle)   // -1 : mot en double dans l'envoi lui-même
       // « dater » : les mots déjà là reçoivent aussi la date du jour (s'ils n'en ont pas)

@@ -55,6 +55,19 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.
 
+## Matières en français
+
+**Français** et **Religion** (et tout onglet dont le nom commence par « FR ») sont des cours
+en français, pas en immersion : leurs mots et questions sont lus avec la voix française et
+corrigés en français, sans traduction.
+- Onglet des mots : colonnes **Mot** et **Définition** (la définition tient lieu de
+  traduction), plus Exemple, Remarque, Chapitre, Page comme ailleurs.
+- Questions : dans « Vragen », avec Matière = `Français` ou `Religion`. Une matière peut
+  n'avoir que des questions, sans onglet de mots.
+- Exercices : Questions de cours, Définitions, Textes à trous, Défilement (le mot, puis sa
+  définition) et Mots croisés. Les exercices de traduction et de néerlandais (QCM, Écrit,
+  Dictée, de/het, Oral…) n'en prennent pas les mots.
+
 ## Traductions au survol
 
 Dans les questions de cours et les définitions (exercices et liste), les mots néerlandais qui

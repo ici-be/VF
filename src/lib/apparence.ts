@@ -12,6 +12,9 @@ interface Apparence {
   mascotte?: Mascotte
 }
 
+/** La langue du cours : néerlandais (immersion), ou français (Français, Religion, onglets « FR … »). */
+export type LangueCours = 'nl' | 'fr'
+
 const CONNUES: [RegExp, string, string, Mascotte?][] = [
   [/geschiedenis|histoire/i, '🏛️', 'Histoire', 'chevalier'],
   [/aardrijkskunde|geografie|géographie/i, '🌍', 'Géographie', 'colomb'],
@@ -27,17 +30,31 @@ const CONNUES: [RegExp, string, string, Mascotte?][] = [
   [/kunst|beeldende|\barts?\b/i, '🎨', 'Arts'],
   [/lichamelijke|sport|\bLO\b/i, '⚽', 'Sport'],
   [/godsdienst|religi|levensbeschouw|morale?/i, '🕊️', 'Religion / morale'],
+  [/fran[cç]ais|\bfrans\b/i, '📖', 'Français'],
   [/engels|anglais|english/i, '🇬🇧', 'Anglais'],
   [/duits|allemand/i, '🇩🇪', 'Allemand'],
   [/néerlandais|nederlands|neerlandais/i, '💬', 'Néerlandais', 'renard'],
 ]
+
+// les matières données en français (pas en immersion) : leurs mots et questions sont en français
+const EN_FRANCAIS = /godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b/i
+const PREFIXE_FR = /^FR\s+/
 
 const EMOJI_DEBUT = /^(\p{Extended_Pictographic}|\p{Regional_Indicator}{2})️?\s*/u
 
 export function apparence(nom: string): Apparence {
   const emoji = nom.match(EMOJI_DEBUT)
   const sansEmoji = emoji ? nom.slice(emoji[0].length) : nom
-  const titre = sansEmoji.replace(/^(HW|NW|MW|AV)\s+/, '').trim() || sansEmoji
+  const titre = sansEmoji.replace(/^(HW|NW|MW|AV|FR)\s+/, '').trim() || sansEmoji
   const connue = CONNUES.find(([re]) => re.test(sansEmoji))
   return { icone: emoji ? emoji[1] : connue?.[1] ?? '📚', titre, fr: connue?.[2], mascotte: connue?.[3] }
 }
+
+/** La langue d'une matière, d'après le nom de son onglet. */
+export function langueMatiere(nom: string): LangueCours {
+  const sansEmoji = nom.replace(EMOJI_DEBUT, '')
+  return PREFIXE_FR.test(sansEmoji) || EN_FRANCAIS.test(sansEmoji) ? 'fr' : 'nl'
+}
+
+/** La langue d'un mot ou d'une question : celle de sa matière. */
+export const langueDe = (m: { matiere: string }) => langueMatiere(m.matiere)

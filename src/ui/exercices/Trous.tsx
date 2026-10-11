@@ -5,11 +5,13 @@ import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Infos, Verdict } from './commun'
 import { Actions } from './Reponses'
 import { nombre } from '../../lib/texte'
+import { langueDe } from '../../lib/apparence'
 
 // L'exemple du tableau avec un trou (ou plusieurs) à compléter ; la traduction
 // française du mot sert d'indice.
 export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
   const m = carte.mot
+  const langue = langueDe(m)
   const morceaux = decouper(m.exemple, m.nl) ?? [{ texte: m.exemple }]
   const trous = morceaux.flatMap(x => ('trou' in x ? [x.trou] : []))
   const [valeurs, setValeurs] = useState<string[]>(() => trous.map(() => ''))
@@ -21,12 +23,12 @@ export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExerci
 
   const valider = (abandon = false) => {
     if (correction) { suivant(correction.resultat); return }
-    const res = trous.map((t, k) => (abandon ? { resultat: 'faux' as const, message: '' } : corriger(valeurs[k], t, 'nl', '', {})))
+    const res = trous.map((t, k) => (abandon ? { resultat: 'faux' as const, message: '' } : corriger(valeurs[k], t, langue, '', {})))
     const pire = res.some(r => r.resultat === 'faux') ? 'faux' : res.some(r => r.resultat === 'presque') ? 'presque' : 'juste'
     setParTrou(res)
     annoncer(pire)
     setCorrection({ resultat: pire, message: [...new Set(res.map(r => r.message).filter(Boolean))].join(' ') })
-    dire(reglages, m.exemple, 'nl')
+    dire(reglages, m.exemple, langue)
   }
 
   let k = -1
@@ -53,7 +55,7 @@ export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExerci
                 style={{ width: `${Math.max(5, x.trou.length + 2)}ch` }}
                 onInput={e => { const v = [...valeurs]; v[i] = (e.target as HTMLInputElement).value; setValeurs(v) }}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); valider() } }}
-                autocomplete="off" autocapitalize="off" spellcheck={false} lang="nl"
+                autocomplete="off" autocapitalize="off" spellcheck={false} lang={langue}
                 aria-label={trous.length > 1 ? `Trou ${i + 1}` : 'Le mot qui manque'}
               />
             )

@@ -7,6 +7,9 @@ argument-hint: <interro.pdf> [autres PDF]
 # Ajouter une interro scannée au tableau
 
 Les interros sont des PDF scannés, remplis et corrigés à la main (immersion en néerlandais).
+Une interro de **Français** ou de **Religion** se traite de la même façon, en français :
+questions et réponses en français, Matière = `Français` ou `Religion`, chapitre au format du
+cours (`1. Les figures de style`). Voir aussi `/cours`, section 8.
 Le but : retrouver **les questions telles que le professeur les pose**, avec la bonne réponse,
 pour que l'élève s'entraîne sur ce format (exercice « Questions de cours », feuille « Interro »).
 On parle français avec l'utilisateur.

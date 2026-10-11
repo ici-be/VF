@@ -1,4 +1,5 @@
 // Les mots néerlandais du tableau reconnus dans un texte (une question, une définition) :
+import { langueDe } from './apparence'
 // au survol, l'appli en montre la traduction. Seulement les vrais mots du vocabulaire (pas les
 // formes conjuguées ni les nombres générés), les expressions de plusieurs mots en priorité.
 import type { Mot, Vocabulaire } from './mots'
@@ -29,7 +30,7 @@ function formes(nl: string): string[] {
 export function indexer(mots: Mot[]): Index {
   const index: Index = new Map()
   for (const m of mots) {
-    if (m.verbe || m.getal !== undefined || m.vraag) continue
+    if (m.verbe || m.getal !== undefined || m.vraag || langueDe(m) === 'fr') continue
     const e: Entree = { nl: m.nl, det: m.det, fr: m.fr, matiere: m.matiere }
     for (const f of formes(m.nl)) {
       const l = index.get(f) ?? []

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { question, reponse } from '../../lib/seance'
 import type { PropsExercice } from '../Seance'
 import { attendre, dire, Infos, Langue } from './commun'
+import { langueDe } from '../../lib/apparence'
 
 // Le mot s'affiche (et est lu), la réponse arrive après « délai » secondes,
 // puis on passe au mot suivant. La pause arrête tout et reprend l'étape en cours.
@@ -58,7 +59,8 @@ export function Defilement({ carte, reglages, setReglages, pause, suivant }: Pro
               <div class="minuteur"><div key={String(pause)} style={{ animation: pause ? 'none' : `vider ${delai}s linear forwards` }} /></div>
             </>
           : <>
-              <Langue l={rep.langue} />
+              {/* une matière en français : la réponse est la définition du mot */}
+              <Langue l={rep.langue} texte={langueDe(carte.mot) === 'fr' ? 'Définition' : undefined} />
               <p class="repondu">{rep.texte}</p>
               <Infos mot={carte.mot} />
             </>}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+import { langueDe } from '../lib/apparence'
 import { derniersAjouts, type Mot, type Vocabulaire } from '../lib/mots'
 import { exercice, motsChoisis, pagesChoisies, questionsChoisies, type Reglages } from '../lib/reglages'
 import { motsARevoir, type Suivi } from '../lib/progression'
@@ -77,6 +78,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
   if (trier === 'nl') mots = [...mots].sort((a, b) => cmp(a.nl, b.nl))
   if (trier === 'fr') mots = [...mots].sort((a, b) => cmp(a.fr.replace(/^(le |la |les |l')/i, ''), b.fr.replace(/^(le |la |les |l')/i, '')))
 
+  // que des matières en français : titres de colonnes en français (Mot, Définition…)
+  const toutFr = mots.length > 0 && mots.every(m => langueDe(m) === 'fr')
   const lignes: (Mot | { groupe: string; matiere: string; chapitre: string })[] = []
   let groupe = ''
   for (const m of mots) {
@@ -177,8 +180,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
         {vue === 'tous' && (
           <div class="segment">
             <button aria-pressed={tri === 'chapitre'} onClick={() => setTri('chapitre')}>Par chapitre</button>
-            <button aria-pressed={tri === 'nl'} onClick={() => setTri('nl')}>A→Z NL</button>
-            <button aria-pressed={tri === 'fr'} onClick={() => setTri('fr')}>A→Z FR</button>
+            <button aria-pressed={tri === 'nl'} onClick={() => setTri('nl')}>{toutFr ? 'A→Z mot' : 'A→Z NL'}</button>
+            <button aria-pressed={tri === 'fr'} onClick={() => setTri('fr')}>{toutFr ? 'A→Z définition' : 'A→Z FR'}</button>
           </div>
         )}
       </div>
@@ -206,7 +209,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
         : (
           <div class={`tableau ${enQuestions ? 'questions' : ''}`}>
             <table>
-              <thead><tr><th></th>{enQuestions ? <><th>Vraag</th><th>Antwoord</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
+              <thead><tr><th></th>{enQuestions ? (toutFr ? <><th>Question</th><th>Réponse</th></> : <><th>Vraag</th><th>Antwoord</th></>) : toutFr ? <><th>Mot</th><th>Définition</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
                 {lignes.map(l => 'groupe' in l
                   ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
@@ -216,7 +219,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                       <td class={`nl ${l.vraag ? 'vraag' : ''}`}>
                         {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
                         {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
-                        <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, 'nl')} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
+                        <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, langueDe(l))} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
                       </td>
                       <td>
                         {l.fr}
@@ -246,7 +249,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
 function Details({ m }: { m: Mot }) {
   return (
     <>
-      {m.definition && <span class="extra"><i>Définition :</i> <Glose texte={m.definition} matiere={m.matiere} exclure={[m.nl]} /></span>}
+      {m.definition && m.definition !== m.fr && <span class="extra"><i>Définition :</i> <Glose texte={m.definition} matiere={m.matiere} exclure={[m.nl]} /></span>}
       {m.exemple && <span class="extra"><i>Exemple :</i> {m.exemple.replace(/[\[\]]/g, '')}</span>}
       {m.remarque && <span class="extra"><i>Remarque :</i> {m.remarque}</span>}
     </>

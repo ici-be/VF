@@ -5,6 +5,7 @@ import { lireXlsx, type Onglet } from './xlsx'
 import { lire, ecrire } from './stockage'
 import { avecConjugaison } from './conjugaison'
 import { avecGetallen } from './getallen'
+import { langueMatiere } from './apparence'
 
 export const SHEET_ID = '11jHRMPgM1A3N8eBCXocn-eqs52uqaJCVtbFNq2U0K8Y'
 export const SANS_CHAPITRE = 'Sans chapitre'
@@ -13,8 +14,10 @@ export interface Mot {
   id: string           // matière + mot néerlandais : sert à suivre la progression
   matiere: string
   chapitre: string
+  /** le mot dans la langue du cours : néerlandais, ou français pour une matière en français (voir langueMatiere) */
   nl: string
   det: string          // de | het | ''
+  /** la traduction française ; pour une matière en français, la définition du mot */
   fr: string
   definition: string
   exemple: string      // la partie à trouver est entre [crochets]
@@ -104,18 +107,24 @@ export function dateAjout(v: string): string {
 }
 
 const norm = (s: string) => s.trim().toLowerCase()
+/** une matière en français : le mot dans « Mot », sa définition sert de traduction */
+const MOT_FR = ['mot', 'terme', 'notion', 'mot-clé']
 const PAGE = ['page', 'pagina', 'blz', 'blz.']
 const INTERRO = ['interro', 'toets']
 /** « 12 » → 12 ; vide ou illisible → rien */
 const lirePage = (v: string) => { const n = parseInt(v, 10); return Number.isFinite(n) ? { page: n } : {} }
 
 export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
-  const entete = onglet.lignes.findIndex(l => l.some(c => COLONNES.nl.includes(norm(c))))
+  const francais = langueMatiere(onglet.nom) === 'fr'
+  const nomsNl = francais ? [...MOT_FR, ...COLONNES.nl] : COLONNES.nl
+  const entete = onglet.lignes.findIndex(l => l.some(c => nomsNl.includes(norm(c))))
   if (entete < 0) return null
   const titres = onglet.lignes[entete].map(norm)
   const col = Object.fromEntries(
-    Object.entries(COLONNES).map(([cle, noms]) => [cle, titres.findIndex(t => noms.includes(t))]),
+    Object.entries({ ...COLONNES, nl: nomsNl }).map(([cle, noms]) => [cle, titres.findIndex(t => noms.includes(t))]),
   ) as Record<keyof typeof COLONNES, number>
+  // en français, pas de traduction : la définition en tient lieu
+  if (francais && col.fr < 0) col.fr = col.definition
   if (col.fr < 0) return null
   const colPage = titres.findIndex(t => PAGE.includes(t))
   const colInterro = titres.findIndex(t => INTERRO.includes(t)), colRate = titres.findIndex(t => RATE.includes(t))
@@ -126,7 +135,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
   for (const ligne of onglet.lignes.slice(entete + 1)) {
     const val = (k: keyof typeof COLONNES) => (col[k] >= 0 ? (ligne[col[k]] ?? '').trim() : '')
     const nl = val('nl'), fr = val('fr')
-    if (!nl || !fr || COLONNES.nl.includes(norm(nl))) continue   // ligne vide ou en-tête répété
+    if (!nl || !fr || nomsNl.includes(norm(nl))) continue   // ligne vide ou en-tête répété
     const chapitre = val('chapitre') || SANS_CHAPITRE
     if (!chapitres.includes(chapitre)) chapitres.push(chapitre)
     // un même mot peut apparaître dans deux chapitres : l'identifiant reste unique
@@ -208,10 +217,11 @@ export function vocabulaireDepuisXlsx(octets: Uint8Array): Vocabulaire {
   const onglets = lireXlsx(octets)
   const matieres = onglets.map(matiereDepuisOnglet).filter((m): m is Matiere => m !== null)
   if (!matieres.length) throw new Error('Aucun onglet du tableau n’a de colonnes « Néerlandais » et « Français ».')
-  // chaque question rejoint sa matière (colonne « Matière » = nom de l'onglet des mots)
+  // chaque question rejoint sa matière (colonne « Matière » = nom de l'onglet des mots) ;
+  // une matière sans onglet de mots (Religion, au début) n'a que ses questions
   for (const q of onglets.flatMap(o => questionsDepuisOnglet(o) ?? [])) {
-    const m = matieres.find(x => norm(x.nom) === norm(q.matiere))
-    if (!m) continue
+    let m = matieres.find(x => norm(x.nom) === norm(q.matiere))
+    if (!m) matieres.push(m = { nom: q.matiere, chapitres: [], mots: [] })
     q.matiere = m.nom
     q.id = `${m.nom}|?|${q.nl}`
     ;(m.questions ??= []).push(q)
@@ -243,3 +253,6 @@ export async function telechargerVocabulaire(): Promise<Vocabulaire> {
   ecrire(CLE, voc)
   return avecGetallen(avecConjugaison(voc))
 }
+
+/** Ce que compte une matière (ou un chapitre) : ses mots, ou ses questions si elle n'a pas de mots. */
+export const contenu = (m: Matiere): Mot[] => (m.mots.length ? m.mots : m.questions ?? [])

@@ -1,4 +1,5 @@
 // Le haut de l'accueil : le logo (les deux bulles NL/FR de l'icône), le nom « Woordjes »
+import { langueDe } from '../lib/apparence'
 // et, dessous, un mot des matières choisies avec sa traduction.
 import { useEffect, useState } from 'preact/hooks'
 import type { Mot } from '../lib/mots'
@@ -26,7 +27,7 @@ export function MotExemple({ mots }: { mots: Mot[] }) {
   useEffect(() => {
     if (paire) return
     // un mot court (il doit tenir sur une ligne de téléphone), sans les formes conjuguées
-    const possibles = mots.filter(m => !m.verbe)
+    const possibles = mots.filter(m => !m.verbe && langueDe(m) === 'nl')
       .map(m => [nlComplet(m), premiereTraduction(m.fr)] as const)
       .filter(([nl, fr]) => nl && fr && nl.length <= 18 && fr.length <= 20)
     if (possibles.length) setPaire(possibles[Math.floor(Math.random() * possibles.length)])

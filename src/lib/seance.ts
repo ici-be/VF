@@ -3,6 +3,7 @@ import type { Mot } from './mots'
 import { exercice, type Reglages } from './reglages'
 import { fragilite } from './progression'
 import { simplifier } from './correction'
+import { langueDe } from './apparence'
 
 export interface Carte {
   mot: Mot
@@ -34,19 +35,21 @@ export function construireSerie(mots: Mot[], r: Reglages, hasard = Math.random):
   if (r.ordre === 'fragiles') choisis = melanger(choisis, hasard)
   return choisis.map(mot => ({
     mot,
-    sens: r.sens === 'mix' ? (hasard() < 0.5 ? 'fr-nl' : 'nl-fr') : r.sens,
+    // une matière en français : toujours le mot, puis sa définition (pas de sens NL ↔ FR)
+    sens: langueDe(mot) === 'fr' ? 'nl-fr' : r.sens === 'mix' ? (hasard() < 0.5 ? 'fr-nl' : 'nl-fr') : r.sens,
   }))
 }
 
 /** Le mot néerlandais avec son article : « het geloof ». */
 export const nlComplet = (m: Mot) => (m.det ? `${m.det} ${m.nl}` : m.nl)
 
+// le côté « nl » d'un mot est dans la langue du cours (le français pour Français, Religion…)
 export function question(c: Carte): { texte: string; langue: 'fr' | 'nl' } {
-  return c.sens === 'fr-nl' ? { texte: c.mot.fr, langue: 'fr' } : { texte: nlComplet(c.mot), langue: 'nl' }
+  return c.sens === 'fr-nl' ? { texte: c.mot.fr, langue: 'fr' } : { texte: nlComplet(c.mot), langue: langueDe(c.mot) }
 }
 
 export function reponse(c: Carte): { texte: string; langue: 'fr' | 'nl' } {
-  return c.sens === 'fr-nl' ? { texte: nlComplet(c.mot), langue: 'nl' } : { texte: c.mot.fr, langue: 'fr' }
+  return c.sens === 'fr-nl' ? { texte: nlComplet(c.mot), langue: langueDe(c.mot) } : { texte: c.mot.fr, langue: 'fr' }
 }
 
 /**

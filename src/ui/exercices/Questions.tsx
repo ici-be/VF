@@ -7,6 +7,7 @@ import { dire, EntreeSuivant, Langue } from './commun'
 import { Actions, Choix, Saisie } from './Reponses'
 import { TROU } from '../../lib/mots'
 import { Glose } from '../Glose'
+import { langueDe } from '../../lib/apparence'
 
 // Une question du cours (onglet « Vragen ») : choisir la bonne réponse parmi 4,
 // ou y répondre dans sa tête, voir la réponse et dire honnêtement si on la savait.
@@ -16,27 +17,29 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
   const m = carte.mot
   const vraag = m.vraag!
   const trou = TROU.test(m.nl)
+  // néerlandais (immersion), ou français (Français, Religion)
+  const langue = langueDe(m)
   // les mauvaises réponses écrites avec la question ; s'il en manque, les réponses d'autres questions
   const options = useMemo(() => {
     const propres = vraag.leurres.filter(l => l !== m.fr).slice(0, 3)
     return melanger([m.fr, ...propres, ...leurres({ mot: m, sens: 'nl-fr' }, tous, 3 - propres.length)])
   }, [])
-  const lireReponse = () => dire(reglages, trou ? m.nl.replace(TROU, m.fr.split(/\s*\/\s*/)[0]) : m.fr, 'nl')
+  const lireReponse = () => dire(reglages, trou ? m.nl.replace(TROU, m.fr.split(/\s*\/\s*/)[0]) : m.fr, langue)
 
-  useEffect(() => { dire(reglages, m.nl, 'nl') }, [])
+  useEffect(() => { dire(reglages, m.nl, langue) }, [])
 
   return (
     <>
       <div class="carte">
-        <Langue l="nl" />
+        <Langue l={langue} />
         <p class="mot petit">{trou ? <PhraseATrou phrase={m.nl} matiere={m.matiere} /> : <Glose texte={m.nl} matiere={m.matiere} />}</p>
         <p class="astuce">{nomChapitre(m.chapitre)}{vraag.page && ` · p. ${vraag.page}`}{vraag.interro && <> · <span class="tag-interro">{vraag.interro}</span></>}</p>
       </div>
       {trou
-        ? <Saisie langue="nl" attendu={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer}
-            corriger={t => corriger(t, m.fr, 'nl')} placeholder="Le mot qui manque" />
+        ? <Saisie langue={langue} attendu={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer}
+            corriger={t => corriger(t, m.fr, langue)} placeholder="Le mot qui manque" />
         : vraag.nombre > 0
-        ? <Enumeration elements={vraag.elements} nombre={vraag.nombre} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />
+        ? <Enumeration langue={langue} elements={vraag.elements} nombre={vraag.nombre} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />
         : reglages.repondre === 'choix'
         ? <Choix options={options} bonne={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} longues />
         : <DansMaTete reponse={m.fr} matiere={m.matiere} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />}
@@ -129,7 +132,8 @@ function ChampCorrige({ tape, champ, attendu }: {
   )
 }
 
-function Enumeration({ elements, nombre, pause, lire, suivant, annoncer }: {
+function Enumeration({ langue, elements, nombre, pause, lire, suivant, annoncer }: {
+  langue: 'fr' | 'nl'
   elements: string[]
   nombre: number
   pause: boolean
@@ -176,7 +180,7 @@ function Enumeration({ elements, nombre, pause, lire, suivant, annoncer }: {
             {c
               ? <ChampCorrige tape={t} champ={c.champs[i]} attendu={places[i]} />
               : <input
-                  ref={el => { champs.current[i] = el }} value={t} lang="nl"
+                  ref={el => { champs.current[i] = el }} value={t} lang={langue}
                   autocomplete="off" autocapitalize="off" spellcheck={false} aria-label={`Réponse ${i + 1}`}
                   onInput={e => { const v = (e.target as HTMLInputElement).value; setTextes(ts => ts.map((x, j) => (j === i ? v : x))) }}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); entree(i) } }}

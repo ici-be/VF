@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
+import { langueDe } from '../lib/apparence'
 import { IconeExercice } from './icones'
 import { question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
@@ -104,8 +105,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   // les voix de toute la série, téléchargées dès le départ
   useEffect(() => { if (reglages.voix || ex.id === 'oral' || ex.id === 'dictee') precharger(serie.flatMap(c => [
     // une question de cours et sa réponse sont toutes deux en néerlandais
-    ...(c.mot.vraag ? [{ texte: c.mot.nl, langue: 'nl' as const }, { texte: c.mot.fr, langue: 'nl' as const }] : [question(c), reponse(c)]),
-    ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: 'nl' as const })),
+    ...(c.mot.vraag ? [{ texte: c.mot.nl, langue: langueDe(c.mot) }, { texte: c.mot.fr, langue: langueDe(c.mot) }] : [question(c), reponse(c)]),
+    ...[c.mot.definition, c.mot.exemple].filter(Boolean).map(texte => ({ texte, langue: langueDe(c.mot) })),
     // conjugaison : la lecture du temps choisi et ses questions
     ...(c.mot.verbe ? vocalesConjugaison(c.mot.verbe, reglages.temps) : []),
   ])) }, [])

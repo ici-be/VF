@@ -3,6 +3,7 @@ import { lire, ecrire } from './stockage'
 import type { Mot, Vocabulaire } from './mots'
 import { aDesTrous } from './trous'
 import { lettresDe } from './grille'
+import { langueDe } from './apparence'
 import { estPrimitif, type Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
@@ -30,19 +31,21 @@ export interface Exercice {
   nederlands?: boolean
   /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
   surQuestions?: boolean
+  /** convient aussi aux matières en français (Français, Religion) : sinon, seulement au néerlandais */
+  enFrancais?: boolean
   /** mots utilisables par cet exercice */
   accepte: (m: Mot) => boolean
 }
 
 export const EXERCICES: Exercice[] = [
-  { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, accepte: () => true },
+  { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, enFrancais: true, accepte: () => true },
   { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, accepte: () => true },
-  { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot néerlandais.', avecSens: false, avecVitesse: false, avecRepondre: true, accepte: m => m.definition !== '' },
-  { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, accepte: aDesTrous },
-  { id: 'questions', nom: 'Questions de cours', description: 'Une question du cours : choisir la bonne réponse, ou y répondre dans sa tête puis vérifier.', avecSens: false, avecVitesse: false, avecRepondre: true, surQuestions: true, accepte: m => !!m.vraag },
-  { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots néerlandais, la traduction en indice.', avecSens: false, avecVitesse: false, jeu: true, accepte: m => lettresDe(m.nl) !== null },
+  { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot.', avecSens: false, avecVitesse: false, avecRepondre: true, enFrancais: true, accepte: m => m.definition !== '' },
+  { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, enFrancais: true, accepte: aDesTrous },
+  { id: 'questions', nom: 'Questions de cours', description: 'Une question du cours : choisir la bonne réponse, ou y répondre dans sa tête puis vérifier.', avecSens: false, avecVitesse: false, avecRepondre: true, surQuestions: true, enFrancais: true, accepte: m => !!m.vraag },
+  { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots, la traduction (ou la définition) en indice.', avecSens: false, avecVitesse: false, jeu: true, enFrancais: true, accepte: m => lettresDe(m.nl) !== null },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
   // à la fin : l'oral, encore en rodage, puis ce qui ne vaut que pour Nederlands (chapitres Conjugaison et Getallen)
   { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, beta: true, accepte: () => true },
@@ -51,6 +54,14 @@ export const EXERCICES: Exercice[] = [
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, accepte: m => !!m.getal },
 ]
+
+// les exercices propres au néerlandais (traduction, de/het, dictée, oral…) ne prennent pas
+// les mots et questions des matières en français
+for (const e of EXERCICES) {
+  if (e.enFrancais) continue
+  const accepte = e.accepte
+  e.accepte = m => langueDe(m) === 'nl' && accepte(m)
+}
 
 export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? EXERCICES[0]
 

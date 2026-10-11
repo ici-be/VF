@@ -39,6 +39,18 @@ COLONNES = {
     'definition': ['définition', 'definition', 'definitie'],
     'exemple': ['exemple', 'voorbeeld', 'phrase'],
 }
+# une matière en français (comme langueMatiere dans src/lib/apparence.ts) : mot, définition,
+# exemple et questions sont lus avec la voix française ; le mot est dans la colonne « Mot »
+EN_FRANCAIS = re.compile(r'godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b', re.I)
+MOT_FR = ['mot', 'terme', 'notion', 'mot-clé']
+EMOJI_DEBUT = re.compile(r'^(?:[\U0001F000-\U0001FAFF\u2600-\u27BF]|[\U0001F1E6-\U0001F1FF]{2})\ufe0f?\s*')
+
+
+def langue_matiere(nom: str) -> str:
+    sans = EMOJI_DEBUT.sub('', nom.strip())
+    return 'fr' if re.match(r'FR\s+', sans) or EN_FRANCAIS.search(sans) else 'nl'
+
+
 NS = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
 NS_REL = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 
@@ -116,44 +128,50 @@ def lire_onglets(octets: bytes):
 def textes(octets: bytes) -> set[tuple[str, str]]:
     """Tous les (langue, texte) que l'appli peut lire à voix haute."""
     res = set()
-    for _, lignes in lire_onglets(octets):
+    for nom, lignes in lire_onglets(octets):
         res |= textes_questions(lignes)
-        entete = next((i for i, l in enumerate(lignes) if any(c.strip().lower() in COLONNES['nl'] for c in l)), None)
+        langue = langue_matiere(nom)
+        noms_nl = MOT_FR + COLONNES['nl'] if langue == 'fr' else COLONNES['nl']
+        entete = next((i for i, l in enumerate(lignes) if any(c.strip().lower() in noms_nl for c in l)), None)
         if entete is None:
             continue
         titres = [c.strip().lower() for c in lignes[entete]]
-        col = {k: next((i for i, t in enumerate(titres) if t in noms), -1) for k, noms in COLONNES.items()}
+        col = {k: next((i for i, t in enumerate(titres) if t in noms), -1) for k, noms in {**COLONNES, 'nl': noms_nl}.items()}
+        if langue == 'fr' and col['fr'] < 0:
+            col['fr'] = col['definition']   # en français, la définition tient lieu de traduction
         if col['fr'] < 0:
             continue
         for l in lignes[entete + 1:]:
             val = lambda k: l[col[k]].strip() if 0 <= col[k] < len(l) else ''
             nl, fr = val('nl'), val('fr')
-            if not nl or not fr or nl.lower() in COLONNES['nl']:
+            if not nl or not fr or nl.lower() in noms_nl:
                 continue
             det = val('det').lower()
-            res.add(('nl', f'{det} {nl}' if det in ('de', 'het') else nl))
+            res.add((langue, f'{det} {nl}' if det in ('de', 'het') else nl))
             res.add(('fr', fr))
             for k in ('definition', 'exemple'):
                 if val(k):
-                    res.add(('nl', val(k)))
+                    res.add((langue, val(k)))
     return {(lg, t) for lg, t in res if texte_a_lire(t)}
 
 
 def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
-    """Un onglet de questions de cours (« Vragen ») : questions et réponses, en néerlandais."""
+    """Un onglet de questions de cours (« Vragen ») : questions et réponses, dans la langue de leur matière."""
     entete = next((i for i, l in enumerate(lignes) if any(c.strip().lower() in ('question', 'vraag') for c in l)), None)
     if entete is None:
         return set()
     titres = [c.strip().lower() for c in lignes[entete]]
     cols = [i for i, t in enumerate(titres) if t in ('question', 'vraag', 'réponse', 'reponse', 'antwoord')]
-    res = {('nl', l[i].strip()) for l in lignes[entete + 1:] for i in cols if i < len(l) and l[i].strip()}
+    m = next((i for i, t in enumerate(titres) if t in ('matière', 'matiere', 'vak')), None)
+    langue = lambda l: langue_matiere(l[m]) if m is not None and m < len(l) else 'nl'
+    res = {(langue(l), l[i].strip()) for l in lignes[entete + 1:] for i in cols if i < len(l) and l[i].strip()}
     # une phrase à compléter : la correction lit la phrase complète, avec la première variante
     # de la réponse dans le trou (comme Questions.tsx)
     q, r = (next((i for i, t in enumerate(titres) if t in noms), None) for noms in (('question', 'vraag'), ('réponse', 'reponse', 'antwoord')))
     if q is not None and r is not None:
         for l in lignes[entete + 1:]:
             if q < len(l) and r < len(l) and re.search(r'_{3,}', l[q]) and l[r].strip():
-                res.add(('nl', re.sub(r'_{3,}', re.split(r'\s*/\s*', l[r].strip())[0], l[q].strip(), count=1)))
+                res.add((langue(l), re.sub(r'_{3,}', re.split(r'\s*/\s*', l[r].strip())[0], l[q].strip(), count=1)))
     return res
 
 

@@ -11,16 +11,17 @@ export const attendre = (ms: number) => new Promise<void>(r => setTimeout(r, ms)
 export const dire = (r: Reglages, texte: string, langue: 'fr' | 'nl') =>
   r.voix ? parler(texte, langue) : Promise.resolve()
 
-export function Langue({ l }: { l: 'fr' | 'nl' }) {
-  return <span class={`langue ${l}`}>{l === 'fr' ? 'Français' : 'Nederlands'}</span>
+export function Langue({ l, texte }: { l: 'fr' | 'nl'; texte?: string }) {
+  return <span class={`langue ${l}`}>{texte ?? (l === 'fr' ? 'Français' : 'Nederlands')}</span>
 }
 
 /** Définition, remarque et exemple du mot, montrés après la réponse. */
 export function Infos({ mot }: { mot: Mot }) {
-  if (!mot.definition && !mot.remarque && !mot.exemple) return null
+  if ((!mot.definition || mot.definition === mot.fr) && !mot.remarque && !mot.exemple) return null
   return (
     <div class="info">
-      {mot.definition && <span><b>Définition :</b> <Glose texte={mot.definition} matiere={mot.matiere} exclure={[mot.nl]} /></span>}
+      {/* une matière en français : la définition est déjà la réponse */}
+      {mot.definition && mot.definition !== mot.fr && <span><b>Définition :</b> <Glose texte={mot.definition} matiere={mot.matiere} exclure={[mot.nl]} /></span>}
       {mot.exemple && <span><b>Exemple :</b> {mot.exemple.replace(/[\[\]]/g, '')}</span>}
       {mot.remarque && <span><b>Remarque :</b> {mot.remarque}</span>}
     </div>

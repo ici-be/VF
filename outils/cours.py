@@ -8,6 +8,8 @@
 
 Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
+- mots d'une matière en français (Français, Religion) : Page, Mot, Définition, Exemple,
+  Remarque, Chapitre (avec --creer, l'onglet est créé s'il n'existe pas) ;
 - questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres, Éléments, Nombre
   (leurres et éléments séparés par « | »), et Interro pour celles d'une interro scannée,
   envoyées avec --onglet Vragen ;
@@ -37,6 +39,8 @@ TITRES = {
     'matière': 'matiere', 'question': 'question', 'réponse': 'reponse', 'leurres': 'leurres',
     'éléments': 'elements', 'nombre': 'nombre', 'interro': 'interro',
     'raté': 'rate',
+    # une matière en français (Français, Religion) : « Mot » et « Définition », sans traduction
+    'mot': 'nl', 'terme': 'nl',
 }
 
 
@@ -137,15 +141,17 @@ def envoyer(args):
         lecteur = csv.reader(f, delimiter='\t')
         titres = [TITRES.get(t.strip().lower()) for t in next(lecteur)]
         questions = 'question' in titres
-        requis = ('matiere', 'question', 'reponse', 'chapitre') if questions else ('nl', 'fr', 'chapitre')
+        requis = ('matiere', 'question', 'reponse', 'chapitre') if questions else (
+            ('nl', 'fr', 'chapitre') if 'fr' in titres else ('nl', 'definition', 'chapitre'))
         if not all(k in titres for k in requis):
             sys.exit('Il faut au moins les colonnes ' + (
-                'Matière, Question, Réponse et Chapitre.' if questions else 'Néerlandais, Français et Chapitre.'))
+                'Matière, Question, Réponse et Chapitre.' if questions
+                else 'Néerlandais, Français et Chapitre (ou Mot, Définition et Chapitre en français).'))
         lignes = [{k: v.strip() for k, v in zip(titres, l) if k} for l in lecteur if any(c.strip() for c in l)]
     for l in lignes:
         if l.get('page', '').isdigit():
             l['page'] = int(l['page'])
-    res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai, 'dater': args.dater})
+    res = appeler({'onglet': args.onglet, 'lignes': lignes, 'essai': args.essai, 'dater': args.dater, 'creer': args.creer})
     quoi = 'Serait fait' if args.essai else 'Fait'
     print(f'{quoi} dans « {args.onglet} »' + (' (nouvel onglet)' if res.get('nouvelOnglet') else '') + ' :')
     if questions:
@@ -180,6 +186,7 @@ def main():
     s.add_argument('--onglet', required=True)
     s.add_argument('--essai', action='store_true', help='ne rien écrire, dire ce qui serait fait')
     s.add_argument('--dater', action='store_true', help='dater aussi d\'aujourd\'hui les mots déjà présents sans date')
+    s.add_argument('--creer', action='store_true', help='créer l\'onglet s\'il n\'existe pas (matière en français : Mot, Définition…)')
     s.set_defaults(f=envoyer)
     args = p.parse_args()
     args.f(args)

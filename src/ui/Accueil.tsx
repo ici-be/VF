@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { derniersAjouts, type Vocabulaire } from '../lib/mots'
+import { contenu, derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
   EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, questionsChoisies, SEP,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
-import { apparence } from '../lib/apparence'
+import { apparence, langueMatiere } from '../lib/apparence'
 import { motsARevoir, noteSur20 } from '../lib/progression'
 import type { Vue } from './Liste'
 import { niveauNote, nombre, note } from '../lib/texte'
@@ -144,6 +144,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const dispo = aReviser(voc, r, ex).length
   const unite = ex.surQuestions ? 'question' : 'mot'
   // la conjugaison et les nombres n'existent que dans Nederlands : leurs exercices n'apparaissent que si cette matière est choisie
+  // le sens NL → FR n'a de sens que pour une matière en néerlandais
+  const avecSens = r.matieres.some(n => langueMatiere(n) === 'nl')
   const avecNederlands = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe || x.getal !== undefined))
   // un exercice de Nederlands choisi alors que Nederlands ne l'est plus : on passe au QCM
   useEffect(() => { if (ex.nederlands && !avecNederlands) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands])
@@ -173,8 +175,16 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   }
 
   // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
-  const choisirMatiere = (nom: string) => maj({ matieres: [nom] })
-  const ajouterMatiere = (nom: string) => maj({ matieres: [...r.matieres, nom] })
+  // une matière où l'exercice choisi n'a rien (Religion et ses seules questions, Français et le QCM) :
+  // on passe au premier exercice qui y trouve de quoi réviser
+  const avecMatieres = (matieres: string[]) => {
+    const r2 = { ...r, matieres }
+    if (aReviser(voc, r2).length > 0) return maj({ matieres })
+    const ex2 = EXERCICES.find(e => !e.jeu && aReviser(voc, r2, e).length > 0)
+    maj(ex2 ? { matieres, exercice: ex2.id } : { matieres })
+  }
+  const choisirMatiere = (nom: string) => avecMatieres([nom])
+  const ajouterMatiere = (nom: string) => avecMatieres([...r.matieres, nom])
   const retirerMatiere = (nom: string) => { if (r.matieres.length > 1) maj({ matieres: r.matieres.filter(m => m !== nom) }) }
   const basculerChapitre = (cle: string) =>
     maj({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
@@ -199,8 +209,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   const cle = cleChapitre(m.nom, c)
                   return (
                     <button class="puce" aria-pressed={coches.includes(cle)} onClick={() => basculerChapitre(cle)}>
-                      {nomChapitre(c)} <span class="n">{m.mots.filter(x => x.chapitre === c).length}</span>
-                      <Note mots={m.mots.filter(x => x.chapitre === c)} r={r} />
+                      {nomChapitre(c)} <span class="n">{contenu(m).filter(x => x.chapitre === c).length}</span>
+                      <Note mots={contenu(m).filter(x => x.chapitre === c)} r={r} />
                     </button>
                   )
                 })}
@@ -215,7 +225,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc reglages-bloc">
         <h2>Réglages</h2>
         <div class="reglages">
-          {ex.avecSens && (
+          {ex.avecSens && avecSens && (
             <div class="reglage">
               <span class="lbl">Sens</span>
               <div class="segment">
@@ -340,8 +350,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   {a.mascotte
                     ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
                     : <span class="ico" aria-hidden="true">{a.icone}</span>}
-                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={m.mots} r={r} /></span></span>
-                  <span class="n">{m.mots.length}</span>
+                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={contenu(m)} r={r} /></span></span>
+                  <span class="n">{contenu(m).length}</span>
                 </button>
                 {!choisie
                   ? <button class="ajout" onClick={() => ajouterMatiere(m.nom)} title="Ajouter aux matières choisies" aria-label={`Ajouter ${a.titre} aux matières choisies`}>+</button>

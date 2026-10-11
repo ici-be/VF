@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { langueDe } from '../lib/apparence'
 import type { Mot } from '../lib/mots'
 import type { Reglages } from '../lib/reglages'
 import { genererGrille, type Grille, type MotGrille } from '../lib/grille'
@@ -74,7 +75,7 @@ function Partie({ grille, reglages, quitter, rejouer }: { grille: Grille<Mot> } 
         // le mot néerlandais, puis sa traduction (« beginnen… commencer ») ;
         // si un autre mot est trouvé entre-temps, cette traduction-là ne vient pas le couper
         const moi = ++lecture.current
-        parler(nlComplet(m.donnee), 'nl').then(() => { if (moi === lecture.current) parler(m.donnee.fr, 'fr') })
+        parler(nlComplet(m.donnee), langueDe(m.donnee)).then(() => { if (moi === lecture.current) parler(m.donnee.fr, 'fr') })
       }
       noter(m.donnee.id, cases(m).some(k => aides.has(k)) ? 'presque' : 'juste')
     }

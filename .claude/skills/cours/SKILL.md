@@ -7,6 +7,8 @@ argument-hint: <fichier.pdf> [autres PDF]
 # Ajouter un cours scanné au tableau
 
 Les cours sont des PDF scannés (immersion en néerlandais : histoire, géographie, biologie…).
+Les cours **en français** (Français, Religion, ou tout onglet « FR … ») suivent les mêmes
+étapes, avec les différences de la section 8.
 Le but : en tirer les mots utiles, les proposer à l'utilisateur, puis les envoyer dans le
 tableau avec `outils/cours.py`. On parle français avec l'utilisateur.
 
@@ -149,3 +151,33 @@ avec l'API GitHub (`curl -s https://api.github.com/repos/ici-be/VF/actions/runs?
 jusqu'à `completed success`, puis dire à l'utilisateur que les voix sont en ligne (recharger
 l'appli). Si `voix.py` échoue entièrement, le dire : les mots restent lus par la voix du
 navigateur en attendant la tâche horaire.
+
+## 8. Matière en français (Français, Religion)
+
+L'appli sait que **Français** et **Religion** sont en français (et tout onglet nommé « FR … ») :
+voix française, correction en français, exercices adaptés (Questions de cours, Définitions,
+Textes à trous, Défilement, Mots croisés ; pas de traduction ni de de/het). Différences :
+
+- **Onglet** : `Français`, `Religion` (s'il n'existe pas encore, `--creer` le crée au premier
+  envoi de mots, avec les colonnes `Chapitre Page Mot Définition Exemple Remarque Ajouté`).
+  Les questions vont toujours dans `Vragen`, avec Matière = `Français` ou `Religion` ; une
+  matière peut n'avoir que des questions (pas d'onglet de mots).
+- **Chapitre** : comme dans le cours (`1. Les figures de style`), en français.
+- **Mots** : les notions à connaître (termes définis, mots en gras : `métaphore`, `parabole`,
+  `alliance`), pas le vocabulaire courant. **Mot** : forme de base, sans article (sauf s'il fait
+  partie du terme : `l'Ancien Testament`) ; **Définition** (obligatoire : elle tient lieu de
+  traduction et sert de réponse) : reprise du cours, courte, avec majuscule, sans point final ;
+  **Exemple** : une phrase du cours avec le mot entre crochets ; pas de Dét. ni de Français.
+  TSV : `Page	Mot	Définition	Exemple	Remarque	Chapitre`.
+- **Questions** : en français, comme un professeur les poserait (`Qu'est-ce qu'… ?`,
+  `Pourquoi … ?`, `Cite trois …`), avec l'espace français avant `?` ; réponses avec les mots
+  du cours ; leurres, énumérations et phrases à compléter `___` comme en néerlandais.
+- **Envoyer** :
+
+```sh
+python3 outils/cours.py envoyer "<fichier.tsv>" --onglet "Français" --creer --essai
+python3 outils/cours.py envoyer "<fichier.tsv>" --onglet "Français" --creer
+python3 outils/cours.py envoyer "<fichier - questions.tsv>" --onglet Vragen
+```
+
+Puis les voix (section 7) : `voix.py` lit ces mots et questions avec la voix française.
