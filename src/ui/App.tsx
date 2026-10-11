@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
 import { appliquerRates } from '../lib/progression'
 import { glossaire } from '../lib/glossaire'
@@ -54,6 +54,29 @@ export function App() {
     }
   }
   useEffect(() => { actualiser() }, [])
+
+  // le geste « retour » du téléphone (ou le bouton ← du navigateur) ramène à l'accueil au lieu
+  // de quitter le site : hors de l'accueil, une entrée est ajoutée à l'historique ; le retour la
+  // consomme. Revenu à l'accueil par un bouton de l'appli, on la retire pour ne pas la laisser traîner.
+  const empile = useRef(false)
+  useEffect(() => {
+    if (ecran.nom !== 'accueil' && !empile.current) {
+      history.pushState({ woordjes: 'ecran' }, '')
+      empile.current = true
+    } else if (ecran.nom === 'accueil' && empile.current) {
+      empile.current = false
+      history.back()
+    }
+  }, [ecran.nom])
+  useEffect(() => {
+    const retour = () => {
+      if (!empile.current) return
+      empile.current = false
+      setEcran({ nom: 'accueil' })
+    }
+    addEventListener('popstate', retour)
+    return () => removeEventListener('popstate', retour)
+  }, [])
   // un permalien collé dans l'onglet déjà ouvert : seule la fin de l'adresse (#r=…) change,
   // la page ne se recharge pas ; on applique ses réglages et on revient à l'accueil
   useEffect(() => {
