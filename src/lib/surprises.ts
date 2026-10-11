@@ -49,7 +49,7 @@ function etincelle(svg: SVGSVGElement, x: number, y: number, taille = 1) {
 }
 
 // la bouche (ou le museau, ou la fente du heaume) de chaque mascotte
-const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5] }
+const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53] }
 const bouche = (svg: SVGSVGElement) => BOUCHE[svg.dataset.mascotte as Mascotte] ?? [60, 55]
 
 /** Quelques ronds de fumée grise qui montent de (x, y). */
@@ -262,6 +262,18 @@ export const SURPRISES: Surprise[] = [
     await vol
   } },
 
+  // le moine ferme les yeux et chante à pleine voix, en se balançant : les notes s'envolent
+  { id: 'chant', pour: 'moine', async jouer(svg) {
+    const p = parties(svg), D = 3200
+    const [x, y] = bouche(svg)
+    const o = ajout(svg, `<ellipse cx="${x}" cy="${y}" rx="3.4" ry="3" fill="#7a2a22" stroke="${TRAIT}" stroke-width="1.3"/>`)
+    anim(o, [{ transform: 'scale(1)', opacity: 1 }, ...tour(8, i => ({ transform: `scale(${i % 2 ? .7 : 1.15})`, opacity: 1 })), { transform: 'scale(1)', opacity: 0 }], { duration: D, easing: 'ease-in-out' })
+      .then(() => o.remove())
+    o.style.transformOrigin = `${x}px ${y}px`
+    tour(6, i => envol(svg, `<text text-anchor="middle" font-size="${13 + (i % 3) * 2}" font-weight="700" fill="${['#6b4a2e', '#c0506a', '#2f6db0'][i % 3]}" stroke="${TRAIT}" stroke-width=".4">${i % 2 ? '♫' : '♪'}</text>`, x + (i % 2 ? 8 : -6), y - 6, { dx: i % 2 ? 18 : -16, dy: -34, duree: 1500, delai: 150 + i * 420, echelle: 1.2 }))
+    await anim(p.corps, [{ transform: 'rotate(0)' }, ...tour(6, i => ({ transform: `rotate(${i % 2 ? -4 : 4}deg) translateY(${i % 2 ? 0 : -1}px)` })), { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
+  } },
+
   // ---------- deuxième série (démo du 9 octobre) : surtout avec le feu du flambeau ----------
 
   // la flamme s'agite de plus en plus, la mascotte la surveille… pouf ! visage noirci, deux clignements ahuris
@@ -414,6 +426,21 @@ export const SURPRISES: Surprise[] = [
     suie(svg, D * .52, D * .44)
     anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-2px,1.5px)', offset: .1 }, { transform: 'translate(-2px,1.5px) scale(1.2)', offset: .48 }, { transform: 'scaleY(.1)', offset: .51 }, { transform: 'scale(1.25)', offset: .6 }, { transform: 'scale(1.25)', offset: .7 }, { transform: 'scaleY(.1)', offset: .73 }, { transform: 'scale(1.2)', offset: .76 }, { transform: 'scale(1.2)', offset: .86 }, { transform: 'none', offset: .9 }, { transform: 'none' }], D)
     await anim(p.perso, [{ transform: 'rotate(0)' }, { transform: 'rotate(0)', offset: .49 }, { transform: 'translateX(3px) rotate(7deg)', offset: .52 }, { transform: 'rotate(2deg)', offset: .6 }, { transform: 'rotate(0)', offset: .7 }, { transform: 'rotate(0)' }], D)
+  } },
+
+  // la flamme se penche vers le crâne tonsuré, qui prend feu : le moine bondit, souffle… crâne rouge et fumant
+  { id: 'crane', pour: 'moine', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3600
+    anim(p.flamme, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-40deg) scale(1.3)', offset: .14 }, { transform: 'rotate(-36deg) scale(1.35)', offset: .22 }, { transform: 'rotate(0) scale(1)', offset: .3 }, { transform: 'rotate(0) scale(1)' }], D)
+    // le feu et la rougeur dans le corps : ils suivent le moine quand il bondit
+    petitFeu(svg, 60, 31, D * .22, D * .6, { dans: p.corps ?? svg, taille: .9 })
+    const rouge = ajout(svg, `<ellipse cx="60" cy="36" rx="9" ry="5.5" fill="#e0503a"/>`, svg, p.yeux)
+    anim(rouge, [{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: .55, offset: .55 }, { opacity: .55, offset: .85 }, { opacity: 0 }], D).finally(() => rouge.remove())
+    fumee(svg, 60, 28, 3, D * .6, 2.6)
+    souffle(svg, D * .62, 8, -26)
+    envol(svg, texte('!', 22), 82, 22, { dx: 0, dy: -10, duree: 800, delai: D * .3, echelle: 1.1 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'scale(1.4,1.8)', offset: .3 }, { transform: 'scale(1.4,1.8)', offset: .62 }, { transform: 'none', offset: .7 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .3 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .34 }, { transform: 'translateY(-14px)', offset: .42 }, { transform: 'translateY(0) scale(1.05,.93)', offset: .5 }, ...tour(4, i => ({ transform: `rotate(${i % 2 ? 3 : -3}deg)`, offset: .54 + i * .03 })), { transform: 'rotate(0)', offset: .68 }, { transform: 'translateY(0)' }], D)
   } },
 ]
 

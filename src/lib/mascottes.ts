@@ -1,9 +1,9 @@
-// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes »).
+// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; le moine de la Religion ensuite).
 // Chacune tient un flambeau, qu'elle passe à la suivante quand on change de matière.
 
 import { interrompre } from './surprises'
 
-export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille'
+export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine'
 
 const TRAIT = '#26303d'
 const t = `stroke="${TRAIT}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"`
@@ -190,6 +190,38 @@ const DESSINS: Record<Mascotte, string> = {
       <circle cx="71" cy="38" r="6" fill="none" stroke="#3b3b44" stroke-width="1.5"/>
       <path d="M55 38 Q60 36 65 38" stroke="#3b3b44" stroke-width="1.5" fill="none"/>
       <path d="M48 56 Q60 62 72 56" stroke="${TRAIT}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    </g>`,
+
+  // un moine : robe de bure, capuche, cordelière, tonsure, une Bible à la main
+  moine: `
+    ${ombre}
+    ${jambes('#5a3a22', '#7a4f2a')}
+    <g class="corps">
+      <path d="M44 66 Q60 60 76 66 L81 135 Q60 140 39 135 Z" fill="#7a5236" ${t}/>
+      ${ombrage('M62 62 Q70 63 76 66 L81 135 Q70 138 62 139 Z')}
+      <path d="M52 104 L50 134 M68 104 L70 134" stroke="${TRAIT}" stroke-width="1.2" opacity=".35"/>
+      <path d="M43 92 Q60 97 77 92" stroke="${TRAIT}" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M43 92 Q60 97 77 92" stroke="#e8d9b0" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M50 94.5 L48 114" stroke="${TRAIT}" stroke-width="4.4" stroke-linecap="round"/>
+      <path d="M50 94.5 L48 114" stroke="#e8d9b0" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="48.7" cy="104" r="2" fill="#e8d9b0" ${t} stroke-width="1.2"/><circle cx="48" cy="114" r="2.2" fill="#e8d9b0" ${t} stroke-width="1.2"/>
+      ${brasGauche('#7a5236', peau, 37, 90)}
+      <g class="bible" transform="translate(25 78)">
+        <rect x="0" y="0" width="17" height="22" rx="2" fill="#6b2f2a" ${t}/>
+        <path d="M2 1 L2 21" stroke="#4a1f1b" stroke-width="1.4"/>
+        <path d="M9.5 5 L9.5 16 M5.5 9 L13.5 9" stroke="#e2b53c" stroke-width="2.2" stroke-linecap="round"/>
+      </g>
+      <circle cx="37" cy="90" r="4.6" fill="${peau}" ${t}/>
+      ${bras('#7a5236', peau)}
+      <path d="M45 64 Q46 54 60 55 Q74 54 75 64 Q68 70 60 69 Q52 70 45 64 Z" fill="#69452c" ${t}/>
+      <rect x="56" y="52" width="8" height="10" rx="2" fill="${peau}" ${t}/>
+      <ellipse class="crane" cx="60" cy="44" rx="13" ry="14" fill="${peau}" ${t}/>
+      ${ombrage('M62 30 Q73 32 73 44 Q73 57 62 58 Z')}
+      <path d="M48 47 Q46.5 37 51 33.5 M69 33.5 Q73.5 37 72 47" stroke="${TRAIT}" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M48 47 Q46.5 37 51 33.5 M69 33.5 Q73.5 37 72 47" stroke="#8a6040" stroke-width="4.4" fill="none" stroke-linecap="round"/>
+      <circle cx="52" cy="50" r="2.6" fill="#e58f7e" opacity=".55"/><circle cx="68" cy="50" r="2.6" fill="#e58f7e" opacity=".55"/>
+      <g class="yeux"><path d="M52.5 45 Q55 42.5 57.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M62.5 45 Q65 42.5 67.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/></g>
+      <path d="M55 51 Q60 55.5 65 51" stroke="${TRAIT}" stroke-width="1.6" fill="#b44a3a" stroke-linecap="round"/>
     </g>`,
 }
 
