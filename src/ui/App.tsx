@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
-import { aReviser, chargerReglages, enregistrerReglages, type Reglages } from '../lib/reglages'
+import { aReviser, chargerReglages, enregistrerReglages, reglagesDuLien, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
 import { Seance, type Bilan } from './Seance'
@@ -43,6 +43,17 @@ export function App() {
     }
   }
   useEffect(() => { actualiser() }, [])
+  // un permalien collé dans l'onglet déjà ouvert : seule la fin de l'adresse (#r=…) change,
+  // la page ne se recharge pas ; on applique ses réglages et on revient à l'accueil
+  useEffect(() => {
+    const lien = () => {
+      if (!reglagesDuLien(location.hash)) return
+      setReglagesBruts(chargerReglages(voc))
+      setEcran({ nom: 'accueil' })
+    }
+    addEventListener('hashchange', lien)
+    return () => removeEventListener('hashchange', lien)
+  }, [voc])
 
   const lancer = (serie?: Carte[]) => {
     if (!voc) return
