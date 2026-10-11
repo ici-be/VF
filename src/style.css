@@ -682,3 +682,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .copier-lien { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; padding: 4px; border-radius: 6px; color: var(--muted); opacity: .45; font: 600 .78rem var(--body); cursor: pointer; }
 .copier-lien:hover, .copier-lien:focus-visible { opacity: 1; background: var(--panel-2); }
 .copier-lien.copie { opacity: 1; color: var(--ok); }
+
+/* ---------- phrases à compléter (questions d'interro) ---------- */
+.trou { display: inline-block; min-width: 4.5em; margin: 0 .2em; padding: 0 .3em; border-bottom: 3px solid var(--accent); color: var(--accent); text-align: center; line-height: 1.1; }
+.tag-interro { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--mid-bg); color: var(--fg); font-size: .75rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }
+.astuce .tag-interro { margin-left: 0; }
+@media print {
+  .tag-interro { background: none; border: .5pt solid #000; font-size: 7pt; }
+  .feuille-interro .blanc { display: inline-block; width: 45mm; border-bottom: .6pt solid #000; margin: 0 1mm; }
+}

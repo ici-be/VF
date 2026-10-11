@@ -24,7 +24,10 @@ Les **questions de cours** sont dans l'onglet « Vragen » (créé par `/cours`)
 Matière (le nom exact de l'onglet des mots), Chapitre, Page, Question, Réponse, Leurres
 (trois mauvaises réponses séparées par `|`, pour le choix parmi 4), Éléments et Nombre
 (pour les énumérations : `Titel | Oriëntatie | Legende | Schaal`, variantes séparées par
-`/`, et combien en donner si la question en demande moins), et Ajouté. Elles servent
+`/`, et combien en donner si la question en demande moins), Interro (l'interro d'où vient
+la question, remplie par `/interro`) et Ajouté. Une **phrase à compléter** s'écrit avec `___` à
+la place du trou dans « Question », le mot attendu dans « Réponse » : l'élève l'écrit, et
+l'orthographe compte (une lettre de travers = « presque »). Elles servent
 à l'exercice « Questions de cours » et à l'onglet « Questions » de la liste des mots.
 Le bouton **Interro** de l'accueil (ou de cet onglet) imprime une **feuille d'interro** : les questions numérotées avec des
 lignes pour répondre à la main (selon la longueur de la réponse, une par élément pour les
@@ -51,6 +54,14 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
 
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.
+
+## Ajouter une interro
+
+Dans Claude Code, `/interro` suivi du PDF d'une interro corrigée scannée : les questions sont
+reprises dans le style du professeur (phrases à compléter, tableaux, cases à cocher), avec la
+bonne réponse (correction du professeur ou cours), et une vingtaine de questions du même style
+sur le reste du chapitre, pour des interros blanches. Elles vont dans l'onglet « Vragen » ;
+rien de personnel (nom, note, réponses de l'élève) n'est mis dans le tableau, qui est public.
 
 ## Partager des réglages
 

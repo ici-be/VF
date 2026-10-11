@@ -10,6 +10,7 @@ describe('voix', () => {
     expect(texteALire('la légende (d’une carte)')).toBe('la légende')
     expect(texteALire('Het bevolkingsaantal [neemt af]')).toBe('Het bevolkingsaantal neemt af')
     expect(texteALire('barrer / biffer')).toBe('barrer, biffer')
+    expect(texteALire('Een periode van 1000 jaar noemen we een ___.')).toBe('Een periode van 1000 jaar noemen we een ….')
   })
   it('abréviations lues en entier', () => {
     expect(texteALire('Van 3500 v.C. tot 753 v.C.')).toBe('Van 3500 voor Christus tot 753 voor Christus')

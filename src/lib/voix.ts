@@ -21,10 +21,10 @@ const ABREVIATIONS: [RegExp, string][] = [
   [/\bca\./g, 'circa'],
 ]
 
-/** Le texte à lire : sans crochets ni précisions entre parenthèses (identique à outils/voix.py). */
+/** Le texte à lire : sans crochets ni précisions entre parenthèses, le trou d'une phrase à compléter lu comme une pause (identique à outils/voix.py). */
 export function texteALire(t: string): string {
   for (const [abr, mot] of ABREVIATIONS) t = t.replace(abr, mot)
-  return t.normalize('NFC').replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
+  return t.normalize('NFC').replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/_{3,}/g, '…').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
 }
 
 /** Nom du fichier mp3 d'un texte (identique à empreinte() dans outils/voix.py). */

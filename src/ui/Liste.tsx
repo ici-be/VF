@@ -13,6 +13,8 @@ import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
 import { FeuilleInterro } from './FeuilleInterro'
+import { PhraseATrou } from './exercices/Questions'
+import { TROU } from '../lib/mots'
 
 export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux' | 'questions'
 
@@ -196,7 +198,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
                     <tr>
                       <td class="det">{l.det}</td>
                       <td class="nl">
-                        {l.nl}
+                        {l.vraag && TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} /> : l.nl}
+                        {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
                         <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, 'nl')} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
                       </td>
                       <td>

@@ -64,6 +64,7 @@ def texte_a_lire(t: str) -> str:
     t = unicodedata.normalize('NFC', t)
     t = re.sub(r'\([^)]*\)', ' ', t)
     t = re.sub(r'[\[\]]', '', t)
+    t = re.sub(r'_{3,}', '…', t)
     t = re.sub(r'\s*/\s*', ', ', t)
     return re.sub(r'\s+', ' ', t).strip()
 
@@ -136,7 +137,15 @@ def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
         return set()
     titres = [c.strip().lower() for c in lignes[entete]]
     cols = [i for i, t in enumerate(titres) if t in ('question', 'vraag', 'réponse', 'reponse', 'antwoord')]
-    return {('nl', l[i].strip()) for l in lignes[entete + 1:] for i in cols if i < len(l) and l[i].strip()}
+    res = {('nl', l[i].strip()) for l in lignes[entete + 1:] for i in cols if i < len(l) and l[i].strip()}
+    # une phrase à compléter : la correction lit la phrase complète, avec la première variante
+    # de la réponse dans le trou (comme Questions.tsx)
+    q, r = (next((i for i, t in enumerate(titres) if t in noms), None) for noms in (('question', 'vraag'), ('réponse', 'reponse', 'antwoord')))
+    if q is not None and r is not None:
+        for l in lignes[entete + 1:]:
+            if q < len(l) and r < len(l) and re.search(r'_{3,}', l[q]) and l[r].strip():
+                res.add(('nl', re.sub(r'_{3,}', re.split(r'\s*/\s*', l[r].strip())[0], l[q].strip(), count=1)))
+    return res
 
 
 def textes_conjugaison() -> set[tuple[str, str]]:

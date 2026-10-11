@@ -1,6 +1,7 @@
 import type { Mot } from '../lib/mots'
 import { apparence } from '../lib/apparence'
 import { nomChapitre } from './Accueil'
+import { TROU } from '../lib/mots'
 
 // La feuille d'interro imprimable : les questions de cours numérotées, avec des lignes
 // pour répondre à la main, puis le corrigé sur une page à part. Cachée à l'écran.
@@ -37,12 +38,14 @@ export function FeuilleInterro({ questions, titre, sujets }: Props) {
         <p class="eleve"><span>Nom :</span><span>Date :</span></p>
         {questions.map((q, i) => {
           const v = q.vraag!
+          // une phrase à compléter : le trou est la place pour répondre
+          const [avant, ...apres] = q.nl.split(TROU)
           return (
             <>
               {intertitre(q, i)}
               <div class="question">
-                <p><b>{i + 1}.</b> {q.nl}{v.nombre > 0 && v.nombre < v.elements.length && <i> ({v.nombre} au choix)</i>}</p>
-                {v.nombre > 0
+                <p><b>{i + 1}.</b> {apres.length ? <>{avant}<span class="blanc" />{apres.join('…')}</> : q.nl}{v.nombre > 0 && v.nombre < v.elements.length && <i> ({v.nombre} au choix)</i>}</p>
+                {apres.length ? null : v.nombre > 0
                   ? <ol class="lignes">{Array.from({ length: v.nombre }, () => <li />)}</ol>
                   : <div class="lignes">{Array.from({ length: lignesPour(q.fr) }, () => <span />)}</div>}
               </div>
@@ -57,7 +60,7 @@ export function FeuilleInterro({ questions, titre, sujets }: Props) {
             const v = q.vraag!
             return (
               <li>
-                <span class="q">{q.nl}</span>
+                <span class="q">{q.nl.replace(TROU, '…')}</span>
                 {v.nombre > 0
                   ? <span class="r">{v.nombre < v.elements.length && <i>{v.nombre} parmi : </i>}{v.elements.join(' · ')}</span>
                   : <span class="r">{q.fr}</span>}

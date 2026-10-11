@@ -4,20 +4,23 @@ import { corriger, corrigerListe, differences, type CorrectionListe } from '../.
 import { nomChapitre } from '../Accueil'
 import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Langue } from './commun'
-import { Actions, Choix } from './Reponses'
+import { Actions, Choix, Saisie } from './Reponses'
+import { TROU } from '../../lib/mots'
 
 // Une question du cours (onglet « Vragen ») : choisir la bonne réponse parmi 4,
 // ou y répondre dans sa tête, voir la réponse et dire honnêtement si on la savait.
-// Une énumération (« Noem drie … ») se répond toujours en écrivant chaque élément.
+// Une énumération (« Noem drie … ») se répond toujours en écrivant chaque élément, une phrase
+// à compléter (« … noemen we een ___. », comme à l'interro) en écrivant le mot qui manque.
 export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: PropsExercice) {
   const m = carte.mot
   const vraag = m.vraag!
+  const trou = TROU.test(m.nl)
   // les mauvaises réponses écrites avec la question ; s'il en manque, les réponses d'autres questions
   const options = useMemo(() => {
     const propres = vraag.leurres.filter(l => l !== m.fr).slice(0, 3)
     return melanger([m.fr, ...propres, ...leurres({ mot: m, sens: 'nl-fr' }, tous, 3 - propres.length)])
   }, [])
-  const lireReponse = () => dire(reglages, m.fr, 'nl')
+  const lireReponse = () => dire(reglages, trou ? m.nl.replace(TROU, m.fr.split(/\s*\/\s*/)[0]) : m.fr, 'nl')
 
   useEffect(() => { dire(reglages, m.nl, 'nl') }, [])
 
@@ -25,16 +28,25 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
     <>
       <div class="carte">
         <Langue l="nl" />
-        <p class="mot petit">{m.nl}</p>
-        <p class="astuce">{nomChapitre(m.chapitre)}{vraag.page && ` · p. ${vraag.page}`}</p>
+        <p class="mot petit">{trou ? <PhraseATrou phrase={m.nl} /> : m.nl}</p>
+        <p class="astuce">{nomChapitre(m.chapitre)}{vraag.page && ` · p. ${vraag.page}`}{vraag.interro && <> · <span class="tag-interro">{vraag.interro}</span></>}</p>
       </div>
-      {vraag.nombre > 0
+      {trou
+        ? <Saisie langue="nl" attendu={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer}
+            corriger={t => corriger(t, m.fr, 'nl')} placeholder="Le mot qui manque" />
+        : vraag.nombre > 0
         ? <Enumeration elements={vraag.elements} nombre={vraag.nombre} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />
         : reglages.repondre === 'choix'
         ? <Choix options={options} bonne={m.fr} mot={m} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} longues />
         : <DansMaTete reponse={m.fr} pause={pause} lire={lireReponse} suivant={suivant} annoncer={annoncer} />}
     </>
   )
+}
+
+/** La phrase avec son trou bien visible. */
+export function PhraseATrou({ phrase }: { phrase: string }) {
+  const [avant, ...apres] = phrase.split(TROU)
+  return <>{avant}<span class="trou" aria-label="mot qui manque">?</span>{apres.join('…')}</>
 }
 
 const AUTO = [

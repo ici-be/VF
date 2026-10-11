@@ -40,7 +40,13 @@ export interface Vraag {
   elements: string[]
   /** combien d'éléments donner (≤ elements.length) ; 0 si ce n'est pas une énumération */
   nombre: number
+  /** l'interro d'où vient la question (« Toets 5 – 05/10/2026 »), '' sinon */
+  interro?: string
 }
+
+/** Le trou d'une phrase à compléter : « Een periode van 1000 jaar noemen we een ___. » */
+export const TROU = /_{3,}/
+export const aTrou = (m: Mot) => !!m.vraag && TROU.test(m.nl)
 
 export interface Matiere {
   nom: string
@@ -132,6 +138,7 @@ const COLONNES_QUESTIONS = {
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
   elements: ['éléments', 'elements', 'elementen'],
   nombre: ['nombre', 'aantal'],
+  interro: ['interro', 'toets'],
   ajoute: COLONNES.ajoute,
 }
 
@@ -157,7 +164,10 @@ export function questionsDepuisOnglet(onglet: Onglet): Mot[] | null {
     res.push({
       id: `${matiere}|?|${q}`, matiere, chapitre: val('chapitre') || SANS_CHAPITRE, nl: q, fr: r,
       det: '', definition: '', exemple: '', remarque: '',
-      vraag: { leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page'), elements: nombre ? elements : [], nombre },
+      vraag: {
+        leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page'), elements: nombre ? elements : [], nombre,
+        ...(val('interro') && { interro: val('interro') }),
+      },
       ...(ajoute && { ajoute }),
       ...lirePage(val('page')),
     })

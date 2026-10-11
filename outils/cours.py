@@ -9,7 +9,8 @@
 Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
 - questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres, Éléments, Nombre
-  (leurres et éléments séparés par « | »), envoyées avec --onglet Vragen.
+  (leurres et éléments séparés par « | »), et Interro pour celles d'une interro scannée,
+  envoyées avec --onglet Vragen.
 L'URL et la clé restent dans ~/.config/vocabulaire-nl/envoi.json, hors du dépôt (public).
 """
 import argparse
@@ -32,7 +33,7 @@ TITRES = {
     'page': 'page', 'néerlandais': 'nl', 'dét.': 'det', 'français': 'fr', 'remarque': 'remarque',
     'définition': 'definition', 'exemple': 'exemple', 'chapitre': 'chapitre',
     'matière': 'matiere', 'question': 'question', 'réponse': 'reponse', 'leurres': 'leurres',
-    'éléments': 'elements', 'nombre': 'nombre',
+    'éléments': 'elements', 'nombre': 'nombre', 'interro': 'interro',
 }
 
 

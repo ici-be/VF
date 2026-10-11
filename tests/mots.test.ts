@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { lireXlsx } from '../src/lib/xlsx'
-import { dateAjout, derniersAjouts, matiereDepuisOnglet, questionsDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
+import { aTrou, dateAjout, derniersAjouts, matiereDepuisOnglet, questionsDepuisOnglet, SANS_CHAPITRE, vocabulaireDepuisXlsx } from '../src/lib/mots'
 
 // petit classeur .xlsx fabriqué à la main, avec la même structure que Google Sheets
 function classeur(): Uint8Array {
@@ -87,5 +87,15 @@ describe('lecture du tableau', () => {
     expect(e1.vraag).toMatchObject({ nombre: 3 })
     expect(e2.vraag).toMatchObject({ nombre: 4, elements: ['Titel', 'Oriëntatie', 'Legende', 'Schaal'] })
     expect(matiereDepuisOnglet({ nom: 'Vragen', lignes: [['Matière', 'Question', 'Réponse']] })).toBeNull()
+  })
+  it('les questions d’une interro : la colonne Interro, et les phrases à compléter', () => {
+    const [p, q] = questionsDepuisOnglet({ nom: 'Vragen', lignes: [
+      ['Matière', 'Question', 'Réponse', 'Interro'],
+      ['A', 'Een periode van 1000 jaar noemen we een ___.', 'millennium', 'Toets 5 – 05/10/2026'],
+      ['A', 'Wat is een dynastie?', 'Een familie van koningen', ''],
+    ] })!
+    expect(p.vraag?.interro).toBe('Toets 5 – 05/10/2026')
+    expect(q.vraag).not.toHaveProperty('interro')
+    expect([aTrou(p), aTrou(q)]).toEqual([true, false])
   })
 })

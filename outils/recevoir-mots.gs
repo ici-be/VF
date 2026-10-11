@@ -25,12 +25,13 @@
  * Les questions de cours (lignes avec « question ») vont dans l'onglet « Vragen », créé au
  * premier envoi : une question est reconnue par sa matière et son texte. Pour une question déjà
  * là, l'envoi complète les cases vides (par exemple « Éléments » d'une énumération).
+ * Les questions d'une interro (/interro) ont en plus la colonne « Interro », créée au premier envoi.
  * Ensuite l'onglet est trié : chapitres dans leur ordre actuel, et dans chaque chapitre
  * les mots dans l'ordre des pages (les mots sans page restent à la fin du chapitre,
  * dans leur ordre actuel). Avec « essai », rien n'est écrit : la réponse dit ce qui serait fait.
  */
 
-// mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; les six dernières pour l'onglet « Vragen »
+// mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; les sept dernières pour l'onglet « Vragen »
 const COLONNES = {
   nl: ['néerlandais', 'nederlands', 'nl'],
   det: ['dét.', 'dét', 'det', 'déterminant', 'lidwoord', 'article'],
@@ -47,12 +48,13 @@ const COLONNES = {
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
   elements: ['éléments', 'elements', 'elementen'],
   nombre: ['nombre', 'aantal'],
+  interro: ['interro', 'toets'],
 }
 
 // l'onglet des questions de cours, créé au premier envoi de questions
 const TITRES_QUESTIONS = ['Matière', 'Chapitre', 'Page', 'Question', 'Réponse', 'Leurres', 'Éléments', 'Nombre', 'Ajouté']
 // champs d'une question qu'un nouvel envoi peut compléter s'ils sont vides
-const COMPLETABLES = ['reponse', 'leurres', 'elements', 'nombre', 'page']
+const COMPLETABLES = ['reponse', 'leurres', 'elements', 'nombre', 'page', 'interro']
 
 const aujourdhui = () => Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')
 
@@ -143,6 +145,8 @@ function recevoir(nomOnglet, lignes, essai, dater) {
       col.elements = colonne(feuille, titres, 'elements', 'Éléments')
       col.nombre = colonne(feuille, titres, 'nombre', 'Nombre')
     }
+    // les questions d'une interro scannée (/interro) : de quelle interro elles viennent
+    if (questions && lignes.some(m => m.interro)) col.interro = colonne(feuille, titres, 'interro', 'Interro')
   }
   const largeur = titres.length
 
