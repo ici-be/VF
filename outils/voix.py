@@ -163,7 +163,15 @@ def textes(octets: bytes) -> set[tuple[str, str]]:
             for k in ('definition', 'exemple'):
                 if val(k):
                     res.add((langue, val(k)))
+            # en français, Textes à trous ne relit que ce qui manquait (comme motsATrouver dans src/lib/trous.ts)
+            if langue == 'fr' and val('exemple'):
+                res.add(('fr', mots_a_trouver(val('exemple'), nl)))
     return {(lg, t) for lg, t in res if texte_a_lire(t, lg)}
+
+
+def mots_a_trouver(exemple: str, nl: str) -> str:
+    """Identique à motsATrouver() dans src/lib/trous.ts."""
+    return ', '.join(x.strip() for x in re.findall(r'\[([^\]]+)\]', exemple)) if '[' in exemple else nl
 
 
 def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
@@ -182,7 +190,9 @@ def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
     if q is not None and r is not None:
         for l in lignes[entete + 1:]:
             if q < len(l) and r < len(l) and re.search(r'_{3,}', l[q]) and l[r].strip():
-                res.add((langue(l), re.sub(r'_{3,}', re.split(r'\s*/\s*', l[r].strip())[0], l[q].strip(), count=1)))
+                premiere = re.split(r'\s*/\s*', l[r].strip())[0]
+                # en français, seulement le mot qui manque (comme Questions.tsx)
+                res.add((langue(l), premiere if langue(l) == 'fr' else re.sub(r'_{3,}', premiere, l[q].strip(), count=1)))
     return res
 
 

@@ -24,7 +24,9 @@ export function Questions({ carte, tous, reglages, pause, suivant, annoncer }: P
     const propres = vraag.leurres.filter(l => l !== m.fr).slice(0, 3)
     return melanger([m.fr, ...propres, ...leurres({ mot: m, sens: 'nl-fr' }, tous, 3 - propres.length)])
   }, [])
-  const lireReponse = () => dire(reglages, trou ? m.nl.replace(TROU, m.fr.split(/\s*\/\s*/)[0]) : m.fr, langue)
+  // la phrase complétée en néerlandais (pour l'entendre en entier) ; en français, seulement le mot qui manque
+  const premiere = m.fr.split(/\s*\/\s*/)[0]
+  const lireReponse = () => dire(reglages, trou ? (langue === 'fr' ? premiere : m.nl.replace(TROU, premiere)) : m.fr, langue)
 
   useEffect(() => { dire(reglages, m.nl, langue) }, [])
 

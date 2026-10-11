@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { corriger, type Correction } from '../../lib/correction'
-import { decouper } from '../../lib/trous'
+import { decouper, motsATrouver } from '../../lib/trous'
 import type { PropsExercice } from '../Seance'
 import { dire, EntreeSuivant, Infos, Verdict } from './commun'
 import { Actions } from './Reponses'
@@ -28,7 +28,8 @@ export function Trous({ carte, reglages, pause, suivant, annoncer }: PropsExerci
     setParTrou(res)
     annoncer(pire)
     setCorrection({ resultat: pire, message: [...new Set(res.map(r => r.message).filter(Boolean))].join(' ') })
-    dire(reglages, m.exemple, langue)
+    // en néerlandais, toute la phrase ; en français, seulement ce qui manquait (les mots entre crochets, ou le mot)
+    dire(reglages, langue === 'fr' ? motsATrouver(m) : m.exemple, langue)
   }
 
   let k = -1

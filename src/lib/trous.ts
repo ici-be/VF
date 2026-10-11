@@ -61,3 +61,8 @@ export function decouper(exemple: string, nl: string): Morceau[] | null {
 }
 
 export const aDesTrous = (m: Mot) => !!m.exemple && decouper(m.exemple, m.nl) !== null
+
+/** Ce qui manque dans l'exemple, à lire après la correction (matières en français) : les mots entre
+ *  crochets, ou le mot lui-même. Identique à mots_a_trouver() dans outils/voix.py. */
+export const motsATrouver = (m: Mot) =>
+  m.exemple.includes('[') ? [...m.exemple.matchAll(/\[([^\]]+)\]/g)].map(x => x[1].trim()).join(', ') : m.nl
