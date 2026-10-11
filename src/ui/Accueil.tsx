@@ -334,7 +334,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </button>
       </section>
 
-      {/* grand écran : matière et réglages à gauche, exercice, chapitres et mots à droite ;
+      {/* grand écran : matière à gauche ; exercice, chapitres, mots et réglages à droite ;
           téléphone : dans l'ordre de lecture (matière, chapitres, mots, exercice, réglages) */}
       <div class="accueil-corps">
         <div class="col-choix">
@@ -363,7 +363,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <p class="astuce gauche astuce-matiere">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
       </section>
-      {large ? blocReglages : <>{blocChapitres}{blocMots}</>}
+      {!large && <>{blocChapitres}{blocMots}</>}
         </div>
         <div class="col-exercice">
       <section class="bloc">
@@ -381,7 +381,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           })}
         </div>
       </section>
-      {large ? <>{blocChapitres}{blocMots}</> : blocReglages}
+      {large ? <>{blocChapitres}{blocMots}{blocReglages}</> : blocReglages}
         </div>
       </div>
     </main>
