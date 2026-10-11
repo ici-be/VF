@@ -11,8 +11,8 @@ Le but : retrouver **les questions telles que le professeur les pose**, avec la 
 pour que l'élève s'entraîne sur ce format (exercice « Questions de cours », feuille « Interro »).
 On parle français avec l'utilisateur.
 
-**Rien de personnel dans le tableau** (il est lisible publiquement) : ni nom, ni note, ni
-réponse de l'élève, ni appréciation. Seulement les questions et les bonnes réponses.
+**Dans le tableau** (lisible publiquement) : les questions, les bonnes réponses, et les erreurs
+de l'élève (colonne « Raté », d'accord de l'utilisateur). Jamais de nom, de note ni d'appréciation.
 
 ## 1. Lire le PDF
 
@@ -57,8 +57,15 @@ en gardant **les mots du professeur** :
 - **Question ouverte** : une question normale (Réponse en une phrase, trois Leurres), comme
   dans `/cours` (section 4 bis).
 
-Colonnes : `Matière	Chapitre	Page	Question	Réponse	Leurres	Éléments	Nombre	Interro`,
-avec **Interro** = `Toets N – JJ/MM/AAAA` (le numéro et la date de l'interro).
+Colonnes : `Matière	Chapitre	Page	Question	Réponse	Leurres	Éléments	Nombre	Interro	Raté`,
+avec **Interro** = `Toets N – JJ/MM/AAAA` (le numéro et la date de l'interro : l'appli date
+l'erreur avec) et **Raté** = ce que l'élève a écrit, tel quel (`millenium`), ou `—` s'il n'a rien
+écrit ; vide si la réponse est juste. Un demi-point compte comme raté (faute d'orthographe).
+Dans un tableau, la case de l'élève pour cette question précise.
+
+Une interro de **vocabulaire** (mots d'un onglet de matière) : un TSV de mots (`Néerlandais`,
+`Français`, `Chapitre`… comme `/cours`) avec seulement les mots ratés, et `Interro` et `Raté` ;
+les mots déjà là reçoivent ces deux cases si elles sont vides.
 
 ## 4. Questions du même style sur le reste du chapitre
 
@@ -79,6 +86,7 @@ nom suivi de ` - questions.tsv`. Pas de tabulation ni de retour à la ligne dans
 Montrer un compte rendu court :
 - onglet, chapitre, nom de l'interro ;
 - les questions de l'interro (question → réponse, page), en liste compacte ;
+- les erreurs (question → ce que l'élève a écrit) ;
 - les questions écartées (réponse inconnue) et pourquoi ;
 - les questions du même style, en liste compacte ;
 - **ce que l'interro révèle** (types d'erreurs de l'élève : orthographe, notion confondue, calcul
@@ -93,13 +101,14 @@ python3 outils/cours.py envoyer "<fichier - questions.tsv>" --onglet Vragen --es
 python3 outils/cours.py envoyer "<fichier - questions.tsv>" --onglet Vragen
 ```
 
-La colonne « Interro » est créée au premier envoi qui en a une. Si elle n'apparaît pas, le
+Les colonnes « Interro » et « Raté » sont créées au premier envoi qui en a. Si elles n'apparaissent pas, le
 script du tableau (`outils/recevoir-mots.gs`) n'est pas à jour : le recoller dans Apps Script
 et redéployer (mode d'emploi en tête du fichier).
 
 Puis les voix, comme pour `/cours` (section 7) : `python3 outils/voix.py`, commit de
 `public/audio`, push, suivi de la publication.
 
-Rappeler où les retrouver : exercice « Questions de cours » (les phrases à compléter se
+Rappeler où les retrouver : « À revoir » sur l'accueil (les erreurs, avec ce que l'élève avait
+écrit, à la prochaine ouverture de l'appli sur son appareil), exercice « Questions de cours » (les phrases à compléter se
 répondent en écrivant le mot), liste des mots onglet « Questions » (avec l'étiquette de
 l'interro), et le bouton « Interro » de l'accueil pour imprimer une interro blanche.

@@ -60,8 +60,15 @@ Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs
 Dans Claude Code, `/interro` suivi du PDF d'une interro corrigée scannée : les questions sont
 reprises dans le style du professeur (phrases à compléter, tableaux, cases à cocher), avec la
 bonne réponse (correction du professeur ou cours), et une vingtaine de questions du même style
-sur le reste du chapitre, pour des interros blanches. Elles vont dans l'onglet « Vragen » ;
-rien de personnel (nom, note, réponses de l'élève) n'est mis dans le tableau, qui est public.
+sur le reste du chapitre, pour des interros blanches. Elles vont dans l'onglet « Vragen ».
+
+Les **erreurs de l'élève** vont dans la colonne **Raté** (ce qu'il avait écrit, « — » s'il n'a
+rien écrit ; la même colonne existe pour les mots d'une interro de vocabulaire, avec Interro).
+À l'ouverture, l'appli compte chaque erreur comme une réponse fausse du jour de l'interro (une
+seule fois par appareil ; si la question a été réussie dans l'appli depuis, rien ne change) :
+elle apparaît dans **À revoir**, qui montre les mots et les questions de cours, avec ce que
+l'élève avait écrit, et un bouton pour s'entraîner sur les questions ratées. Ni nom ni note
+ne vont dans le tableau.
 
 ## Partager des réglages
 

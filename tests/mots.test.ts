@@ -98,4 +98,17 @@ describe('lecture du tableau', () => {
     expect(q.vraag).not.toHaveProperty('interro')
     expect([aTrou(p), aTrou(q)]).toEqual([true, false])
   })
+  it('les erreurs d’une interro : la colonne Raté, datée par le nom de l’interro', () => {
+    const [p, q, r] = questionsDepuisOnglet({ nom: 'Vragen', lignes: [
+      ['Matière', 'Question', 'Réponse', 'Interro', 'Raté'],
+      ['A', 'Een periode van 1000 jaar noemen we een ___.', 'millennium', 'Toets 5 – 5/10/2026', 'millenium'],
+      ['A', 'Een periode van 100 jaar noemen we een ___.', 'eeuw', 'Toets 5 – 05/10/2026', '—'],
+      ['A', 'Wat is een dynastie?', 'Een familie van koningen', 'Toets 5', 'x'],
+    ] })!
+    expect(p.rate).toEqual({ interro: 'Toets 5 – 5/10/2026', reponse: 'millenium', date: '2026-10-05' })
+    expect(q.rate).toMatchObject({ reponse: '', date: '2026-10-05' })
+    expect(r).not.toHaveProperty('rate')   // pas de date : ignoré
+    const [m] = matiereDepuisOnglet({ nom: 'Bio', lignes: [['Néerlandais', 'Français', 'Interro', 'Raté'], ['de cel', 'la cellule', 'Toets 2 – 01/10/2026', 'de sel']] })!.mots
+    expect(m.rate).toMatchObject({ reponse: 'de sel', date: '2026-10-01' })
+  })
 })

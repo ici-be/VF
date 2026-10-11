@@ -85,6 +85,37 @@ export function motsARevoir(mots: Mot[], max = 30, maintenant = Date.now()): ARe
     .slice(0, max)
 }
 
+/**
+ * Les erreurs des interros en classe (colonne « Raté » du tableau) comptent comme des
+ * réponses fausses, le jour de l'interro, une seule fois par appareil. Si l'élève a déjà
+ * retravaillé le mot depuis l'interro, ce qu'il a fait après garde la main (sa boîte reste).
+ * Renvoie le nombre d'erreurs nouvellement prises en compte.
+ */
+export function appliquerRates(mots: Mot[]): number {
+  const faits = new Set(lire<string[]>('rates-interro', []))
+  let n = 0
+  for (const m of mots) {
+    if (!m.rate) continue
+    const cle = `${m.id}|${m.rate.date}`
+    if (faits.has(cle)) continue
+    faits.add(cle)
+    const date = new Date(m.rate.date + 'T12:00').getTime()
+    const avant = suivi(m.id)
+    const s = { ...(avant ?? { boite: 0, vus: 0, justes: 0, dernier: 0, rates: 0 }) }
+    s.vus++
+    s.rates++
+    s.dernierRate = Math.max(s.dernierRate ?? 0, date)
+    if (s.dernier < date) { s.boite = 0; s.dernier = date }
+    tout()[m.id] = s
+    n++
+  }
+  if (n) {
+    ecrire('progression', tout())
+    ecrire('rates-interro', [...faits])
+  }
+  return n
+}
+
 /** Pour les tests : oublier la copie en mémoire. */
 export function _reinitialiser(): void {
   cache = null

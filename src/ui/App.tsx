@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { telechargerVocabulaire, vocabulaireEnCache, type Vocabulaire } from '../lib/mots'
+import { appliquerRates } from '../lib/progression'
 import { aReviser, chargerReglages, enregistrerReglages, reglagesDuLien, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
@@ -22,8 +23,14 @@ type Ecran =
   | { nom: 'liste'; vue: Vue | 'interro' }
   | { nom: 'jeu'; mots: Mot[]; cle: number }
 
+/** Les erreurs des interros en classe (colonne « Raté ») rejoignent les mots « à revoir ». */
+function avecRates(voc: Vocabulaire | null): Vocabulaire | null {
+  if (voc) appliquerRates(voc.matieres.flatMap(m => [...m.mots, ...(m.questions ?? [])]))
+  return voc
+}
+
 export function App() {
-  const [voc, setVoc] = useState<Vocabulaire | null>(vocabulaireEnCache)
+  const [voc, setVoc] = useState<Vocabulaire | null>(() => avecRates(vocabulaireEnCache()))
   const [chargement, setChargement] = useState<Chargement>({ etat: 'chargement' })
   const [reglages, setReglagesBruts] = useState<Reglages>(() => chargerReglages(voc))
   const [ecran, setEcran] = useState<Ecran>({ nom: 'accueil' })
@@ -34,7 +41,7 @@ export function App() {
     setChargement({ etat: 'chargement' })
     try {
       const v = await telechargerVocabulaire()
-      setVoc(v)
+      setVoc(avecRates(v))
       // les réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau
       setReglagesBruts(chargerReglages(v))
       setChargement({ etat: 'ok' })
@@ -107,7 +114,8 @@ export function App() {
         />
       )
     case 'liste':
-      return <Liste key={ecran.vue} voc={voc} reglages={reglages} vueInitiale={ecran.vue} retour={() => setEcran({ nom: 'accueil' })} lancer={lancer} />
+      return <Liste key={ecran.vue} voc={voc} reglages={reglages} vueInitiale={ecran.vue} retour={() => setEcran({ nom: 'accueil' })} lancer={lancer}
+        lancerQuestions={serie => { setReglages({ ...reglages, exercice: 'questions' }); setEcran({ nom: 'seance', serie, cle: Date.now() }) }} />
     default:
       return (
         <Accueil

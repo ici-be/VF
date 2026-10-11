@@ -29,6 +29,30 @@ export interface Mot {
   getal?: number
   /** question de cours : nl = la question, fr = la réponse (en néerlandais aussi) */
   vraag?: Vraag
+  /** raté à une interro en classe (colonnes « Interro » et « Raté ») : l'appli le met « à revoir » */
+  rate?: RateInterro
+}
+
+export interface RateInterro {
+  /** « Toets 5 – 05/10/2026 » */
+  interro: string
+  /** ce que l'élève avait écrit, '' si rien */
+  reponse: string
+  /** date de l'interro (AAAA-MM-JJ), tirée du nom de l'interro */
+  date: string
+}
+
+/** « Toets 5 – 05/10/2026 » → 2026-10-05 ; sans date → '' */
+export function dateInterro(interro: string): string {
+  const d = interro.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  return d ? `${d[3]}-${d[2].padStart(2, '0')}-${d[1].padStart(2, '0')}` : ''
+}
+
+const RATE = ['raté', 'rate', 'ratée', 'fout op toets']
+/** Une erreur d'interro, si la case « Raté » est remplie et que l'interro a une date. « — » = rien écrit. */
+function lireRate(interro: string, rate: string): { rate?: RateInterro } {
+  const date = dateInterro(interro)
+  return rate && date ? { rate: { interro, reponse: /^[-—–?]+$/.test(rate) ? '' : rate, date } } : {}
 }
 
 export interface Vraag {
@@ -81,6 +105,7 @@ export function dateAjout(v: string): string {
 
 const norm = (s: string) => s.trim().toLowerCase()
 const PAGE = ['page', 'pagina', 'blz', 'blz.']
+const INTERRO = ['interro', 'toets']
 /** « 12 » → 12 ; vide ou illisible → rien */
 const lirePage = (v: string) => { const n = parseInt(v, 10); return Number.isFinite(n) ? { page: n } : {} }
 
@@ -93,6 +118,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
   ) as Record<keyof typeof COLONNES, number>
   if (col.fr < 0) return null
   const colPage = titres.findIndex(t => PAGE.includes(t))
+  const colInterro = titres.findIndex(t => INTERRO.includes(t)), colRate = titres.findIndex(t => RATE.includes(t))
 
   const mots: Mot[] = []
   const chapitres: string[] = []
@@ -115,6 +141,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
       definition: val('definition'), exemple: val('exemple'), remarque: val('remarque'),
       ...(ajoute && { ajoute }),
       ...(colPage >= 0 && lirePage(ligne[colPage] ?? '')),
+      ...(colRate >= 0 && lireRate((ligne[colInterro] ?? '').trim(), (ligne[colRate] ?? '').trim())),
     })
   }
   // « Sans chapitre » toujours en dernier
@@ -138,7 +165,8 @@ const COLONNES_QUESTIONS = {
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
   elements: ['éléments', 'elements', 'elementen'],
   nombre: ['nombre', 'aantal'],
-  interro: ['interro', 'toets'],
+  interro: INTERRO,
+  rate: RATE,
   ajoute: COLONNES.ajoute,
 }
 
@@ -170,6 +198,7 @@ export function questionsDepuisOnglet(onglet: Onglet): Mot[] | null {
       },
       ...(ajoute && { ajoute }),
       ...lirePage(val('page')),
+      ...lireRate(val('interro'), val('rate')),
     })
   }
   return res

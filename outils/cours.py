@@ -10,7 +10,9 @@ Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
 - questions de cours : Matière, Chapitre, Page, Question, Réponse, Leurres, Éléments, Nombre
   (leurres et éléments séparés par « | »), et Interro pour celles d'une interro scannée,
-  envoyées avec --onglet Vragen.
+  envoyées avec --onglet Vragen ;
+- une interro scannée peut ajouter, aux mots comme aux questions, Interro et Raté (ce que
+  l'élève avait écrit, « — » si rien) : l'appli met ces lignes « à revoir ».
 L'URL et la clé restent dans ~/.config/vocabulaire-nl/envoi.json, hors du dépôt (public).
 """
 import argparse
@@ -34,6 +36,7 @@ TITRES = {
     'définition': 'definition', 'exemple': 'exemple', 'chapitre': 'chapitre',
     'matière': 'matiere', 'question': 'question', 'réponse': 'reponse', 'leurres': 'leurres',
     'éléments': 'elements', 'nombre': 'nombre', 'interro': 'interro',
+    'raté': 'rate',
 }
 
 
@@ -152,6 +155,8 @@ def envoyer(args):
         return
     print(f'  {len(res["ajoutes"])} mots ajoutés : {", ".join(res["ajoutes"]) or "—"}')
     print(f'  {len(res["pages"])} mots déjà présents, page ajoutée')
+    if res.get('completes'):
+        print(f'  {len(res["completes"])} mots déjà présents, interro et erreur ajoutées : {", ".join(res["completes"])}')
     print(f'  {len(res["dejaLa"])} mots déjà présents avec leur page')
     if args.dater:
         print(f'  {len(res.get("dates", []))} mots déjà présents datés d\'aujourd\'hui')

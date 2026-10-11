@@ -25,6 +25,8 @@ interface Props {
   vueInitiale: Vue | 'interro'
   retour: () => void
   lancer: (serie: Carte[]) => void
+  /** les questions ratées : avec l'exercice « Questions de cours » */
+  lancerQuestions: (serie: Carte[]) => void
 }
 
 /** « aujourd'hui », « hier », « il y a 5 jours » */
@@ -36,7 +38,7 @@ function quand(ms: number): string {
 type Tri = 'chapitre' | 'nl' | 'fr'
 const cmp = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'base' })
 
-export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
+export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuestions }: Props) {
   const [cherche, setCherche] = useState('')
   const [tri, setTri] = useState<Tri>('chapitre')
   const [vue, setVue] = useState<Vue>(vueInitiale === 'interro' ? 'questions' : vueInitiale)
@@ -45,13 +47,19 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const simple = (s: string) => sansAccents(s.toLowerCase())
   const q = simple(cherche.trim())
   const choisis = motsChoisis(voc, reglages)
-  const aRevoir = motsARevoir(choisis)
+  const questions = questionsChoisies(voc, reglages)
+  // les mots et les questions de cours ratés (à l'appli ou à une interro en classe)
+  const aRevoir = motsARevoir([...choisis, ...questions])
   const suivis = new Map<string, Suivi>(aRevoir.map(x => [x.mot.id, x.suivi]))
+  const motsRates = aRevoir.map(x => x.mot).filter(m => !m.vraag)
+  const questionsRatees = aRevoir.map(x => x.mot).filter(m => m.vraag)
+  // « mots », « questions » ou « mots et questions »
+  const quoiRate = [motsRates.length && 'mot', questionsRatees.length && 'question'].filter(Boolean) as string[]
+  const ratesNom = (pluriel: boolean) => quoiRate.length ? quoiRate.map(x => pluriel ? x + 's' : x).join(' et ') : 'mots'
   // les temps primitifs : les verbes les plus courants du choix, dans l'ordre de fréquence
   const verbesPrimitifs = choisis.filter(m => estPrimitif(m.verbe)).sort((a, b) => verbe(a.verbe!)!.rang - verbe(b.verbe!)!.rang)
   // les mots du dernier envoi /cours, toutes matières confondues (pas seulement celles choisies)
   const nouveaux = derniersAjouts(voc)
-  const questions = questionsChoisies(voc, reglages)
   const dateNouveaux = nouveaux.date && new Date(nouveaux.date + 'T12:00').toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
   let mots = (vue === 'revoir' ? aRevoir.map(x => x.mot) : vue === 'primitifs' ? verbesPrimitifs : vue === 'nouveaux' ? nouveaux.mots : vue === 'questions' ? questions : choisis).filter(m =>
     !q || [m.nl, m.fr, m.definition, m.remarque, m.exemple].some(t => simple(t).includes(q)))
@@ -74,7 +82,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   }
 
   const ex = exercice(reglages.exercice)
-  const serieARevoir = construireSerie(aRevoir.map(x => x.mot), { ...reglages, nombre: 0, ordre: 'hasard' })
+  const serieARevoir = ex.surQuestions ? [] : construireSerie(motsRates, { ...reglages, nombre: 0, ordre: 'hasard' })
+  const serieQuestions = construireSerie(questionsRatees, { ...reglages, exercice: 'questions', nombre: 0, ordre: 'hasard' })
   const serieNouveaux = construireSerie(nouveaux.mots, { ...reglages, nombre: 0, ordre: 'hasard' })
   const colonnes = vue === 'revoir' ? 4 : 3
 
@@ -88,7 +97,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   })
   const titreImpression = feuille ? `Interro – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}` : vue === 'nouveaux'
     ? `Nouveaux mots – ${dateNouveaux}`
-    : `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
+    : `${vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
   // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
   useEffect(() => {
     const avant = document.title
@@ -112,14 +121,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     <main class={`page liste ${feuille ? 'mode-feuille' : ''}`}>
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
-        <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
+        <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
         {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
         <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : vue === 'questions' ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
       <div class="haut">
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
-          <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
+          <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
           {vue === 'questions' && mots.length > 0 && <button class="second" onClick={() => setFeuille(true)} title="Les questions avec des lignes pour répondre, les réponses sur une page à part">🖨 Interro</button>}
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
@@ -140,11 +149,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
       </div>
       {vue === 'revoir' && (
         <div class="bandeau">
-          <p>{aRevoir.length > 1 ? `Les ${aRevoir.length} mots ratés` : aRevoir.length === 1 ? 'Le mot raté' : 'Les mots ratés'} ces 30 derniers jours et pas encore {accord(aRevoir.length, 'rattrapé')}, les plus souvent ratés d’abord (30 au maximum). Un mot sort de la liste quand il est réussi plusieurs fois de suite.</p>
-          {aRevoir.length > 0 && (
+          <p>{aRevoir.length > 1 ? `Les ${aRevoir.length} ${ratesNom(true)} ratés` : aRevoir.length === 1 ? `${questionsRatees.length ? 'La question ratée' : 'Le mot raté'}` : 'Les mots ratés'} ces 30 derniers jours (à l’appli ou à une interro en classe) et pas encore {accord(aRevoir.length, questionsRatees.length && !motsRates.length ? 'rattrapée' : 'rattrapé')}, les plus souvent ratés d’abord (30 au maximum). {questionsRatees.length && !motsRates.length ? 'Une question' : 'Un mot'} sort de la liste quand il est réussi plusieurs fois de suite.</p>
+          {motsRates.length > 0 && (
             serieARevoir.length
-              ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur {aRevoir.length > 1 ? 'ces mots' : 'ce mot'} · {ex.nom} ▶</button>
+              ? <button class="go" onClick={() => lancer(serieARevoir)}>S’entraîner sur {motsRates.length > 1 ? 'ces mots' : 'ce mot'} · {ex.nom} ▶</button>
               : <p class="astuce gauche">L’exercice « {ex.nom} » ne convient à aucun de ces mots : choisis-en un autre dans le menu.</p>
+          )}
+          {serieQuestions.length > 0 && (
+            <button class="go" onClick={() => lancerQuestions(serieQuestions)}>S’entraîner sur {questionsRatees.length > 1 ? 'ces questions' : 'cette question'} · Questions de cours ▶</button>
           )}
         </div>
       )}
@@ -186,7 +198,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         </div>
       )}
       {vue === 'primitifs' ? null : mots.length === 0
-        ? <p class="vide">{vue === 'revoir' && !q ? 'Aucun mot raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
+        ? <p class="vide">{vue === 'revoir' && !q ? 'Rien de raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
         : (
           <div class={`tableau ${vue === 'questions' ? 'questions' : ''}`}>
             <table>
@@ -210,7 +222,11 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
                       <td class="details"><Details m={l} /></td>
                       {vue === 'revoir' && (() => {
                         const su = suivis.get(l.id)!
-                        return <td class="rate">{su.rates}×<span class="extra">{quand(su.dernierRate!)}</span></td>
+                        return (
+                          <td class="rate">{su.rates}×<span class="extra">{quand(su.dernierRate!)}</span>
+                            {l.rate && <span class="extra interro-rate" title={l.rate.interro}>{l.rate.interro.replace(/\s*[–-]\s*[\d/]+$/, '')} : {l.rate.reponse ? <>« {l.rate.reponse} »</> : 'pas de réponse'}</span>}
+                          </td>
+                        )
                       })()}
                     </tr>
                   ))}

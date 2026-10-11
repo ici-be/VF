@@ -147,7 +147,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const avecNederlands = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe || x.getal !== undefined))
   // un exercice de Nederlands choisi alors que Nederlands ne l'est plus : on passe au QCM
   useEffect(() => { if (ex.nederlands && !avecNederlands) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands])
-  const nbARevoir = motsARevoir(choisis).length
+  // les mots et les questions de cours ratés (à l'appli ou à une interro en classe)
+  const nbARevoir = motsARevoir([...choisis, ...questionsChoisies(voc, r)]).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
   const nouveauxRecents = nouveaux.mots.length > 0 && Date.now() - new Date(nouveaux.date + 'T00:00').getTime() < 14 * 86_400_000
