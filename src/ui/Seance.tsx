@@ -71,6 +71,9 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   const [i, setI] = useState(0)
   const [resultats, setResultats] = useState<Map<string, Resultat>>(new Map())
   const [pause, setPause] = useState(false)
+  // mise en pause toute seule (la page n'était plus affichée) : le bandeau le dit
+  const [pauseAuto, setPauseAuto] = useState(false)
+  useEffect(() => { if (!pause) setPauseAuto(false) }, [pause])
   // la fenêtre « Signaler une erreur » ouverte : l'exercice attend (sans le bandeau de pause)
   const [aSignaler, setASignaler] = useState(false)
   // bonnes réponses d'affilée (« presque » compte) ; une erreur remet à zéro
@@ -105,7 +108,13 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       if (document.querySelector('dialog[open]')) return   // Échap ferme la fenêtre de signalement
       if (e.key === 'Escape' || (e.key === ' ' && ex.id === 'defilement')) { e.preventDefault(); setPause(p => !p) }
     }
-    const cache = () => { if (document.hidden) setPause(true) }
+    // la page n'est plus affichée (autre onglet, autre application, écran en veille, fenêtre recouverte) :
+    // la voix se tait ; seul le défilement, qui avance tout seul, se met en pause (les autres attendent la réponse)
+    const cache = () => {
+      if (!document.hidden) return
+      taire()
+      if (ex.id === 'defilement') { setPause(true); setPauseAuto(true) }
+    }
     addEventListener('keydown', touche)
     document.addEventListener('visibilitychange', cache)
     return () => { removeEventListener('keydown', touche); document.removeEventListener('visibilitychange', cache); taire() }
@@ -174,7 +183,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
         {carte && carte.mot.getal === undefined && <BoutonSignaler onClick={() => setASignaler(true)} />}
         <button class="icone" onClick={precedente} disabled={i === 0} aria-label="Question précédente" title="Revenir à la question précédente"><ArrowLeft size={16} strokeWidth={2.4} /></button>
-        <button class="icone" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
+        <button class="icone bouton-pause" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
       </div>
       <div class="progres"><div style={{ width: `${(i / file.length) * 100}%` }} /></div>
       <main class={`scene ${pause ? 'en-pause' : ''}`}>
@@ -198,7 +207,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
         <div class="bandeau-pause" role="status">
-          <span class="quoi-pause"><b>En pause</b> · {ex.surQuestions ? nombre(i, 'question vue', 'questions vues') : nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
+          <span class="quoi-pause"><b>En pause</b>{pauseAuto && ' (la page n’était plus affichée)'} · {ex.surQuestions ? nombre(i, 'question vue', 'questions vues') : nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
           <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
           <button class="second" onClick={arreter}>Arrêter</button>
         </div>

@@ -734,3 +734,6 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .fenetre-signalement .merci { text-align: center; }
 .fenetre-signalement .merci .titre { justify-content: center; color: var(--ok); }
 @media print { .bouton-signaler, .fenetre-signalement { display: none !important; } }
+
+/* le bouton pause un peu à l'écart de la flèche « question précédente » (pas de pause par mégarde) */
+.barre .bouton-pause { margin-left: 10px; }
