@@ -22,7 +22,7 @@
   --display: "Bricolage Grotesque", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", system-ui, sans-serif;
   --radius: 12px;
-  color-scheme: light;
+  color-scheme: only light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
