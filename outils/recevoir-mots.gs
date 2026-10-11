@@ -195,7 +195,7 @@ function modifier(modifications, essai) {
       : norm(l[col.nl]) === norm(m.nl) && (col.chapitre < 0 || !m.chapitre || norm(l[col.chapitre]) === norm(m.chapitre)))
     if (i < 0) { res.introuvables.push(m); continue }
     res.faites.push({ ...m, avant: String(donnees[i][col[champ]]) })
-    if (!essai) feuille.getRange(i + 2, col[champ] + 1).setValue(m.valeur)
+    if (!essai) feuille.getRange(i + 2, col[champ] + 1).setNumberFormat('@').setValue(m.valeur)
   }
   return res
 }
@@ -282,7 +282,7 @@ function recevoir(nomOnglet, lignes, essai, dater, creer) {
         const vides = COMPLETABLES.filter(k => m[k] != null && String(m[k]).trim() !== '' && (col[k] < 0 || !String(donnees[i][col[k]]).trim()))
         if (vides.length) {
           res.completes.push(nom(m))
-          if (!essai) for (const k of vides) feuille.getRange(i + 2, col[k] + 1).setValue(m[k])
+          if (!essai) for (const k of vides) feuille.getRange(i + 2, col[k] + 1).setNumberFormat('@').setValue(m[k])
         } else {
           res.dejaLa.push(nom(m))
         }
@@ -297,7 +297,7 @@ function recevoir(nomOnglet, lignes, essai, dater, creer) {
       // (en essai, la colonne Page n'existe peut-être pas encore : elle serait vide)
       if (i >= 0 && m.page && (col.page < 0 || !String(donnees[i][col.page]).trim())) {
         res.pages.push(nom(m))
-        if (!essai) feuille.getRange(i + 2, col.page + 1).setValue(m.page)
+        if (!essai) feuille.getRange(i + 2, col.page + 1).setNumberFormat('@').setValue(m.page)
       } else if (!vides.length) {
         res.dejaLa.push(nom(m))
       }
@@ -314,8 +314,8 @@ function recevoir(nomOnglet, lignes, essai, dater, creer) {
   if (essai) return res
   if (nouvelles.length) {
     const debut = feuille.getLastRow() + 1
-    // en texte, sinon Sheets transforme la date en nombre
-    feuille.getRange(debut, col.ajoute + 1, nouvelles.length, 1).setNumberFormat('@')
+    // tout en texte : sinon Sheets transforme « 7 / sept » en date, « 2026-10-11 » en nombre…
+    feuille.getRange(debut, 1, nouvelles.length, largeur).setNumberFormat('@')
     feuille.getRange(debut, 1, nouvelles.length, largeur).setValues(nouvelles)
   }
   if (col.page >= 0 && col.chapitre >= 0) trierParPage(feuille, col, largeur, questions)
