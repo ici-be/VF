@@ -52,6 +52,13 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.
 
+## Partager des réglages
+
+L'icône 🔗 discrète à côté du nom de l'exercice, sur l'accueil, copie un **permalien** :
+l'adresse de l'appli avec les réglages en cours (matières, chapitres, pages, exercice, sens,
+nombre de mots, réponse, voix…). Qui l'ouvre arrive sur l'accueil avec ces réglages, qui
+restent ensuite les siens (l'adresse est nettoyée aussitôt).
+
 ## Installer
 
 Adresse : **https://ici-be.github.io/VF/**

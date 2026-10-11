@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Mot, Vocabulaire } from '../src/lib/mots'
-import { aReviser, bornesPages, chapitreSeul, cleChapitre, motsChoisis, questionsChoisies, type Reglages } from '../src/lib/reglages'
+import { appliquerLien, aReviser, bornesPages, chapitreSeul, cleChapitre, lienReglages, motsChoisis, questionsChoisies, reglagesDuLien, type Reglages } from '../src/lib/reglages'
 
 const mot = (nl: string, chapitre: string, vraag = false): Mot => ({
   id: nl, matiere: 'Aard', chapitre, nl, det: '', fr: nl, definition: '', exemple: '', remarque: '',
@@ -58,5 +58,30 @@ describe('pages d’un chapitre', () => {
   })
   it('les pages ne comptent plus quand plusieurs chapitres sont choisis', () => {
     expect(motsChoisis(v, r({ pages: { [un]: [5, 15] } }))).toHaveLength(5)
+  })
+})
+
+describe('permalien', () => {
+  const bio = cleChapitre('NW Biologie', '1. De ecosystemen')
+  const aard = cleChapitre('Aard', '2')
+  const partage = r({ matieres: ['NW Biologie'], chapitres: [bio, aard], pages: { [bio]: [5, 12], [aard]: [1, 3] }, exercice: 'questions', voix: false, repondre: 'ecrit' })
+  it('aller-retour : les réglages, avec seulement les chapitres et pages des matières choisies', () => {
+    const lien = lienReglages(partage, 'https://ici-be.github.io/VF/')
+    expect(lien).toMatch(/^https:\/\/ici-be\.github\.io\/VF\/#r=[\w-]+$/)
+    const lu = reglagesDuLien(lien.slice(lien.indexOf('#')))!
+    expect(lu).toMatchObject({ matieres: ['NW Biologie'], chapitres: [bio], pages: { [bio]: [5, 12] }, exercice: 'questions', voix: false, repondre: 'ecrit' })
+  })
+  it('ignore un lien abîmé et les champs inconnus ou mal typés', () => {
+    expect(reglagesDuLien('')).toBeNull()
+    expect(reglagesDuLien('#r=%%%')).toBeNull()
+    const b64 = btoa(JSON.stringify({ voix: 'oui', pirate: 1, nombre: 10 }))
+    expect(reglagesDuLien('#r=' + b64)).toEqual({ nombre: 10 })
+  })
+  it('garde la mémoire des chapitres des autres matières', () => {
+    const avant = r({ matieres: ['Aard'], chapitres: [aard, cleChapitre('NW Biologie', '2. Cellen')], pages: { [aard]: [1, 3] } })
+    const apres = appliquerLien(avant, { matieres: ['NW Biologie'], chapitres: [bio], pages: { [bio]: [5, 12] } })
+    expect(apres.matieres).toEqual(['NW Biologie'])
+    expect(apres.chapitres).toEqual([aard, bio])
+    expect(apres.pages).toEqual({ [aard]: [1, 3], [bio]: [5, 12] })
   })
 })

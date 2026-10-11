@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
-  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, motsChoisis, questionsChoisies, SEP,
+  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, questionsChoisies, SEP,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
@@ -12,7 +12,7 @@ import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
-import { ArrowRight } from 'lucide-preact'
+import { ArrowRight, Check, Link } from 'lucide-preact'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
@@ -78,6 +78,26 @@ function Pages({ cle, bornes, r, maj, n, unite }: {
         : <span class="astuce-pages">tout le chapitre</span>}
       {limite && <span class="astuce-pages">{nombre(n, unite)}</span>}
     </div>
+  )
+}
+
+/** Une petite icône discrète : copie le permalien de ces réglages. */
+function CopierLien({ r }: { r: Reglages }) {
+  const [copie, setCopie] = useState(false)
+  const copier = async () => {
+    try {
+      await navigator.clipboard.writeText(lienReglages(r))
+      setCopie(true)
+      setTimeout(() => setCopie(false), 2000)
+    } catch {
+      prompt('Copier le lien :', lienReglages(r))
+    }
+  }
+  return (
+    <button class={`copier-lien ${copie ? 'copie' : ''}`} onClick={copier} title={copie ? 'Lien copié' : 'Copier le lien vers ces réglages (matière, chapitres, pages, exercice…)'} aria-label="Copier le lien vers ces réglages">
+      {copie ? <Check size={15} strokeWidth={2.4} /> : <Link size={15} strokeWidth={2} />}
+      {copie && <span>Lien copié</span>}
+    </button>
   )
 }
 
@@ -286,7 +306,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <Scene matieres={r.matieres} />
         <Scene matieres={r.matieres} petit />
         <div class="resume">
-          <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}</p>
+          <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}<CopierLien r={r} /></p>
           {/* plusieurs matières : une par ligne, sans la description ; le sens et le nombre sont dans le bouton */}
           <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}

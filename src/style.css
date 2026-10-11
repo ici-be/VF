@@ -677,3 +677,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .pages-chapitre.limite input { border-color: var(--accent); }
 .pages-chapitre .astuce-pages { color: var(--muted); font-size: .85rem; }
 .pages-chapitre .lien { font-size: .85rem; }
+
+/* ---------- permalien : une icône discrète à côté du nom de l'exercice ---------- */
+.copier-lien { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; padding: 4px; border-radius: 6px; color: var(--muted); opacity: .45; font: 600 .78rem var(--body); cursor: pointer; }
+.copier-lien:hover, .copier-lien:focus-visible { opacity: 1; background: var(--panel-2); }
+.copier-lien.copie { opacity: 1; color: var(--ok); }

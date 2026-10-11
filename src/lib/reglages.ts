@@ -85,9 +85,62 @@ const DEFAUT: Reglages = {
   delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', notes: false, pages: {},
 }
 
+// Le permalien : les réglages de l'accueil dans l'adresse (#r=…), en JSON encodé en base64url.
+// Seuls les chapitres et les pages des matières choisies y sont ; le reste de la mémoire de
+// la personne qui l'ouvre (chapitres d'autres matières) est gardé.
+const LIEN = 'r'
+
+const versBase64 = (texte: string) =>
+  btoa(String.fromCharCode(...new TextEncoder().encode(texte))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+const depuisBase64 = (b64: string) =>
+  new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)))
+
+/** L'adresse de l'appli avec ces réglages. */
+export function lienReglages(r: Reglages, base = location.origin + location.pathname): string {
+  const dans = (c: string) => r.matieres.some(m => c.startsWith(m + SEP))
+  const partage: Reglages = {
+    ...r,
+    chapitres: r.chapitres.filter(dans),
+    pages: Object.fromEntries(Object.entries(r.pages).filter(([c]) => dans(c))),
+  }
+  return `${base}#${LIEN}=${versBase64(JSON.stringify(partage))}`
+}
+
+/** Les réglages d'un permalien (« #r=… »), seulement les champs connus et du bon type ; null sinon. */
+export function reglagesDuLien(hash: string): Partial<Reglages> | null {
+  const b64 = new URLSearchParams(hash.replace(/^#/, '')).get(LIEN)
+  if (!b64) return null
+  try {
+    const brut = JSON.parse(depuisBase64(b64)) as Record<string, unknown>
+    const ok = Object.entries(brut).filter(([k, v]) =>
+      k in DEFAUT && (Array.isArray(DEFAUT[k as keyof Reglages]) ? Array.isArray(v) : typeof v === typeof DEFAUT[k as keyof Reglages] && v !== null))
+    return ok.length ? Object.fromEntries(ok) as Partial<Reglages> : null
+  } catch {
+    return null
+  }
+}
+
+/** Les réglages enregistrés, avec par-dessus ceux du lien : ses matières y gardent seulement ses chapitres et ses pages. */
+export function appliquerLien(r: Reglages, lien: Partial<Reglages>): Reglages {
+  const matieres = lien.matieres ?? r.matieres
+  const ailleurs = (c: string) => !matieres.some(m => c.startsWith(m + SEP))
+  return {
+    ...r, ...lien,
+    chapitres: [...r.chapitres.filter(ailleurs), ...(lien.chapitres ?? [])],
+    pages: { ...Object.fromEntries(Object.entries(r.pages).filter(([c]) => ailleurs(c))), ...lien.pages },
+  }
+}
+
 /** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */
 export function chargerReglages(voc: Vocabulaire | null): Reglages {
-  const r: Reglages = { ...DEFAUT, ...lire<Partial<Reglages>>('reglages', {}) }
+  let r: Reglages = { ...DEFAUT, ...lire<Partial<Reglages>>('reglages', {}) }
+  // ouvert depuis un permalien : ses réglages sont retenus, puis l'adresse est nettoyée
+  const lien = typeof location !== 'undefined' ? reglagesDuLien(location.hash) : null
+  if (lien) {
+    r = appliquerLien(r, lien)
+    enregistrerReglages(r)
+    history.replaceState(null, '', location.pathname + location.search)
+  }
   if (!EXERCICES.some(e => e.id === r.exercice)) r.exercice = DEFAUT.exercice
   if (voc) {
     const noms = voc.matieres.map(m => m.nom)
