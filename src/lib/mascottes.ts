@@ -1,9 +1,9 @@
-// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; le moine de la Religion et Pythagore des Mathématiques ensuite).
+// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; puis le moine de la Religion, Pythagore des Mathématiques et Molière du Français).
 // Chacune tient un flambeau, qu'elle passe à la suivante quand on change de matière.
 
 import { interrompre } from './surprises'
 
-export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine' | 'pythagore'
+export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine' | 'pythagore' | 'moliere'
 
 const TRAIT = '#26303d'
 const t = `stroke="${TRAIT}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"`
@@ -261,6 +261,48 @@ const DESSINS: Record<Mascotte, string> = {
           <ellipse cx="57" cy="27.5" rx="3.6" ry="1.9" transform="rotate(-12 57 27.5)"/><ellipse cx="63" cy="27.5" rx="3.6" ry="1.9" transform="rotate(12 63 27.5)"/>
           <ellipse cx="67.5" cy="29.5" rx="3.6" ry="1.9" transform="rotate(30 67.5 29.5)"/><ellipse cx="71.5" cy="33.5" rx="3.6" ry="1.9" transform="rotate(50 71.5 33.5)"/>
         </g>
+      </g>
+    </g>`,
+
+  // Molière : grande perruque bouclée, veste prune à galons dorés, jabot de dentelle, plume d'oie
+  moliere: `
+    ${ombre}
+    <g class="jambe g"><rect x="50" y="106" width="8" height="31" rx="3" fill="#f2efe6" ${t}/><path d="M47 140 Q47 134 54 134 Q60 134 60 140 Z" fill="#2a2a33" ${t}/><rect x="51.5" y="134.5" width="5" height="2.6" rx=".6" fill="#d9a92b" ${t} stroke-width="1"/></g>
+    <g class="jambe d"><rect x="62" y="106" width="8" height="31" rx="3" fill="#f2efe6" ${t}/><path d="M60 140 Q60 134 66 134 Q73 134 73 140 Z" fill="#2a2a33" ${t}/><rect x="63.5" y="134.5" width="5" height="2.6" rx=".6" fill="#d9a92b" ${t} stroke-width="1"/></g>
+    <g class="corps">
+      <g class="perruque">
+        <path d="M47 34 Q35 46 38 66 Q42 74 50 70 Q47 56 50 42 Z M73 34 Q85 46 82 66 Q78 74 70 70 Q73 56 70 42 Z" fill="#4a3020" ${t}/>
+        <g fill="#5e3d27" ${t} stroke-width="1.3"><circle cx="40" cy="52" r="4"/><circle cx="40.5" cy="61" r="4"/><circle cx="45" cy="68" r="3.6"/><circle cx="80" cy="52" r="4"/><circle cx="79.5" cy="61" r="4"/><circle cx="75" cy="68" r="3.6"/></g>
+      </g>
+      <rect x="56" y="52" width="8" height="15" rx="2" fill="${peau}" ${t}/>
+      <path d="M45 66 Q60 60 75 66 L80 114 Q60 120 40 114 Z" fill="#6b3a7a" ${t}/>
+      ${ombrage('M62 62 Q70 63 75 66 L80 114 Q70 117 62 118 Z')}
+      <path d="M57 68 L55 116 M63 68 L65 116" stroke="#d9a92b" stroke-width="2.2"/>
+      <g fill="#d9a92b" ${t} stroke-width="1.1"><circle cx="66.5" cy="80" r="1.6"/><circle cx="66.8" cy="90" r="1.6"/><circle cx="67.1" cy="100" r="1.6"/></g>
+      <path d="M41.5 106 Q60 111 78.5 106" stroke="#d9a92b" stroke-width="2" fill="none"/>
+      ${brasGauche('#6b3a7a', peau, 37, 90)}
+      <path d="M33.5 86 Q37 84 40.5 86 L40 89 Q37 87.5 34 89 Z" fill="#fbfaf5" ${t} stroke-width="1.2"/>
+      <g transform="translate(37 90)"><g class="plume-oie">
+        <path d="M0 0 L-9 -26" stroke="${TRAIT}" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M-2 -6 Q-14 -18 -13 -34 Q-6 -24 -3 -10 Z" fill="#fbfaf5" ${t} stroke-width="1.3"/>
+        <path d="M-3 -9 Q-8 -20 -12 -31" stroke="#c9d1dc" stroke-width="1" fill="none"/>
+        <path d="M0.5 1.5 L-1.2 -3" stroke="#26303d" stroke-width="2.2" stroke-linecap="round"/>
+      </g></g>
+      <circle cx="37" cy="90" r="4.6" fill="${peau}" ${t}/>
+      ${bras('#6b3a7a', peau)}
+      <path d="M53 64 Q56 70 53 74 Q57 76 60 73 Q63 76 67 74 Q64 70 67 64 Q60 68 53 64 Z" fill="#fbfaf5" ${t} stroke-width="1.4"/>
+      <path d="M55 70 Q57.5 71.5 60 70 Q62.5 71.5 65 70" stroke="#c9d1dc" stroke-width="1" fill="none"/>
+      <ellipse class="crane" cx="60" cy="44" rx="12" ry="13.5" fill="${peau}" ${t}/>
+      ${ombrage('M62 31 Q72 33 72 44 Q72 56 62 58 Z')}
+      <g class="yeux">${oeil(55.5, 44)}${oeil(64.5, 44)}</g>
+      <path d="M53 40 Q55.5 38.5 58 40 M62 40 Q64.5 38.5 67 40" stroke="#4a3020" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M60 45 Q58.5 48.5 60.5 49" stroke="${TRAIT}" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M54.5 51 Q57 49.5 60 50.6 Q63 49.5 65.5 51 Q66.5 49 67.5 49.5 Q66 52.5 63 52 Q61 51.5 60 52 Q59 51.5 57 52 Q54 52.5 52.5 49.5 Q53.5 49 54.5 51 Z" fill="#4a3020"/>
+      <path d="M57 54 Q60 56 63 54" stroke="${TRAIT}" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <path d="M59 56.5 L61 56.5 L60 58.5 Z" fill="#4a3020"/>
+      <g class="perruque">
+        <path d="M46.5 42 Q45 27 60 26 Q75 27 73.5 42 Q70 34 64 33 Q60 36 56 33 Q50 34 46.5 42 Z" fill="#4a3020" ${t}/>
+        <g fill="#5e3d27" ${t} stroke-width="1.3"><circle cx="48" cy="34" r="4"/><circle cx="54" cy="28.5" r="4"/><circle cx="60.5" cy="27" r="4"/><circle cx="67" cy="28.5" r="4"/><circle cx="72.5" cy="34" r="4"/><circle cx="44.5" cy="42" r="3.8"/><circle cx="75.5" cy="42" r="3.8"/></g>
       </g>
     </g>`,
 }

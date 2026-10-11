@@ -509,14 +509,14 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .mascotte-fin svg { width: 100%; height: 100%; overflow: visible; }
 
 /* ---------- menu des matières : médaillons et teinte par matière ---------- */
-:root { --c-renard: #d9efe8; --c-chevalier: #f4e6c6; --c-colomb: #d7e7f6; --c-detective: #e7e0f6; --c-grenouille: #fbe2e6; --c-moine: #f1e4d2; --c-pythagore: #d6efed;
-        --b-renard: #3d8f78; --b-chevalier: #a7802c; --b-colomb: #2f6db0; --b-detective: #6d55b0; --b-grenouille: #c0506a; --b-moine: #8a5a36; --b-pythagore: #2f8c88; }
+:root { --c-renard: #d9efe8; --c-chevalier: #f4e6c6; --c-colomb: #d7e7f6; --c-detective: #e7e0f6; --c-grenouille: #fbe2e6; --c-moine: #f1e4d2; --c-pythagore: #d6efed; --c-moliere: #ece0f1;
+        --b-renard: #3d8f78; --b-chevalier: #a7802c; --b-colomb: #2f6db0; --b-detective: #6d55b0; --b-grenouille: #c0506a; --b-moine: #8a5a36; --b-pythagore: #2f8c88; --b-moliere: #6b3a7a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229; --c-moine: #3a2c1e; --c-pythagore: #17393a;
-  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; --b-moine: #d9a878; --b-pythagore: #6fd0c9; } }
+  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229; --c-moine: #3a2c1e; --c-pythagore: #17393a; --c-moliere: #2e2236;
+  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; --b-moine: #d9a878; --b-pythagore: #6fd0c9; --b-moliere: #c9a3dd; } }
 :root[data-theme="dark"] {
-  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229; --c-moine: #3a2c1e; --c-pythagore: #17393a;
-  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; --b-moine: #d9a878; --b-pythagore: #6fd0c9; }
+  --c-renard: #1d3a33; --c-chevalier: #3a3120; --c-colomb: #1b3048; --c-detective: #2c2644; --c-grenouille: #3d2229; --c-moine: #3a2c1e; --c-pythagore: #17393a; --c-moliere: #2e2236;
+  --b-renard: #6cc8ad; --b-chevalier: #dcb45c; --b-colomb: #7fb3f0; --b-detective: #ad98ea; --b-grenouille: #f08ea3; --b-moine: #d9a878; --b-pythagore: #6fd0c9; --b-moliere: #c9a3dd; }
 .teinte-renard { --teinte: var(--c-renard); --bord: var(--b-renard); }
 .teinte-chevalier { --teinte: var(--c-chevalier); --bord: var(--b-chevalier); }
 .teinte-colomb { --teinte: var(--c-colomb); --bord: var(--b-colomb); }
@@ -524,6 +524,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .teinte-grenouille { --teinte: var(--c-grenouille); --bord: var(--b-grenouille); }
 .teinte-moine { --teinte: var(--c-moine); --bord: var(--b-moine); }
 .teinte-pythagore { --teinte: var(--c-pythagore); --bord: var(--b-pythagore); }
+.teinte-moliere { --teinte: var(--c-moliere); --bord: var(--b-moliere); }
 
 .medaillon { flex: none; width: 3rem; height: 3rem; border-radius: 12px; overflow: hidden; position: relative; background: var(--teinte, var(--panel-2)); }
 .medaillon svg { position: absolute; inset: 0; width: 100%; height: 100%; }

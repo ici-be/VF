@@ -49,7 +49,7 @@ function etincelle(svg: SVGSVGElement, x: number, y: number, taille = 1) {
 }
 
 // la bouche (ou le museau, ou la fente du heaume) de chaque mascotte
-const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53], pythagore: [60, 51.5] }
+const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53], pythagore: [60, 51.5], moliere: [60, 54] }
 const bouche = (svg: SVGSVGElement) => BOUCHE[svg.dataset.mascotte as Mascotte] ?? [60, 55]
 
 /** Quelques ronds de fumée grise qui montent de (x, y). */
@@ -285,6 +285,17 @@ export const SURPRISES: Surprise[] = [
     await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .6 }, { transform: 'translateY(3px) scale(1.04,.95)', offset: .64 }, { transform: 'translateY(-12px)', offset: .72 }, { transform: 'translateY(0) scale(1.04,.95)', offset: .8 }, { transform: 'translateY(0)', offset: .86 }, { transform: 'translateY(0)' }], D)
   } },
 
+  // Molière déclame : les lettres s'envolent de sa bouche, il agite sa plume… et finit par une révérence
+  { id: 'tirade', pour: 'moliere', async jouer(svg) {
+    const p = parties(svg), D = 3600
+    const [x, y] = bouche(svg)
+    ;['A', 'é', 'ç', '!', 'Ô', '?'].forEach((c, i) => envol(svg, `<text text-anchor="middle" font-size="${12 + (i % 3) * 2}" font-weight="800" font-family="serif" fill="${['#6b3a7a', '#c0506a', '#2f6db0'][i % 3]}" stroke="${TRAIT}" stroke-width=".4">${c}</text>`, x - 6, y, { dx: -18 - (i % 2) * 8, dy: -22 - (i % 3) * 6, duree: 1200, delai: 120 + i * 300, echelle: 1.3 }))
+    anim(svg.querySelector('.plume-oie'), [{ transform: 'rotate(0)' }, { transform: 'rotate(-14deg)', offset: .15 }, { transform: 'rotate(8deg)', offset: .3 }, { transform: 'rotate(-14deg)', offset: .45 }, { transform: 'rotate(0)', offset: .6 }, { transform: 'rotate(0)' }], D)
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-1px,-1.5px)', offset: .15 }, { transform: 'translate(-1px,-1.5px)', offset: .58 }, { transform: 'scaleY(.25)', offset: .7 }, { transform: 'scaleY(.25)', offset: .9 }, { transform: 'none' }], D)
+    await anim(p.corps, [{ transform: 'rotate(0)' }, { transform: 'rotate(-4deg)', offset: .15 }, { transform: 'rotate(3deg)', offset: .3 }, { transform: 'rotate(-4deg)', offset: .45 }, { transform: 'rotate(0)', offset: .58 },
+      { transform: 'rotate(-14deg) translate(-2px,6px)', offset: .72 }, { transform: 'rotate(-14deg) translate(-2px,6px)', offset: .86 }, { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
+  } },
+
   // ---------- deuxième série (démo du 9 octobre) : surtout avec le feu du flambeau ----------
 
   // la flamme s'agite de plus en plus, la mascotte la surveille… pouf ! visage noirci, deux clignements ahuris
@@ -467,6 +478,19 @@ export const SURPRISES: Surprise[] = [
     envol(svg, texte('!', 22), 82, 22, { dx: 0, dy: -10, duree: 800, delai: D * .3, echelle: 1.1 })
     anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(0,2px)', offset: .26 }, { transform: 'translate(0,2px) scale(1.4)', offset: .32 }, { transform: 'translate(0,2px) scale(1.4)', offset: .66 }, { transform: 'scaleY(.3)', offset: .76 }, { transform: 'scaleY(.3)', offset: .9 }, { transform: 'none' }], D)
     await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .32 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .36 }, { transform: 'translateY(-14px)', offset: .44 }, { transform: 'translateY(0) scale(1.05,.93)', offset: .52 }, ...tour(4, i => ({ transform: `rotate(${i % 2 ? 4 : -4}deg)`, offset: .55 + i * .03 })), { transform: 'rotate(0)', offset: .68 }, { transform: 'translateY(0)' }], D)
+  } },
+
+  // la flamme met le feu à la perruque : elle s'envole (Molière est chauve !), retombe et fume
+  { id: 'perruque', pour: 'moliere', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3800, perruques = [...svg.querySelectorAll('.perruque')]
+    anim(p.flamme, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-36deg) scale(1.3)', offset: .14 }, { transform: 'rotate(-32deg) scale(1.35)', offset: .22 }, { transform: 'rotate(0) scale(1)', offset: .3 }, { transform: 'rotate(0) scale(1)' }], D)
+    const devant = perruques[perruques.length - 1]
+    if (devant) petitFeu(svg, 70, 30, D * .2, D * .62, { dans: devant, taille: .8 })
+    envol(svg, texte('!', 22), 84, 22, { dx: 0, dy: -10, duree: 800, delai: D * .3, echelle: 1.1 })
+    perruques.forEach(g => anim(g, [{ transform: 'none' }, { transform: 'none', offset: .36 }, { transform: 'translate(2px,-30px) rotate(10deg)', offset: .5, easing: 'ease-out' }, { transform: 'translate(3px,-34px) rotate(-6deg)', offset: .6 }, { transform: 'translate(0,1px) rotate(2deg)', offset: .72, easing: 'ease-in' }, { transform: 'translate(0,-1px) rotate(-1deg)', offset: .78 }, { transform: 'none', offset: .84 }, { transform: 'none' }], D))
+    fumee(svg, 66, 26, 3, D * .7, 2.6)
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(0,-2px)', offset: .3 }, { transform: 'translate(0,-2px) scale(1.4)', offset: .42 }, { transform: 'translate(0,-2px) scale(1.4)', offset: .72 }, { transform: 'scaleY(.3)', offset: .8 }, { transform: 'scaleY(.3)', offset: .92 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .34 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .38 }, { transform: 'translateY(-6px)', offset: .46 }, { transform: 'translateY(0) scale(1.03,.96)', offset: .54 }, { transform: 'translateY(0)', offset: .6 }, { transform: 'translateY(0)' }], D)
   } },
 ]
 

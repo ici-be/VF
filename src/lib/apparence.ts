@@ -30,7 +30,7 @@ const CONNUES: [RegExp, string, string, Mascotte?][] = [
   [/kunst|beeldende|\barts?\b/i, '🎨', 'Arts'],
   [/lichamelijke|sport|\bLO\b/i, '⚽', 'Sport'],
   [/godsdienst|religi|levensbeschouw|morale?/i, '🕊️', 'Religion', 'moine'],
-  [/fran[cç]ais|\bfrans\b/i, '📖', 'Français'],
+  [/fran[cç]ais|\bfrans\b/i, '📖', 'Français', 'moliere'],
   [/engels|anglais|english/i, '🇬🇧', 'Anglais'],
   [/duits|allemand/i, '🇩🇪', 'Allemand'],
   [/néerlandais|nederlands|neerlandais/i, '💬', 'Néerlandais', 'renard'],
