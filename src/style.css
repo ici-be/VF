@@ -737,3 +737,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 
 /* le bouton pause un peu à l'écart de la flèche « question précédente » (pas de pause par mégarde) */
 .barre .bouton-pause { margin-left: 10px; }
+
+/* toucher la mascotte du bloc « Commencer » : une surprise */
+.reprendre .acteur { cursor: pointer; }
+.scene-mini .acteur { pointer-events: auto; }

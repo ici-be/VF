@@ -2,7 +2,8 @@
 // à l'écran joue une petite animation. Jamais moins de 30 secondes entre deux, souvent bien plus.
 // Aussi dans les médaillons du menu des matières.
 // Raccourci : S pour une surprise au hasard (sur une mascotte visible au hasard), Maj+S pour passer
-// en revue celles de la mascotte du bloc « Commencer ».
+// en revue celles de la mascotte du bloc « Commencer », dans un ordre au hasard (toutes avant de
+// recommencer). Sur téléphone (et à la souris) : toucher cette mascotte fait la même chose.
 // Onze surprises communes (dont six avec le flambeau), et deux propres à chaque mascotte.
 import type { Mascotte } from './mascottes'
 
@@ -550,8 +551,37 @@ function essayer() {
   setTimeout(essayer, delai())
 }
 
-// --- le raccourci clavier : S = une surprise au hasard, Maj+S = la suivante dans l'ordre ---
-let revue = -1
+// --- le raccourci clavier : S = une surprise au hasard, Maj+S = la suivante de la revue ---
+
+// la revue des surprises d'une mascotte : toutes, dans un ordre tiré au hasard, puis un nouveau tirage
+// (jamais la même deux fois de suite, même d'un tirage à l'autre)
+const revues = new Map<string, { reste: Surprise[]; derniere?: Surprise }>()
+function prochaine(svg: SVGSVGElement): Surprise {
+  const m = svg.dataset.mascotte as Mascotte, flambeau = tientLeFlambeau(svg)
+  const cle = `${m}|${flambeau}`
+  const r = revues.get(cle) ?? { reste: [] }
+  if (!r.reste.length) {
+    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && !x.sauf?.includes(m) && (!x.flambeau || flambeau))
+    for (let i = possibles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[possibles[i], possibles[j]] = [possibles[j], possibles[i]]
+    }
+    if (possibles.length > 1 && possibles[0] === r.derniere) possibles.push(possibles.shift()!)
+    r.reste = possibles
+  }
+  r.derniere = r.reste.shift()!
+  revues.set(cle, r)
+  return r.derniere
+}
+
+/** Toucher (ou cliquer) la mascotte du bloc « Commencer » : sa prochaine surprise. */
+function toucher(e: Event) {
+  const svg = (e.target as Element | null)?.closest?.<SVGSVGElement>('.reprendre svg.mascotte[data-mascotte]')
+  if (!svg || svg.closest('.en-course')) return
+  interrompre(svg)
+  if (!svg.dataset.saute) surprendre(svg, prochaine(svg))
+}
+
 function declencher(dansLOrdre: boolean) {
   const candidates = [...document.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')]
     .filter(svg => { const r = svg.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight && !svg.closest('.en-course') })
@@ -561,16 +591,7 @@ function declencher(dansLOrdre: boolean) {
   const m = svg.dataset.mascotte as Mascotte
   interrompre(svg)
   if (svg.dataset.saute) return
-  let s: Surprise
-  if (dansLOrdre) {
-    // les surprises possibles pour cette mascotte : les communes, puis les siennes
-    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && !x.sauf?.includes(m) && (!x.flambeau || tientLeFlambeau(svg)))
-    revue = (revue + 1) % possibles.length
-    s = possibles[revue]
-  } else {
-    s = choisirSurprise(m, Math.random, tientLeFlambeau(svg), svg.classList.contains('buste'))
-  }
-  surprendre(svg, s)
+  surprendre(svg, dansLOrdre ? prochaine(svg) : choisirSurprise(m, Math.random, tientLeFlambeau(svg), svg.classList.contains('buste')))
 }
 
 const dansUnChamp = (el: EventTarget | null) =>
@@ -588,5 +609,6 @@ export function lancerSurprises() {
     if (e.key.toLowerCase() !== 's' || e.ctrlKey || e.altKey || e.metaKey || e.repeat || dansUnChamp(e.target)) return
     declencher(e.shiftKey)
   })
+  addEventListener('click', toucher)
   setTimeout(essayer, delai())
 }
