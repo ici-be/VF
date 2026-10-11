@@ -216,22 +216,158 @@ function gigue(svg: SVGSVGElement, { flambeau = false, delai = 0 } = {}): Promis
   return anim(p.perso, perso, o)
 }
 
+// ---------- les danses de troupe (plusieurs mascottes dans la scène du bloc « Commencer ») ----------
+
+const MOTIF = [[22, 0], [0, -22], [-10, 0], [0, 10]]
+const GRAND = [[30, 0], [0, -30]]            // coups de pied plus amples
+
+/** n pas de gigue à partir de « debut » (ms) : petits sauts raides, coups de pied selon le motif, notes et trèfles. */
+function pasDeGigue(svg: SVGSVGElement, debut: number, n: number, { h = 1, motif = MOTIF, notes = true } = {}) {
+  const p = parties(svg), D = n * GIGUE_TEMPS, o: KeyframeAnimationOptions = { duration: D, delay: debut, easing: 'linear' }
+  const kf: Keyframe[] = [{ transform: 'translateY(0) scale(1,1)', offset: 0 }]
+  for (let i = 0; i < n; i++) {
+    kf.push({ transform: `translateY(${-7 * h}px) scale(1,1)`, offset: (i + .4) / n, easing: 'ease-in' })
+    kf.push({ transform: 'translateY(0) scale(1.03,.97)', offset: (i + .95) / n, easing: 'ease-out' })
+  }
+  kf.push({ transform: 'translateY(0) scale(1,1)', offset: 1 })
+  anim(p.perso, kf, o)
+  anim(svg.querySelector('.ombre-sol'), kf.map(k => ({ offset: k.offset, transform: String(k.transform).includes('-') ? 'scale(.8)' : 'scale(1)' })), o)
+  ;([[p.jg, 0], [p.jd, 1]] as const).forEach(([jambe, k]) => {
+    const j: Keyframe[] = [{ transform: 'rotate(0)', offset: 0 }]
+    for (let i = 0; i < n; i++) j.push({ transform: `rotate(${motif[i % motif.length][k]}deg)`, offset: (i + .45) / n }, { transform: 'rotate(0)', offset: (i + .98) / n })
+    anim(jambe, [...j, { transform: 'rotate(0)', offset: 1 }], o)
+  })
+  if (notes) for (let i = 0; i < n; i += 2) {
+    const g = (i / 2) % 2 === 0
+    envol(svg, (i / 2) % 2 ? NOTE(['#1f5fbf', '#c0506a', '#2f8c88'][(i / 2) % 3]) : TREFLE, g ? 30 : 92, 60, { dx: g ? -14 : 14, dy: -40, duree: 1300, delai: debut + i * GIGUE_TEMPS + 100, echelle: 1.2 })
+  }
+}
+const SAUT_D = 1100
+/** Le grand saut : élan, envol, jambes ouvertes puis talons claqués, réception et étincelles. */
+function grandSaut(svg: SVGSVGElement, debut: number, { h = 1 } = {}) {
+  const p = parties(svg), o: KeyframeAnimationOptions = { duration: SAUT_D, delay: debut }
+  anim(p.perso, [
+    { transform: 'translateY(0) scale(1,1)', offset: 0 }, { transform: 'translateY(3px) scale(1.06,.9)', offset: .22, easing: 'cubic-bezier(.2,.8,.3,1)' },
+    { transform: `translateY(${-30 * h}px) scale(.97,1.05)`, offset: .5, easing: 'ease-in' }, { transform: 'translateY(0) scale(1.07,.92)', offset: .72, easing: 'ease-out' },
+    { transform: 'translateY(0) scale(1,1)', offset: 1 },
+  ], o)
+  anim(svg.querySelector('.ombre-sol'), [{ transform: 'scale(1)' }, { transform: 'scale(.7)', offset: .5 }, { transform: 'scale(1)', offset: .72 }, { transform: 'scale(1)' }], o)
+  ;([[p.jg, 1], [p.jd, -1]] as const).forEach(([jambe, s]) => anim(jambe, [
+    { transform: 'rotate(0)', offset: 0 }, { transform: 'rotate(0)', offset: .3 }, { transform: `rotate(${24 * s}deg)`, offset: .4 },
+    { transform: `rotate(${-8 * s}deg)`, offset: .5 }, { transform: `rotate(${6 * s}deg)`, offset: .55 }, { transform: 'rotate(0)', offset: .72 }, { transform: 'rotate(0)', offset: 1 },
+  ], o))
+  eclair(svg, 60, 112, .8, '#fff6c8', debut + SAUT_D * .5)
+  eclair(svg, 46, 140, .9, '#ffd23f', debut + SAUT_D * .72)
+  eclair(svg, 76, 138, .7, '#ffd23f', debut + SAUT_D * .74)
+}
+/** Les yeux tournés de côté (dx : −3…3) pendant « duree ». */
+function regardDeCote(svg: SVGSVGElement, dx: number, debut: number, duree: number) {
+  anim(parties(svg).yeux, [{ transform: 'translateX(0)' }, { transform: `translateX(${dx}px)`, offset: .1 }, { transform: `translateX(${dx}px)`, offset: .9 }, { transform: 'translateX(0)' }], { duration: duree, delay: debut })
+}
+/** Déplacer une mascotte sur le plancher : étapes [instant (0..1), dx en px, échelle, plan]. Arrêté par interrompre(). */
+function deplacer(el: HTMLElement, etapes: [number, number, number?, number?][], debut: number, duree: number) {
+  const a = el.animate(etapes.map(([offset, dx, s = 1, z = 1]) => ({ offset, transform: `translateX(${dx}px) scale(${s})`, zIndex: z })), { duration: duree, delay: debut, easing: 'ease-in-out' })
+  a.id = 'figure'
+}
+
+interface Danseur { svg: SVGSVGElement; el: HTMLElement; x: number }
+const T = GIGUE_TEMPS
+/** Les figures de troupe ; chacune renvoie sa durée (ms). */
+const FIGURES: Record<string, (tr: Danseur[], flambeau: boolean) => number> = {
+  synchro: (tr, f) => { tr.forEach(d => gigue(d.svg, { flambeau: f && tientLeFlambeau(d.svg) })); return GIGUE_D },
+  canon: (tr, f) => { tr.forEach((d, i) => gigue(d.svg, { flambeau: f && tientLeFlambeau(d.svg), delai: i * T * 2 })); return GIGUE_D + (tr.length - 1) * T * 2 },
+  // la vague : les pas passent de l'une à l'autre ; le grand saut repart dans l'autre sens
+  vague: tr => {
+    tr.forEach((d, i) => { pasDeGigue(d.svg, i * T / 2, 8); grandSaut(d.svg, 8 * T + (tr.length - 1 - i) * T / 2) })
+    return 8 * T + (tr.length - 1) * T / 2 + SAUT_D
+  },
+  // avancer et reculer (céilí) : vers le centre, face à face, puis retour
+  avancer: tr => {
+    const centre = tr.reduce((s, d) => s + d.x, 0) / tr.length, D = 10 * T
+    tr.forEach(d => {
+      const dx = (centre - d.x) * .5, milieu = Math.abs(centre - d.x) < 1
+      pasDeGigue(d.svg, 0, 4); pasDeGigue(d.svg, 4 * T, 2, { motif: GRAND, notes: false }); pasDeGigue(d.svg, 6 * T, 4)
+      deplacer(d.el, [[0, 0], [.4, dx, milieu ? 1.1 : 1], [.6, dx, milieu ? 1.1 : 1], [1, 0]], 0, D)
+      if (!milieu) regardDeCote(d.svg, Math.sign(dx) * 2.4, 0, D)
+      grandSaut(d.svg, D)
+    })
+    return D + SAUT_D
+  },
+  // le chassé-croisé : les deux des bords changent de place, l'une devant, l'autre derrière, puis reviennent
+  chasse: tr => {
+    const a = tr[0], b = tr[tr.length - 1], ecart = b.x - a.x, D = 10 * T
+    tr.forEach(d => { pasDeGigue(d.svg, 0, 4); pasDeGigue(d.svg, 4 * T, 2, { motif: GRAND }); pasDeGigue(d.svg, 6 * T, 4); grandSaut(d.svg, D) })
+    deplacer(a.el, [[0, 0, 1, 3], [.2, ecart * .5, 1.14, 3], [.4, ecart, 1, 3], [.6, ecart, 1, 3], [.8, ecart * .5, .86, 0], [1, 0, 1, 1]], 0, D)
+    deplacer(b.el, [[0, 0, 1, 0], [.2, -ecart * .5, .86, 0], [.4, -ecart, 1, 0], [.6, -ecart, 1, 3], [.8, -ecart * .5, 1.14, 3], [1, 0, 1, 1]], 0, D)
+    tr.slice(1, -1).forEach(d => anim(parties(d.svg).yeux, [{ transform: 'translateX(0)' }, { transform: 'translateX(-2.4px)', offset: .15 }, { transform: 'translateX(2.4px)', offset: .3 },
+      { transform: 'translateX(2.4px)', offset: .5 }, { transform: 'translateX(-2.4px)', offset: .75 }, { transform: 'translateX(0)' }], D))
+    return D + SAUT_D
+  },
+  // le défi : une danse seule, les autres répondent plus haut, elle réplique, et tout finit ensemble
+  defi: tr => {
+    const [solo, ...autres] = tr
+    pasDeGigue(solo.svg, 0, 4)
+    autres.forEach(d => { regardDeCote(d.svg, -2.6, 0, 4 * T); pasDeGigue(d.svg, 4 * T, 4, { h: 1.5, motif: GRAND }); regardDeCote(d.svg, -2.6, 8 * T, 2 * T) })
+    regardDeCote(solo.svg, 2.6, 4 * T, 4 * T)
+    pasDeGigue(solo.svg, 8 * T, 2, { h: 1.3, motif: GRAND, notes: false })
+    tr.forEach(d => { pasDeGigue(d.svg, 10 * T, 2, { notes: false }); grandSaut(d.svg, 12 * T) })
+    return 12 * T + SAUT_D
+  },
+  // le tourniquet : chacune prend la place de sa voisine (celle qui revient du bout passe derrière), un tour complet
+  tourniquet: tr => {
+    const n = tr.length, xs = tr.map(d => d.x), D = 3 * n * T   // trois pas par changement de place
+    tr.forEach((d, i) => {
+      const etapes: [number, number, number?, number?][] = [[0, 0, 1, 2]]
+      for (let m = 0; m < n; m++) {
+        const de = (i + m) % n, vers = (i + m + 1) % n, retour = vers < de
+        etapes.push([(m + .5) / n, (xs[de] + xs[vers]) / 2 - xs[i], retour ? .82 : 1.06, retour ? 0 : 2], [(m + 1) / n, xs[vers] - xs[i], 1, 2])
+      }
+      deplacer(d.el, etapes, 0, D)
+      pasDeGigue(d.svg, 0, 3 * n, { notes: i === 0 })
+      grandSaut(d.svg, D)
+    })
+    return D + SAUT_D
+  },
+  // le grand final en éventail : quatre pas à l'unisson, celle du milieu saute le plus haut, gerbe de trèfles
+  eventail: tr => {
+    const milieu = (tr.length - 1) / 2
+    tr.forEach((d, i) => {
+      pasDeGigue(d.svg, 0, 4)
+      grandSaut(d.svg, 4 * T + Math.abs(i - milieu) * 60, { h: tr.length === 2 ? 1.5 : i === milieu ? 1.9 : 1.15 })
+      for (let k = 0; k < 5; k++) envol(d.svg, k % 2 ? TREFLE : NOTE(['#1f5fbf', '#c0506a', '#2f8c88'][k % 3]), 60, 40, { dx: (k - 2) * 14, dy: -50 + Math.abs(k - 2) * 6, duree: 1500, delai: 4 * T + 520 + k * 40, echelle: 1.2 })
+    })
+    return 4 * T + 60 + SAUT_D
+  },
+}
+
 /**
- * La gigue de toute la troupe : les autres mascottes de la même scène (plusieurs matières choisies)
- * dansent avec celle-ci, en synchro ou en canon (deux pas de décalage chacune).
+ * La danse de toute la troupe : les mascottes de la même scène (plusieurs matières choisies) dansent
+ * ensemble une figure tirée au hasard (la gigue en synchro ou en canon, ou une des figures de céilí).
+ * Avec le flambeau : la gigue, en synchro ou en canon.
  */
 async function gigueEnTroupe(svg: SVGSVGElement, flambeau: boolean) {
   const scene = svg.closest('.scene-mascottes, .scene-mini')
-  const autres = scene ? [...scene.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')].filter(x => x !== svg && !x.dataset.surprise && !x.dataset.saute) : []
-  const canon = autres.length > 0 && Math.random() < .5
-  autres.forEach((x, i) => {
+  const tous = scene ? [...scene.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')] : [svg]
+  const troupe = tous.filter(x => x === svg || (!x.dataset.surprise && !x.dataset.saute))
+  if (troupe.length < 2) { await gigue(svg, { flambeau }); return }
+  const noms = flambeau ? ['synchro', 'canon'] : Object.keys(FIGURES)
+  const figure = FIGURES[noms[Math.floor(Math.random() * noms.length)]]
+  const tr: Danseur[] = troupe.map(x => {
+    const el = x.parentElement as HTMLElement
+    return { svg: x, el, x: el.offsetLeft + el.offsetWidth / 2 }
+  })
+  // les autres sont marquées « en train de danser » jusqu'à la fin de la figure
+  troupe.filter(x => x !== svg).forEach(x => {
     x.dataset.surprise = 'gigue'
     const jeton: number[] = []
     minuteries.set(x, jeton)
-    gigue(x, { flambeau: flambeau && tientLeFlambeau(x), delai: canon ? (i + 1) * GIGUE_TEMPS * 2 : 0 })
-      .finally(() => { if (minuteries.get(x) === jeton) { minuteries.delete(x); delete x.dataset.surprise } })
   })
-  await gigue(svg, { flambeau })
+  const duree = figure(tr, flambeau)
+  troupe.filter(x => x !== svg).forEach(x => {
+    const jeton = minuteries.get(x)
+    apres(x, duree, () => { if (minuteries.get(x) === jeton) { minuteries.delete(x); delete x.dataset.surprise } })
+  })
+  await attendre(svg, duree)
 }
 
 export const SURPRISES: Surprise[] = [
@@ -630,6 +766,7 @@ export function interrompre(svg: SVGSVGElement) {
   minuteries.delete(svg)
   svg.getAnimations({ subtree: true }).filter(a => !(a instanceof CSSAnimation || a instanceof CSSTransition)).forEach(a => a.cancel())
   svg.querySelectorAll('.bulle').forEach(b => b.remove())
+  svg.parentElement?.getAnimations().filter(a => a.id === 'figure').forEach(a => a.cancel())
   delete svg.dataset.surprise
 }
 
