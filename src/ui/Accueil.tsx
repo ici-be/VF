@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
-  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, motsChoisis, SEP,
+  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, motsChoisis, questionsChoisies, SEP,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
@@ -101,7 +101,7 @@ interface Props {
   reglages: Reglages
   setReglages: (r: Reglages) => void
   lancer: () => void
-  liste: (vue: Vue) => void
+  liste: (vue: Vue | 'interro') => void
 }
 
 function useLarge(): boolean {
@@ -269,6 +269,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
         {nouveauxRecents && <button class="second" onClick={() => liste('nouveaux')}>Nouveaux ({nouveaux.mots.length})</button>}
+        {questionsChoisies(voc, r).length > 0 && <button class="second" onClick={() => liste('interro')} title="Imprimer les questions de cours, avec la place pour répondre et les réponses à part">Interro</button>}
         <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
       </header>
       <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
@@ -292,7 +293,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', getallen: 'la matière Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
             : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
-          {ex.id === 'questions' && dispo > 0 && <button class="lien imprimer-questions" onClick={() => liste('questions')}>📝 Imprimer une feuille d’interro</button>}
         </div>
         <button class="go lancer" onClick={commencer} disabled={dispo === 0}>
           <span class="textes">

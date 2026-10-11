@@ -668,7 +668,6 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .feuille-interro .reponses .r { font-weight: 700; }
   .feuille-interro .reponses .p-cours { color: #444; font-size: 9pt; }
 }
-.resume .imprimer-questions { align-self: flex-start; margin-top: 4px; font-size: .9rem; text-align: left; }
 
 /* ---------- pages du chapitre (un seul chapitre choisi) ---------- */
 .pages-chapitre { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: .92rem; }

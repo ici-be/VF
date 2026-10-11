@@ -19,7 +19,7 @@ type Ecran =
   | { nom: 'accueil' }
   | { nom: 'seance'; serie: Carte[]; cle: number }
   | { nom: 'fin'; bilan: Bilan }
-  | { nom: 'liste'; vue: Vue }
+  | { nom: 'liste'; vue: Vue | 'interro' }
   | { nom: 'jeu'; mots: Mot[]; cle: number }
 
 export function App() {
@@ -106,7 +106,7 @@ export function App() {
           reglages={reglages}
           setReglages={setReglages}
           lancer={() => lancer()}
-          liste={(vue: Vue) => setEcran({ nom: 'liste', vue })}
+          liste={(vue: Vue | 'interro') => setEcran({ nom: 'liste', vue })}
         />
       )
   }

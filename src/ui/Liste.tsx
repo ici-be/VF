@@ -19,7 +19,8 @@ export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux' | 'questions'
 interface Props {
   voc: Vocabulaire
   reglages: Reglages
-  vueInitiale: Vue
+  /** « interro » : la vue des questions, avec la feuille d'interro imprimée tout de suite */
+  vueInitiale: Vue | 'interro'
   retour: () => void
   lancer: (serie: Carte[]) => void
 }
@@ -36,9 +37,9 @@ const cmp = (a: string, b: string) => a.localeCompare(b, 'fr', { sensitivity: 'b
 export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const [cherche, setCherche] = useState('')
   const [tri, setTri] = useState<Tri>('chapitre')
-  const [vue, setVue] = useState<Vue>(vueInitiale)
+  const [vue, setVue] = useState<Vue>(vueInitiale === 'interro' ? 'questions' : vueInitiale)
   // imprimer la feuille d'interro (questions + lignes, réponses à part) plutôt que la liste
-  const [feuille, setFeuille] = useState(false)
+  const [feuille, setFeuille] = useState(vueInitiale === 'interro')
   const simple = (s: string) => sansAccents(s.toLowerCase())
   const q = simple(cherche.trim())
   const choisis = motsChoisis(voc, reglages)
@@ -117,7 +118,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
           <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
-          {vue === 'questions' && mots.length > 0 && <button class="second" onClick={() => setFeuille(true)} title="Les questions avec des lignes pour répondre, les réponses sur une page à part">📝 Feuille d’interro</button>}
+          {vue === 'questions' && mots.length > 0 && <button class="second" onClick={() => setFeuille(true)} title="Les questions avec des lignes pour répondre, les réponses sur une page à part">🖨 Interro</button>}
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <span><NomsMatieres voc={voc} r={reglages} /> · la matière et les chapitres se choisissent dans le menu.</span>}</p>
