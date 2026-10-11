@@ -155,7 +155,7 @@ def textes(octets: bytes) -> set[tuple[str, str]]:
         for l in lignes[entete + 1:]:
             val = lambda k: l[col[k]].strip() if 0 <= col[k] < len(l) else ''
             nl, fr = val('nl'), val('fr')
-            if not nl or not fr or nl.lower() in noms_nl:
+            if not nl or not fr or nl.lower() == titres[col['nl']]:   # en-tête répété (« terme » reste un mot)
                 continue
             det = val('det').lower()
             res.add((langue, f'{det} {nl}' if det in ('de', 'het') else nl))

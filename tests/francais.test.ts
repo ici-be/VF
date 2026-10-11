@@ -28,7 +28,8 @@ const voc = vocabulaireDepuisXlsx(classeur({
   'HW Geschiedenis': [['Néerlandais', 'Français', 'Chapitre'], ['eeuw', 'le siècle', '1. Tijd']],
   'Français': [['Chapitre', 'Page', 'Mot', 'Définition', 'Exemple'],
     ['1. Figures de style', '4', 'métaphore', 'comparaison sans outil de comparaison', 'Cette femme est une [métaphore] vivante.'],
-    ['1. Figures de style', '5', 'comparaison', 'rapprochement de deux éléments avec un outil de comparaison', '']],
+    ['1. Figures de style', '5', 'comparaison', 'rapprochement de deux éléments avec un outil de comparaison', ''],
+    ['1. Figures de style', '5', 'terme', 'mot du vocabulaire (un titre de colonne possible, mais ici un mot)', '']],
   'Vragen': [['Matière', 'Chapitre', 'Question', 'Réponse'],
     ['Religion', '1. La Bible', 'Combien de livres compte la Bible ?', '73'],
     ['Français', '1. Figures de style', 'Qu’est-ce qu’une antithèse ?', 'Deux idées opposées rapprochées'],
@@ -66,8 +67,8 @@ describe('matières en français', () => {
     const pour = (id: string) => aReviser(voc, r, exercice(id as Reglages['exercice'])).map(m => m.nl)
     expect(pour('qcm')).toEqual(['eeuw'])
     expect(pour('dehet')).toEqual([])
-    expect(pour('definitions')).toEqual(['métaphore', 'comparaison'])
-    expect(pour('defilement')).toEqual(['eeuw', 'métaphore', 'comparaison'])
+    expect(pour('definitions')).toEqual(['métaphore', 'comparaison', 'terme'])
+    expect(pour('defilement')).toEqual(['eeuw', 'métaphore', 'comparaison', 'terme'])
     expect(pour('questions')).toHaveLength(2)
   })
   it('en français : le mot puis sa définition, lus en français', () => {

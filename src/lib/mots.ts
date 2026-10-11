@@ -135,7 +135,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
   for (const ligne of onglet.lignes.slice(entete + 1)) {
     const val = (k: keyof typeof COLONNES) => (col[k] >= 0 ? (ligne[col[k]] ?? '').trim() : '')
     const nl = val('nl'), fr = val('fr')
-    if (!nl || !fr || nomsNl.includes(norm(nl))) continue   // ligne vide ou en-tête répété
+    if (!nl || !fr || norm(nl) === titres[col.nl]) continue   // ligne vide ou en-tête répété (« terme » reste un mot)
     const chapitre = val('chapitre') || SANS_CHAPITRE
     if (!chapitres.includes(chapitre)) chapitres.push(chapitre)
     // un même mot peut apparaître dans deux chapitres : l'identifiant reste unique
