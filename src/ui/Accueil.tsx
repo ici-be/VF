@@ -341,7 +341,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc">
         <h2>Matière <span class="indice-titre">+ pour en réviser plusieurs</span></h2>
         <div class="matieres">
-          {voc.matieres.map(m => {
+          {/* les matières en néerlandais (immersion) d'abord, puis celles données en français */}
+          {[...voc.matieres].sort((a, b) => Number(langueMatiere(a.nom) === 'fr') - Number(langueMatiere(b.nom) === 'fr')).map(m => {
             const a = apparence(m.nom)
             const choisie = r.matieres.includes(m.nom)
             return (

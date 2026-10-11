@@ -49,7 +49,7 @@ function etincelle(svg: SVGSVGElement, x: number, y: number, taille = 1) {
 }
 
 // la bouche (ou le museau, ou la fente du heaume) de chaque mascotte
-const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53] }
+const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53], pythagore: [60, 51.5] }
 const bouche = (svg: SVGSVGElement) => BOUCHE[svg.dataset.mascotte as Mascotte] ?? [60, 55]
 
 /** Quelques ronds de fumée grise qui montent de (x, y). */
@@ -274,6 +274,17 @@ export const SURPRISES: Surprise[] = [
     await anim(p.corps, [{ transform: 'rotate(0)' }, ...tour(6, i => ({ transform: `rotate(${i % 2 ? -4 : 4}deg) translateY(${i % 2 ? 0 : -1}px)` })), { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
   } },
 
+  // Pythagore réfléchit, les yeux en l'air : des symboles s'envolent de sa tête… Eurêka ! petit saut de joie
+  { id: 'eureka', pour: 'pythagore', async jouer(svg) {
+    const p = parties(svg), D = 3400
+    const symboles = ['π', '+', '²', '×', '√', '=']
+    symboles.forEach((c, i) => envol(svg, `<text text-anchor="middle" font-size="${12 + (i % 2) * 3}" font-weight="700" fill="${['#2f6db0', '#c0506a', '#2f8c88'][i % 3]}" stroke="${TRAIT}" stroke-width=".4">${c}</text>`, 60 + (i % 2 ? 10 : -10), 26, { dx: i % 2 ? 14 : -14, dy: -26, duree: 1200, delai: 100 + i * 260, echelle: 1.3 }))
+    envol(svg, `<text text-anchor="middle" font-size="13" font-weight="800" fill="#e2681f" stroke="${TRAIT}" stroke-width=".5">Eurêka !</text>`, 60, 18, { dx: 0, dy: -16, duree: 1300, delai: D * .62, echelle: 1.25 })
+    apres(svg, D * .64, () => { etincelle(svg, 40, 20); etincelle(svg, 82, 16, .8); etincelle(svg, 50, 6, .7) })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(1.5px,-2.5px)', offset: .12 }, { transform: 'translate(-1.5px,-2.5px)', offset: .35 }, { transform: 'translate(1px,-2.5px)', offset: .55 }, { transform: 'scale(1.3)', offset: .64 }, { transform: 'scale(1.3)', offset: .8 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .6 }, { transform: 'translateY(3px) scale(1.04,.95)', offset: .64 }, { transform: 'translateY(-12px)', offset: .72 }, { transform: 'translateY(0) scale(1.04,.95)', offset: .8 }, { transform: 'translateY(0)', offset: .86 }, { transform: 'translateY(0)' }], D)
+  } },
+
   // ---------- deuxième série (démo du 9 octobre) : surtout avec le feu du flambeau ----------
 
   // la flamme s'agite de plus en plus, la mascotte la surveille… pouf ! visage noirci, deux clignements ahuris
@@ -441,6 +452,21 @@ export const SURPRISES: Surprise[] = [
     envol(svg, texte('!', 22), 82, 22, { dx: 0, dy: -10, duree: 800, delai: D * .3, echelle: 1.1 })
     anim(p.yeux, [{ transform: 'none' }, { transform: 'scale(1.4,1.8)', offset: .3 }, { transform: 'scale(1.4,1.8)', offset: .62 }, { transform: 'none', offset: .7 }, { transform: 'none' }], D)
     await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .3 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .34 }, { transform: 'translateY(-14px)', offset: .42 }, { transform: 'translateY(0) scale(1.05,.93)', offset: .5 }, ...tour(4, i => ({ transform: `rotate(${i % 2 ? 3 : -3}deg)`, offset: .54 + i * .03 })), { transform: 'rotate(0)', offset: .68 }, { transform: 'translateY(0)' }], D)
+  } },
+
+  // la flamme se penche vers la grande barbe, qui prend feu au bout : Pythagore bondit, se secoue… barbe roussie
+  { id: 'barbe', pour: 'pythagore', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3600, barbe = svg.querySelector('.barbe')
+    anim(p.flamme, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-48deg) scale(1.35)', offset: .14 }, { transform: 'rotate(-44deg) scale(1.4)', offset: .22 }, { transform: 'rotate(0) scale(1)', offset: .3 }, { transform: 'rotate(0) scale(1)' }], D)
+    // dans le corps : le feu et la suie suivent Pythagore quand il bondit
+    petitFeu(svg, 60, 74, D * .22, D * .62, { dans: p.corps ?? svg, taille: .85 })
+    const roussi = ajout(svg, `<path d="M51.5 62 Q55 70 60 75 Q65 70 68.5 62 Q64 66 60 65.5 Q56 66 51.5 62 Z" fill="#2b2219"/>`, p.corps ?? svg, barbe?.nextElementSibling ?? null)
+    anim(roussi, [{ opacity: 0 }, { opacity: 0, offset: .4 }, { opacity: .8, offset: .62 }, { opacity: .8, offset: .9 }, { opacity: 0 }], D).finally(() => roussi.remove())
+    fumee(svg, 60, 72, 3, D * .62, 2.6)
+    souffle(svg, D * .64, -4, 18)
+    envol(svg, texte('!', 22), 82, 22, { dx: 0, dy: -10, duree: 800, delai: D * .3, echelle: 1.1 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(0,2px)', offset: .26 }, { transform: 'translate(0,2px) scale(1.4)', offset: .32 }, { transform: 'translate(0,2px) scale(1.4)', offset: .66 }, { transform: 'scaleY(.3)', offset: .76 }, { transform: 'scaleY(.3)', offset: .9 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .32 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .36 }, { transform: 'translateY(-14px)', offset: .44 }, { transform: 'translateY(0) scale(1.05,.93)', offset: .52 }, ...tour(4, i => ({ transform: `rotate(${i % 2 ? 4 : -4}deg)`, offset: .55 + i * .03 })), { transform: 'rotate(0)', offset: .68 }, { transform: 'translateY(0)' }], D)
   } },
 ]
 

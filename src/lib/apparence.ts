@@ -23,7 +23,7 @@ const CONNUES: [RegExp, string, string, Mascotte?][] = [
   [/wetenschap|sciences?/i, '🔬', 'Sciences'],
   [/fysica|natuurkunde|physique/i, '⚛️', 'Physique'],
   [/chemie|chimie/i, '🧪', 'Chimie'],
-  [/wiskunde|math/i, '📐', 'Mathématiques'],
+  [/wiskunde|math/i, '📐', 'Mathématiques', 'pythagore'],
   [/techn/i, '⚙️', 'Technologie'],
   [/informatica|informatique/i, '💻', 'Informatique'],
   [/muziek|musique/i, '🎵', 'Musique'],

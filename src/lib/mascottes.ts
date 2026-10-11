@@ -1,9 +1,9 @@
-// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; le moine de la Religion ensuite).
+// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; le moine de la Religion et Pythagore des Mathématiques ensuite).
 // Chacune tient un flambeau, qu'elle passe à la suivante quand on change de matière.
 
 import { interrompre } from './surprises'
 
-export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine'
+export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine' | 'pythagore'
 
 const TRAIT = '#26303d'
 const t = `stroke="${TRAIT}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"`
@@ -223,11 +223,54 @@ const DESSINS: Record<Mascotte, string> = {
       <g class="yeux"><path d="M52.5 45 Q55 42.5 57.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/><path d="M62.5 45 Q65 42.5 67.5 45" stroke="${TRAIT}" stroke-width="1.7" fill="none" stroke-linecap="round"/></g>
       <path d="M55 51 Q60 55.5 65 51" stroke="${TRAIT}" stroke-width="1.6" fill="#b44a3a" stroke-linecap="round"/>
     </g>`,
+
+  // Pythagore : toge blanche à bordure grecque, couronne de laurier, grande barbe, équerre à la main
+  pythagore: `
+    ${ombre}
+    ${jambes(peau, '#8a5a36')}
+    <g class="corps">
+      <rect x="56" y="52" width="8" height="15" rx="2" fill="${peau}" ${t}/>
+      <path d="M45 66 Q60 60 75 66 L79 116 Q60 121 41 116 Z" fill="#f6f3ea" ${t}/>
+      ${ombrage('M62 62 Q70 63 75 66 L79 116 Q70 119 62 120 Z')}
+      <path d="M41.5 110 Q60 115 78.5 110 L79 116 Q60 121 41 116 Z" fill="#2f6db0" ${t} stroke-width="1.4"/>
+      <path d="M44 113 L44 115.5 L47 115.5 L47 113.5 M51 114.5 L51 117 L54 117 L54 115 M58 115 L58 117.5 L61 117.5 L61 115.3 M65 115 L65 117.3 L68 117.3 L68 114.8 M72 114 L72 116.3 L75 116.3 L75 113.6" stroke="#f6f3ea" stroke-width="1" fill="none"/>
+      <path d="M47 66 L72 104" stroke="${TRAIT}" stroke-width="7" stroke-linecap="round"/>
+      <path d="M47 66 L72 104" stroke="#2f6db0" stroke-width="4.4" stroke-linecap="round"/>
+      <path d="M52 80 Q56 90 54 104 M66 74 Q64 86 67 100" stroke="${TRAIT}" stroke-width="1.1" fill="none" opacity=".35"/>
+      ${brasGauche(peau, peau, 37, 90)}
+      <g class="equerre" transform="translate(22 78)">
+        <path d="M0 0 L0 26 L20 26 Z" fill="#e8c06a" ${t}/>
+        <path d="M4 10 L4 22 L13 22 Z" fill="#f6f3ea" ${t} stroke-width="1.3"/>
+        <path d="M0 6 L3 6 M0 12 L2 12 M0 18 L3 18 M6 26 L6 23 M12 26 L12 24 M18 26 L18 23" stroke="${TRAIT}" stroke-width="1" opacity=".7"/>
+      </g>
+      <circle cx="37" cy="90" r="4.6" fill="${peau}" ${t}/>
+      ${bras(peau, peau)}
+      <path d="M47 38 Q43 50 48 56 L50 42 Z M73 38 Q77 50 72 56 L70 42 Z" fill="#dfe3e8" ${t}/>
+      <ellipse cx="60" cy="44" rx="12" ry="13.5" fill="${peau}" ${t}/>
+      ${ombrage('M62 31 Q72 33 72 44 Q72 56 62 58 Z')}
+      <path class="barbe" d="M48.5 47 Q46 64 60 75 Q74 64 71.5 47 Q67 53 60 52.5 Q53 53 48.5 47 Z" fill="#eef0f3" ${t}/>
+      <path d="M54 56 Q57 62 56 68 M60 56 L60 70 M66 56 Q63 62 64 68" stroke="#c3c9d1" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M53 51 Q56.5 48.5 60 50.5 Q63.5 48.5 67 51 Q63.5 53.5 60 52 Q56.5 53.5 53 51 Z" fill="#dfe3e8" ${t} stroke-width="1.3"/>
+      <path d="M52.5 40 Q55.5 38 58 39.5 M62 39.5 Q64.5 38 67.5 40" stroke="#b9c0c9" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <g class="yeux">${oeil(55.5, 43.5)}${oeil(64.5, 43.5)}</g>
+      <path d="M60 44 Q58.5 48 60.5 48.5" stroke="${TRAIT}" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <g class="laurier">
+        <path d="M47 37 Q60 26 73 37" stroke="#4e7d2e" stroke-width="1.6" fill="none"/>
+        <g fill="#6aa23c" ${t} stroke-width="1.1">
+          <ellipse cx="48.5" cy="33.5" rx="3.6" ry="1.9" transform="rotate(-50 48.5 33.5)"/><ellipse cx="52.5" cy="29.5" rx="3.6" ry="1.9" transform="rotate(-30 52.5 29.5)"/>
+          <ellipse cx="57" cy="27.5" rx="3.6" ry="1.9" transform="rotate(-12 57 27.5)"/><ellipse cx="63" cy="27.5" rx="3.6" ry="1.9" transform="rotate(12 63 27.5)"/>
+          <ellipse cx="67.5" cy="29.5" rx="3.6" ry="1.9" transform="rotate(30 67.5 29.5)"/><ellipse cx="71.5" cy="33.5" rx="3.6" ry="1.9" transform="rotate(50 71.5 33.5)"/>
+        </g>
+      </g>
+    </g>`,
 }
 
 /** Le buste, pour le médaillon du menu des matières : la tête et, à côté, le flambeau tenu à hauteur d'épaule. */
+// dans le médaillon, certaines mascottes sont remontées un peu (de tant d'unités du dessin)
+const HAUSSE_BUSTE: Partial<Record<Mascotte, number>> = { moine: 9, grenouille: 5 }
+
 export const svgBuste = (nom: Mascotte) =>
-  `<svg class="mascotte buste" data-mascotte="${nom}" viewBox="30 8 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
+  `<svg class="mascotte buste" data-mascotte="${nom}" viewBox="30 ${8 + (HAUSSE_BUSTE[nom] ?? 0)} 68 68" xmlns="http://www.w3.org/2000/svg"><g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
 
 export const svgMascotte = (nom: Mascotte, classe = '') =>
   `<svg class="mascotte ${classe}" data-mascotte="${nom}" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">${ombre.replace('<ellipse', '<ellipse class="ombre-sol"')}<g class="perso">${DESSINS[nom].replace(ombre, '')}</g></svg>`
