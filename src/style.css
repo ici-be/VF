@@ -615,7 +615,11 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .tableau.questions td.det, .tableau.questions th:first-child { width: 0; padding: 0; }
 @media print {
   .tableau.questions th:nth-child(2), .tableau.questions td.nl { width: 42%; }
-  .tableau.questions th:nth-child(3) { width: auto; }
+  /* la ligne de chapitre couvre aussi la colonne des détails, cachée : sans largeur ici, elle prendrait le reste */
+  .tableau.questions th:nth-child(3) { width: 58%; }
+  /* « À revoir » : la colonne Raté montre aussi ce que l'élève avait écrit à l'interro */
+  .tableau.questions table:has(td.rate) th:nth-child(3) { width: calc(58% - 30mm); }
+  .tableau.questions td.rate, .tableau.questions th:last-child:not(.details) { width: 30mm; }
   .tableau.questions .details { display: none; }
 }
 .enumeration { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 8px; }

@@ -127,7 +127,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       <header class="impression">
         <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
         {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
-        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : vue === 'questions' ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
+        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : enQuestions ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
       <div class="haut">
         <header class="entete">
