@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
+import { ArrowLeft } from 'lucide-preact'
 import { BoutonSignaler, FenetreSignalement } from './Signaler'
 import { langueDe } from '../lib/apparence'
 import { IconeExercice } from './icones'
@@ -82,7 +83,11 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     meilleurCombo.current = Math.max(meilleurCombo.current, c)
     if (c > 0 && c % 10 === 0) confettis(80)
   }
-  const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = r; compter(r) } }
+  // la carte la plus loin atteinte : en deçà (revenu en arrière avec ←), une réponse ne compte plus
+  // (ni progression, ni score, ni série, ni reprise en fin de série : la première réponse reste)
+  const plusLoin = useRef(0)
+  const revisite = () => i < plusLoin.current
+  const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = r; if (!revisite()) compter(r) } }
   // arrêter en cours de route : la carte affichée compte (ratée si on n'y a pas répondu),
   // les cartes qui restaient dans la série ne comptent pas
   const arreter = () => {
@@ -123,7 +128,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   const suivant = (r: Resultat | null) => {
     let nouvelleFile = file
     const res = new Map(resultats)
-    if (r) {
+    if (r && !revisite()) {
       if (!annonce.current) compter(r)
       // la première réponse compte pour le score et la progression
       if (!carte.reprise && !res.has(carte.mot.id)) { res.set(carte.mot.id, r); noter(carte.mot.id, r) }
@@ -133,7 +138,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     annonce.current = null
     setResultats(res)
     setFile(nouvelleFile)
-    if (i + 1 < nouvelleFile.length) { setI(i + 1); return }
+    if (i + 1 < nouvelleFile.length) { plusLoin.current = Math.max(plusLoin.current, i + 1); setI(i + 1); return }
     taire()
     const valeurs = [...res.values()]
     terminer({
@@ -145,6 +150,15 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       notee: r !== null,
       meilleurCombo: meilleurCombo.current,
     })
+  }
+
+  // ← : la carte d'avant, à nouveau (sa réponse a déjà compté)
+  const precedente = () => {
+    if (i === 0) return
+    taire()
+    annonce.current = null
+    setPause(false)
+    setI(i - 1)
   }
 
   const props: PropsExercice = { carte, tous, reglages, setReglages, pause: pause || aSignaler, suivant, annoncer }
@@ -159,6 +173,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
         <span class="compte">{Math.min(i + 1, file.length)} / {file.length}</span>
         {carte && carte.mot.getal === undefined && <BoutonSignaler onClick={() => setASignaler(true)} />}
+        <button class="icone" onClick={precedente} disabled={i === 0} aria-label="Question précédente" title="Revenir à la question précédente"><ArrowLeft size={16} strokeWidth={2.4} /></button>
         <button class="icone" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
       </div>
       <div class="progres"><div style={{ width: `${(i / file.length) * 100}%` }} /></div>
