@@ -30,7 +30,7 @@ function formes(nl: string): string[] {
 export function indexer(mots: Mot[]): Index {
   const index: Index = new Map()
   for (const m of mots) {
-    if (m.verbe || m.getal !== undefined || m.vraag || langueDe(m) === 'fr') continue
+    if (m.verbe || m.getal !== undefined || m.vraag || m.genere || langueDe(m) === 'fr') continue
     const e: Entree = { nl: m.nl, det: m.det, fr: m.fr, matiere: m.matiere }
     for (const f of formes(m.nl)) {
       const l = index.get(f) ?? []

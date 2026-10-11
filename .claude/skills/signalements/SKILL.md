@@ -52,6 +52,10 @@ python3 outils/cours.py traiter <ID> <ID> --note "réponse corrigée"
 python3 outils/cours.py traiter <ID> --note "pas d'erreur : …"
 ```
 
+Une question ou un mot **à retirer** : un TSV `Matière	Question` (onglet Vragen) ou
+`Mot	Chapitre` (onglet de mots), puis
+`python3 outils/cours.py supprimer <lignes.tsv> --onglet <onglet> --essai`, puis sans `--essai`.
+
 Changer le texte d'une question ou d'un mot (la colonne Question, Néerlandais ou Mot) en change
 l'identifiant : sa progression dans l'appli repart de zéro. Le signaler à l'utilisateur.
 

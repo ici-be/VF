@@ -8,6 +8,7 @@
     python3 outils/cours.py lire Signalements          # les signalements du bouton drapeau
     python3 outils/cours.py corriger corrections.tsv [--essai]
     python3 outils/cours.py traiter ID1 ID2 --note "réponse corrigée"
+    python3 outils/cours.py supprimer [lignes.tsv] --onglet Vragen [--vides] [--essai]
 
 Le fichier envoyé est un TSV avec une ligne de titres :
 - mots : Page, Néerlandais, Dét., Français, Remarque, Définition, Exemple, Chapitre ;
@@ -195,6 +196,23 @@ def corriger(args):
         print(f'  INTROUVABLE [{m["onglet"]}] {m["question"] or m["nl"]} — {m["champ"]}')
 
 
+def supprimer(args):
+    """Supprime des lignes d'un onglet, d'après un TSV (Matière, Question pour « Vragen » ; Mot, Chapitre
+    pour un onglet de mots), et/ou les lignes vidées (--vides)."""
+    sup = []
+    if args.fichier:
+        with open(args.fichier, newline='', encoding='utf-8') as f:
+            for l in csv.DictReader(f, delimiter='\t'):
+                l = {k.strip().lower(): (v or '').strip() for k, v in l.items() if k}
+                sup.append({'matiere': l.get('matière', ''), 'question': l.get('question', ''), 'nl': l.get('mot', '') or l.get('néerlandais', ''), 'chapitre': l.get('chapitre', '')})
+    res = appeler({'action': 'supprimer', 'onglet': args.onglet, 'suppressions': sup, 'vides': args.vides, 'essai': args.essai})
+    print(f'{"Serait supprimé" if args.essai else "Supprimé"} dans « {args.onglet} » : {len(res["supprimees"])} ligne(s)')
+    for l in res['supprimees']:
+        print(f'  {l}')
+    for m in res['introuvables']:
+        print(f'  INTROUVABLE {m["question"] or m["nl"]}')
+
+
 def traiter(args):
     """Marque des signalements comme traités (colonne « Traité » de l'onglet Signalements)."""
     res = appeler({'action': 'traiter', 'ids': args.ids, 'note': args.note})
@@ -223,6 +241,12 @@ def main():
     s.add_argument('fichier')
     s.add_argument('--essai', action='store_true', help='ne rien écrire, montrer ce qui serait corrigé')
     s.set_defaults(f=corriger)
+    s = sous.add_parser('supprimer', help='supprimer des lignes (d’après un TSV) ou les lignes vidées')
+    s.add_argument('fichier', nargs='?')
+    s.add_argument('--onglet', required=True)
+    s.add_argument('--vides', action='store_true', help='supprimer aussi les lignes sans mot ni question')
+    s.add_argument('--essai', action='store_true', help='ne rien supprimer, montrer ce qui le serait')
+    s.set_defaults(f=supprimer)
     s = sous.add_parser('traiter', help='marquer des signalements comme traités')
     s.add_argument('ids', nargs='+')
     s.add_argument('--note', default='', help='ce qui a été fait (« réponse corrigée », « pas d’erreur »…)')

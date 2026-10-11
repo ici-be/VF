@@ -91,6 +91,39 @@ elle apparaît dans **À revoir**, qui montre les mots et les questions de cours
 l'élève avait écrit, et un bouton pour s'entraîner sur les questions ratées. Ni nom ni note
 ne vont dans le tableau.
 
+## Réviser aujourd'hui, suivi, récompenses
+
+- **Réviser aujourd'hui** (bouton de l'accueil) : une séance courte, toutes matières confondues, avec
+  les erreurs récentes puis ce dont la date de révision est arrivée (boîtes de Leitner), une
+  vingtaine de cartes au plus. Chaque carte a son exercice : questions de cours, définitions
+  (matières en français), QCM (néerlandais).
+- **Suivi** (bouton de l'accueil) : régularité (série de jours, record, calendrier des cinq
+  dernières semaines ; un jour compte à partir de 10 réponses), récompenses, ce qui est su par
+  matière et par chapitre, erreurs qui reviennent, et le **lien de transfert** pour réunir la
+  progression de deux appareils (rien ne passe par le tableau ; pour chaque mot, la plus récente
+  l'emporte).
+- **Récompenses** : une surprise de mascotte de plus à 3, 7, 14 et 30 jours de révision d'affilée
+  (confettis, feu d'artifice, couronne, arc-en-ciel de trèfles), annoncée sur l'accueil et acquise
+  pour de bon.
+
+## Exercices fabriqués par l'appli
+
+Sans fin, une question nouvelle à chaque carte ; chacun ajoute un chapitre à sa matière et
+n'apparaît que si elle est choisie :
+- **Eeuwen** (Geschiedenis, en néerlandais) : une année → son siècle ou son tijdvak, un siècle →
+  ses années, avec les pièges classiques (le siècle d'à côté, « v.C. » oublié) et le calcul expliqué ;
+- **Calcul mental** (Mathématiques) : priorité des opérations, parenthèses, distributivité (réponse
+  écrite), coder, décoder, propriétés (choix parmi 4) ;
+- **Natures des mots** (Français) : la nature du mot souligné dans une phrase, et le test du cours
+  (les phrases sont dans `src/data/natures.json`).
+
+## Vérifier et nettoyer le tableau
+
+`python3 outils/verifier.py` liste ce qui cloche : cases changées en date par Sheets, doublons,
+lignes ignorées ou vidées, mots sans page, leurres manquants, réponses qui se repèrent à leur
+longueur, énumérations incohérentes. Ensuite `cours.py corriger`, et
+`cours.py supprimer [lignes.tsv] --onglet … [--vides]` pour retirer des lignes (ou les lignes vidées).
+
 ## Signaler une erreur
 
 Un petit drapeau gris (dans la barre d'un exercice, et au survol d'une ligne de la liste des mots)

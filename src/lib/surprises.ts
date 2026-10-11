@@ -6,6 +6,7 @@
 // recommencer). Sur téléphone (et à la souris) : toucher cette mascotte fait la même chose.
 // Treize surprises communes (dont sept avec le flambeau, dont la gigue), et deux propres à chaque mascotte.
 import type { Mascotte } from './mascottes'
+import { debloquee } from './progression'
 
 const NS = 'http://www.w3.org/2000/svg'
 const TRAIT = '#26303d'
@@ -742,6 +743,58 @@ export const SURPRISES: Surprise[] = [
   } },
 
   // ---------- la gigue (danse irlandaise), pour toutes les mascottes ; la troupe danse ensemble ----------
+  // ---------- les récompenses (séries de jours de révision, voir RECOMPENSES dans progression.ts) ----------
+
+  // 3 jours : des confettis à pleines mains, avec un petit saut de joie
+  { id: 'confettis', async jouer(svg) {
+    const p = parties(svg), D = 1800, couleurs = ['#e0607e', '#ffd23f', '#5ab0ff', '#7cc576', '#c48cff', '#ff9a3c']
+    apres(svg, 350, () => { eclat(svg, 36, 76, couleurs, 22, 14); eclat(svg, 92, 66, couleurs, 22, 14) })
+    apres(svg, 900, () => eclat(svg, 64, 30, couleurs, 26, 16))
+    for (let k = 0; k < 10; k++) envol(svg, `<rect x="-1.6" y="-1" width="3.2" height="2" fill="${couleurs[k % couleurs.length]}"/>`, 20 + k * 9, 10, { dx: (k % 3 - 1) * 6, dy: 60 + (k % 4) * 10, duree: 1500, delai: 500 + k * 70, echelle: 1 })
+    anim(p.yeux, [{ transform: 'scaleY(1)' }, { transform: 'scaleY(.3)', offset: .3 }, { transform: 'scaleY(.3)', offset: .8 }, { transform: 'scaleY(1)' }], D)
+    await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(3px) scale(1.04,.95)', offset: .15 }, { transform: 'translateY(-14px)', offset: .3 }, { transform: 'translateY(0) scale(1.04,.95)', offset: .45 }, { transform: 'translateY(0)', offset: .55 }, { transform: 'translateY(0)' }], D)
+  } },
+
+  // 7 jours : le flambeau tire une fusée, qui monte et éclate en étoiles (deux fois)
+  { id: 'feu-artifice', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 3000
+    const fusee = (x: number, haut: number, t: number, couleurs: string[]) => {
+      apres(svg, t, () => {
+        const g = ajout(svg, `<circle r="1.8" fill="#fff3b0" stroke="${TRAIT}" stroke-width=".6"/>`)
+        anim(g.firstElementChild, [{ transform: 'translate(92px,18px)' }, { transform: `translate(${x}px,${haut}px)` }], { duration: 500, easing: 'ease-out' }).finally(() => g.remove())
+      })
+      apres(svg, t + 500, () => { eclat(svg, x, haut, couleurs, 20, 14); etincelle(svg, x, haut, .8) })
+    }
+    fusee(76, -6, 200, ['#ffd23f', '#e0607e', '#ffffff'])
+    fusee(104, 2, 1100, ['#5ab0ff', '#7cc576', '#ffd23f'])
+    anim(p.flamme, coups([.07, .37], 'scale(1.4,1.6)', 'scale(1,1)', .05), D)
+    await anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(1.5px,-2.5px)', offset: .1 }, { transform: 'translate(1.5px,-2.5px) scale(1.25)', offset: .3 }, { transform: 'translate(2px,-2px) scale(1.25)', offset: .7 }, { transform: 'none' }], D)
+  } },
+
+  // 14 jours : une couronne dorée descend sur sa tête ; la mascotte se redresse, fière, puis la couronne s'efface
+  { id: 'couronne', async jouer(svg) {
+    const p = parties(svg), D = 3400
+    const c = ajout(svg, `<g class="c"><path d="M-11 4 L-11 -6 L-5.5 -1 L0 -9 L5.5 -1 L11 -6 L11 4 Z" fill="#f5c84a" stroke="${TRAIT}" stroke-width="1.3" stroke-linejoin="round"/>
+      <circle cx="0" cy="0" r="1.6" fill="#e0607e" stroke="${TRAIT}" stroke-width=".6"/><circle cx="-6.5" cy="1" r="1.2" fill="#5ab0ff"/><circle cx="6.5" cy="1" r="1.2" fill="#7cc576"/></g>`, p.corps ?? svg)
+    anim(c.querySelector('.c'), [{ transform: 'translate(60px,-14px)', opacity: 0 }, { transform: 'translate(60px,-6px)', opacity: 1, offset: .15 }, { transform: 'translate(60px,24px)', opacity: 1, offset: .35, easing: 'ease-in' },
+      { transform: 'translate(60px,23px)', opacity: 1, offset: .85 }, { transform: 'translate(60px,23px)', opacity: 0 }], { duration: D, fill: 'forwards' }).finally(() => c.remove())
+    apres(svg, D * .38, () => { etincelle(svg, 46, 18, .7); etincelle(svg, 76, 14, .8) })
+    apres(svg, D * .6, () => etincelle(svg, 62, 6, .6))
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translateY(-2px)', offset: .2 }, { transform: 'scaleY(.3)', offset: .45 }, { transform: 'scaleY(.3)', offset: .8 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'scale(1,1)' }, { transform: 'scale(1,1)', offset: .33 }, { transform: 'scale(.98,1.05)', offset: .45 }, { transform: 'scale(.98,1.05)', offset: .85 }, { transform: 'scale(1,1)' }], D)
+  } },
+
+  // 30 jours : un grand saut sous une arche de trèfles et d'étoiles
+  { id: 'arc-trefles', enPied: true, async jouer(svg) {
+    grandSaut(svg, 300, { h: 1.6 })
+    for (let k = 0; k < 9; k++) {
+      const a = Math.PI * (k / 8), x = 60 - Math.cos(a) * 46, y = 70 - Math.sin(a) * 62
+      envol(svg, k % 2 ? TREFLE : NOTE(['#1f5fbf', '#c0506a', '#2f8c88'][k % 3]), x, y, { dx: 0, dy: -12, duree: 1600, delai: 300 + k * 90, echelle: 1.3 })
+      if (k % 2 === 0) apres(svg, 500 + k * 90, () => etincelle(svg, x, y - 6, .5))
+    }
+    await attendre(svg, 2400)
+  } },
+
   { id: 'gigue', enPied: true, async jouer(svg) { await gigueEnTroupe(svg, false) } },
   { id: 'gigue-flambeau', flambeau: true, enPied: true, async jouer(svg) { await gigueEnTroupe(svg, true) } },
 ]
@@ -779,7 +832,7 @@ export const tientLeFlambeau = (svg: SVGSVGElement) => {
 }
 
 export function choisirSurprise(m: Mascotte, hasard = Math.random, avecFlambeau = true, medaillon = false): Surprise {
-  const ok = (s: Surprise) => s.id !== derniere && (avecFlambeau || !s.flambeau) && !(medaillon && s.enPied) && !s.sauf?.includes(m)
+  const ok = (s: Surprise) => debloquee(s.id) && s.id !== derniere && (avecFlambeau || !s.flambeau) && !(medaillon && s.enPied) && !s.sauf?.includes(m)
   const propres = SURPRISES.filter(s => s.pour === m && ok(s))
   const communes = SURPRISES.filter(s => !s.pour && ok(s))
   const s = propres.length && hasard() < 1 / 3 ? propres[Math.floor(hasard() * propres.length)] : communes[Math.floor(hasard() * communes.length)]
@@ -816,7 +869,7 @@ function prochaine(svg: SVGSVGElement): Surprise {
   const cle = `${m}|${flambeau}`
   const r = revues.get(cle) ?? { reste: [] }
   if (!r.reste.length) {
-    const possibles = SURPRISES.filter(x => (!x.pour || x.pour === m) && !x.sauf?.includes(m) && (!x.flambeau || flambeau))
+    const possibles = SURPRISES.filter(x => debloquee(x.id) && (!x.pour || x.pour === m) && !x.sauf?.includes(m) && (!x.flambeau || flambeau))
     for (let i = possibles.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[possibles[i], possibles[j]] = [possibles[j], possibles[i]]

@@ -37,7 +37,7 @@
  *
  * Signalements : le bouton drapeau de l'appli envoie l'action « signaler », la seule possible
  * sans clé (une ligne dans l'onglet « Signalements », créé au premier). La commande /signalements
- * corrige ensuite le tableau avec « modifier » et marque les lignes avec « traiter » (avec clé).
+ * corrige ensuite le tableau avec « modifier » (ou « supprimer ») et marque les lignes avec « traiter » (avec clé).
  */
 
 // mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; de « matiere » à « nombre » pour l'onglet « Vragen »
@@ -106,6 +106,7 @@ function doPost(e) {
       if (req.action === 'signaler') return signaler(req)
       if (req.action === 'modifier') return modifier(req.modifications || [], !!req.essai)
       if (req.action === 'traiter') return traiter(req.ids || [], String(req.note || ''))
+      if (req.action === 'supprimer') return supprimer(req.onglet, req.suppressions || [], !!req.vides, !!req.essai)
       return recevoir(req.onglet, req.lignes || [], !!req.essai, !!req.dater, !!req.creer)
     } finally {
       verrou.releaseLock()
@@ -169,6 +170,35 @@ function traiter(ids, note) {
     faits.push(String(l[colId]))
   })
   return { ok: true, traites: faits }
+}
+
+/**
+ * Supprime des lignes d'un onglet : celles désignées (onglet de mots : nl et chapitre ; « Vragen » :
+ * matière et question), et avec « vides » celles dont le mot ou la question est vide (lignes vidées
+ * avant que cette action existe). Avec « essai », rien n'est supprimé : la réponse dit ce qui le serait.
+ */
+function supprimer(nomOnglet, suppressions, vides, essai) {
+  const feuille = SpreadsheetApp.getActive().getSheetByName(nomOnglet)
+  if (!feuille) throw new Error('onglet introuvable : ' + nomOnglet)
+  const titres = feuille.getRange(1, 1, 1, feuille.getLastColumn()).getValues()[0].map(norm)
+  const col = {}
+  for (const cle in COLONNES) col[cle] = titres.findIndex(t => COLONNES[cle].includes(t))
+  const questions = col.question >= 0
+  const cleIdentite = questions ? col.question : col.nl
+  const n = feuille.getLastRow() - 1
+  const donnees = n > 0 ? feuille.getRange(2, 1, n, titres.length).getValues() : []
+  const lignes = new Set(), introuvables = []
+  for (const m of suppressions) {
+    const i = donnees.findIndex(l => questions
+      ? norm(l[col.matiere]) === norm(m.matiere) && norm(l[col.question]) === norm(m.question)
+      : norm(l[col.nl]) === norm(m.nl) && (col.chapitre < 0 || !m.chapitre || norm(l[col.chapitre]) === norm(m.chapitre)))
+    if (i < 0) introuvables.push(m); else lignes.add(i)
+  }
+  // une ligne vidée : plus de mot ou de question, mais il reste autre chose (matière, chapitre…)
+  if (vides) donnees.forEach((l, i) => { if (!norm(l[cleIdentite]) && l.some(c => norm(c))) lignes.add(i) })
+  const res = { ok: true, essai, supprimees: [...lignes].sort((a, b) => a - b).map(i => donnees[i].map(String).filter(Boolean).join(' · ').slice(0, 120)), introuvables }
+  if (!essai) [...lignes].sort((a, b) => b - a).forEach(i => feuille.deleteRow(i + 2))
+  return res
 }
 
 /**

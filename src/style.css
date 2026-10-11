@@ -743,3 +743,56 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* toucher la mascotte du bloc « Commencer » : une surprise */
 .reprendre .acteur { cursor: pointer; }
 .scene-mini .acteur { pointer-events: auto; }
+
+/* exercices fabriqués : le mot dont on cherche la nature, l'explication après la réponse */
+.carte .cible { color: var(--accent); text-decoration: underline 3px; text-underline-offset: .2em; }
+.info.explication { gap: 2px; }
+.info.explication b { color: var(--fg); }
+
+/* ---------- bandeaux : annonce (transfert…), récompense gagnée ---------- */
+.annonce-app { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; display: flex; align-items: center; gap: 10px; justify-content: space-between;
+  margin: 8px auto 0; max-width: 960px; padding: 10px 14px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; box-shadow: var(--shadow); }
+.bandeau-recompense { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 12px 16px; border-radius: 14px;
+  background: var(--mid-bg); color: var(--fg); border: 1.5px solid var(--mid); }
+.bandeau-recompense b { color: var(--mid); }
+.entete .go.jour { padding: 8px 14px; font-size: .95rem; }
+
+/* ---------- la page de suivi ---------- */
+.suivi .bloc { display: flex; flex-direction: column; gap: 10px; }
+.regularite { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.regularite .chiffre { margin: 0; display: flex; flex-direction: column; font-size: 1rem; }
+.regularite .chiffre b { font: 800 2.6rem/1 var(--display); color: var(--accent); }
+.regularite .chiffre span { color: var(--muted); font-size: .9rem; }
+.calendrier { display: grid; grid-template-columns: repeat(7, 22px); gap: 4px; }
+.calendrier .entete-jour { font-size: .7rem; color: var(--muted); text-align: center; }
+.calendrier .jour { width: 22px; height: 22px; border-radius: 5px; background: var(--panel-2); border: 1px solid var(--line); }
+.calendrier .jour.n1 { background: color-mix(in srgb, var(--ok) 25%, var(--panel)); }
+.calendrier .jour.n2 { background: color-mix(in srgb, var(--ok) 55%, var(--panel)); }
+.calendrier .jour.n3 { background: var(--ok); }
+.calendrier .jour.aujourdhui { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recompenses { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.recompense { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); }
+.recompense .mini-scene { width: 52px; height: 65px; flex: none; }
+.recompense.a-gagner .mini-scene { filter: grayscale(1); opacity: .45; }
+.recompense .texte { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; font-size: .92rem; }
+.recompense .condition { color: var(--muted); font-size: .82rem; }
+.recompense.gagnee .condition { color: var(--ok); }
+.legende-suivi { margin: 0; color: var(--muted); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.pastille { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+.pastille.su, .barre-suivi .su { background: var(--ok); }
+.pastille.en-cours, .barre-suivi .en-cours { background: var(--mid); }
+.pastille.jamais { background: var(--panel-2); border: 1px solid var(--line); }
+.table-suivi { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.table-suivi th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 4px 6px; }
+.table-suivi td { padding: 6px; border-top: 1px solid var(--line); vertical-align: middle; }
+.table-suivi td.nombre { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.table-suivi .ligne-matiere { cursor: pointer; }
+.table-suivi .ligne-chapitre td:first-child { padding-left: 26px; color: var(--muted); }
+.table-suivi td:nth-child(2) { width: 40%; }
+.barre-suivi { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); }
+.erreurs-suivi { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.erreurs-suivi li { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 7px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.erreurs-suivi .combien { font-weight: 800; color: var(--ko); min-width: 2.2em; }
+.erreurs-suivi .quoi { flex: 1; min-width: 12em; }
+.erreurs-suivi .ou { color: var(--muted); font-size: .85rem; }
+.lien-transfert { width: 100%; box-sizing: border-box; font: .8rem var(--body); padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }

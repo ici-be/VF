@@ -40,7 +40,56 @@ export function noter(id: string, resultat: Resultat, maintenant = Date.now()): 
   s.dernier = maintenant
   tout()[id] = s
   ecrire('progression', tout())
+  compterDansLeJournal(maintenant)
   return s
+}
+
+// ---------- le journal : combien de réponses chaque jour (régularité, séries de jours, récompenses) ----------
+
+/** Une journée compte comme « jour de révision » à partir de ce nombre de réponses. */
+export const REPONSES_PAR_JOUR = 10
+const jour = (ms: number) => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+let cacheJournal: Record<string, number> | null = null
+/** Les réponses données, jour par jour (AAAA-MM-JJ, heure locale). */
+export const journal = () => (cacheJournal ??= lire<Record<string, number>>('journal', {}))
+function compterDansLeJournal(maintenant: number) {
+  const j = jour(maintenant)
+  journal()[j] = (journal()[j] ?? 0) + 1
+  ecrire('journal', journal())
+}
+const actif = (j: string) => (journal()[j] ?? 0) >= REPONSES_PAR_JOUR
+const veille = (ms: number) => ms - 86_400_000
+
+/** La série en cours : jours de révision d'affilée jusqu'à aujourd'hui (ou hier, si aujourd'hui n'est pas encore fait). */
+export function serieDeJours(maintenant = Date.now()): number {
+  let t = actif(jour(maintenant)) ? maintenant : veille(maintenant), n = 0
+  while (actif(jour(t))) { n++; t = veille(t) }
+  return n
+}
+
+/** La plus longue série jamais faite (elle débloque les récompenses, qui restent acquises). */
+export function recordDeJours(): number {
+  const jours = Object.keys(journal()).filter(actif).sort()
+  let record = 0, n = 0, avant = ''
+  for (const j of jours) {
+    n = avant && jour(veille(new Date(j + 'T12:00').getTime())) === avant ? n + 1 : 1
+    record = Math.max(record, n)
+    avant = j
+  }
+  return record
+}
+
+/** Les récompenses : une surprise de mascotte de plus à chaque palier de jours de révision d'affilée. */
+export const RECOMPENSES = [
+  { jours: 3, surprise: 'confettis', nom: 'Les confettis', texte: 'La mascotte lance des confettis à pleines mains.' },
+  { jours: 7, surprise: 'feu-artifice', nom: 'Le feu d’artifice', texte: 'Le flambeau tire une fusée qui éclate en étoiles.' },
+  { jours: 14, surprise: 'couronne', nom: 'La couronne', texte: 'Une couronne dorée descend sur sa tête, toute fière.' },
+  { jours: 30, surprise: 'arc-trefles', nom: 'L’arc-en-ciel de trèfles', texte: 'Un grand saut sous une arche de trèfles et d’étoiles.' },
+] as const
+/** La surprise est-elle débloquée ? (celles qui ne sont pas des récompenses le sont toujours) */
+export const debloquee = (surprise: string) => {
+  const r = RECOMPENSES.find(x => x.surprise === surprise)
+  return !r || recordDeJours() >= r.jours
 }
 
 /** Plus c'est petit, plus le mot a besoin d'être revu (jamais vu = au milieu). */
@@ -119,4 +168,25 @@ export function appliquerRates(mots: Mot[]): number {
 /** Pour les tests : oublier la copie en mémoire. */
 export function _reinitialiser(): void {
   cache = null
+  cacheJournal = null
+}
+
+/** Pour le transfert entre appareils : tout ce qui fait la progression, et sa fusion avec celle d'un autre appareil. */
+export interface Sauvegarde { progression: Record<string, Suivi>; journal: Record<string, number>; ratesInterro: string[] }
+export const sauvegarde = (): Sauvegarde => ({ progression: tout(), journal: journal(), ratesInterro: lire<string[]>('rates-interro', []) })
+/**
+ * Fusionne la progression d'un autre appareil : pour chaque mot, le suivi le plus récent l'emporte ;
+ * le journal garde, pour chaque jour, le plus grand nombre de réponses. Renvoie le nombre de mots repris.
+ */
+export function fusionner(s: Sauvegarde): number {
+  let n = 0
+  for (const [id, autre] of Object.entries(s.progression ?? {})) {
+    const ici = suivi(id)
+    if (!ici || autre.dernier > ici.dernier) { tout()[id] = autre; n++ }
+  }
+  for (const [j, k] of Object.entries(s.journal ?? {})) journal()[j] = Math.max(journal()[j] ?? 0, k)
+  ecrire('progression', tout())
+  ecrire('journal', journal())
+  ecrire('rates-interro', [...new Set([...lire<string[]>('rates-interro', []), ...(s.ratesInterro ?? [])])])
+  return n
 }

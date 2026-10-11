@@ -8,7 +8,7 @@ import { estPrimitif, type Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions' | 'getallen'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions' | 'getallen' | 'eeuwen' | 'calcul' | 'natures'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -29,6 +29,8 @@ export interface Exercice {
   beta?: boolean
   /** seulement pour Nederlands (chapitres Conjugaison et Getallen) : caché si Nederlands n'est pas choisi */
   nederlands?: boolean
+  /** un exercice fabriqué par l'appli pour une matière (Eeuwen, calcul mental, natures) : affiché si elle est choisie */
+  pourMatiere?: RegExp
   /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
   surQuestions?: boolean
   /** convient aussi aux matières en français (Français, Religion) : sinon, seulement au néerlandais */
@@ -52,15 +54,18 @@ export const EXERCICES: Exercice[] = [
   { id: 'conjugaison', nom: 'Conjugaison', description: 'Le verbe à conjuguer à toutes les personnes (ik, jij, hij…), puis valider.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, nederlands: true, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
+  { id: 'eeuwen', nom: 'Eeuwen', description: 'Een jaartal → de eeuw of het tijdvak, een eeuw → haar jaren (1789 → 18de eeuw, nieuwste tijd).', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /geschiedenis|histoire/i, accepte: m => m.genere === 'eeuwen' },
+  { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, parenthèses, distributivité, coder et décoder, propriétés.', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
+  { id: 'natures', nom: 'Natures des mots', description: 'Dans une phrase, trouver la nature du mot souligné : nom, déterminant, adjectif, verbe, pronom…', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /fran[cç]ais|\bfrans\b/i, accepte: m => m.genere === 'natures' },
   { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, accepte: m => !!m.getal },
 ]
 
 // les exercices propres au néerlandais (traduction, de/het, dictée, oral…) ne prennent pas
 // les mots et questions des matières en français
 for (const e of EXERCICES) {
-  if (e.enFrancais) continue
   const accepte = e.accepte
-  e.accepte = m => langueDe(m) === 'nl' && accepte(m)
+  // les cartes fabriquées (Eeuwen, calcul, natures) ne vont qu'à leur exercice
+  e.accepte = m => (!m.genere || m.genere === e.id) && (e.enFrancais || langueDe(m) === 'nl') && accepte(m)
 }
 
 export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? EXERCICES[0]
@@ -206,7 +211,9 @@ export function motsChoisis(voc: Vocabulaire, r: Reglages, questions = false): M
       return coches.length ? tous.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : tous
     })
   const p = pagesChoisies(voc, r)
-  return p ? mots.filter(x => x.page !== undefined && x.page >= p.de && x.page <= p.a) : mots
+  // les cartes des exercices fabriqués n'ont rien à faire dans la liste ni dans les autres exercices
+  const vrais = mots.filter(x => !x.genere)
+  return p ? vrais.filter(x => x.page !== undefined && x.page >= p.de && x.page <= p.a) : vrais
 }
 
 /** Les questions de cours des matières et chapitres choisis. */
@@ -214,7 +221,7 @@ export const questionsChoisies = (voc: Vocabulaire, r: Reglages) => motsChoisis(
 
 /** Ce que l'exercice peut réviser avec ce choix de matières et de chapitres : des mots ou des questions. */
 export const aReviser = (voc: Vocabulaire, r: Reglages, ex = exercice(r.exercice)) =>
-  ex.nederlands
-    // les verbes de Conjugaison, les nombres de Getallen, même si d'autres chapitres de Nederlands sont cochés
+  ex.nederlands || ex.pourMatiere
+    // les verbes de Conjugaison, les nombres de Getallen, les exercices fabriqués : même si d'autres chapitres sont cochés
     ? voc.matieres.filter(m => r.matieres.includes(m.nom)).flatMap(m => m.mots).filter(ex.accepte)
     : motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)

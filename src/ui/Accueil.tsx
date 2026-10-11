@@ -6,7 +6,10 @@ import {
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence, langueMatiere } from '../lib/apparence'
-import { motsARevoir, noteSur20 } from '../lib/progression'
+import { motsARevoir, noteSur20, recordDeJours, RECOMPENSES } from '../lib/progression'
+import { lire, ecrire } from '../lib/stockage'
+import { confettis } from '../lib/confettis'
+import { SURPRISES, interrompre, surprendre } from '../lib/surprises'
 import type { Vue } from './Liste'
 import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
@@ -122,6 +125,11 @@ interface Props {
   setReglages: (r: Reglages) => void
   lancer: () => void
   liste: (vue: Vue | 'interro') => void
+  /** la page de suivi */
+  suivi: () => void
+  /** « Réviser aujourd'hui » : la séance du jour, toutes matières confondues */
+  reviserAujourdhui: () => void
+  nbDuJour: number
 }
 
 function useLarge(): boolean {
@@ -136,7 +144,7 @@ function useLarge(): boolean {
   return large
 }
 
-export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages, lancer, liste }: Props) {
+export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages, lancer, liste, suivi, reviserAujourdhui, nbDuJour }: Props) {
   const large = useLarge()
   const maj = (p: Partial<Reglages>) => setReglages({ ...r, ...p })
   const ex = exercice(r.exercice)
@@ -148,8 +156,25 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const avecSens = r.matieres.some(n => langueMatiere(n) === 'nl')
   const avecNederlands = voc.matieres.some(m => r.matieres.includes(m.nom) && m.mots.some(x => x.verbe || x.getal !== undefined))
   // un exercice de Nederlands choisi alors que Nederlands ne l'est plus : on passe au QCM
-  useEffect(() => { if (ex.nederlands && !avecNederlands) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands])
+  // un exercice fabriqué pour une matière (Eeuwen, calcul, natures) : seulement si elle est choisie
+  const pourLesMatieres = (e: typeof ex) => !e.pourMatiere || r.matieres.some(n => e.pourMatiere!.test(n))
+  useEffect(() => { if ((ex.nederlands && !avecNederlands) || !pourLesMatieres(ex)) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands, ex.id, r.matieres.join('|')])
   // les mots et les questions de cours ratés (à l'appli ou à une interro en classe)
+  // une récompense gagnée (série de jours) : annoncée une fois, avec des confettis et la surprise jouée
+  const [nouvelle, setNouvelle] = useState<typeof RECOMPENSES[number] | null>(null)
+  useEffect(() => {
+    const vues = lire<number[]>('recompenses-vues', [])
+    const r2 = RECOMPENSES.find(x => recordDeJours() >= x.jours && !vues.includes(x.jours))
+    if (!r2) return
+    ecrire('recompenses-vues', [...vues, r2.jours])
+    setNouvelle(r2)
+    confettis(120)
+    setTimeout(() => {
+      const svg = [...document.querySelectorAll<SVGSVGElement>('.reprendre svg.mascotte')].find(x => x.getBoundingClientRect().width > 0)
+      const surprise = SURPRISES.find(x => x.id === r2.surprise)
+      if (svg && surprise) { interrompre(svg); surprendre(svg, surprise) }
+    }, 1200)
+  }, [])
   const nbARevoir = motsARevoir([...choisis, ...questionsChoisies(voc, r)]).length
   // le dernier envoi /cours reste signalé deux semaines sur l'accueil
   const nouveaux = derniersAjouts(voc)
@@ -298,10 +323,12 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <h1>Woord<span class="nl">jes</span></h1>
           <MotExemple mots={choisis} />
         </div>
+        {nbDuJour > 0 && <button class="go jour" onClick={reviserAujourdhui} title="Une séance courte, toutes matières : ce qui est à revoir aujourd’hui et les erreurs récentes">Réviser aujourd’hui ({nbDuJour})</button>}
         {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
         {nouveauxRecents && <button class="second" onClick={() => liste('nouveaux')}>Nouveaux ({nouveaux.mots.length})</button>}
         {questionsChoisies(voc, r).length > 0 && <button class="second" onClick={() => liste('interro')} title="Imprimer les questions de cours, avec la place pour répondre et les réponses à part">Interro</button>}
         <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
+        <button class="second" onClick={suivi} title="Régularité, récompenses, ce qui est su, erreurs qui reviennent, changer d’appareil">Suivi</button>
       </header>
       <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
         {chargement.etat === 'chargement' && 'Mise à jour des mots…'}
@@ -313,6 +340,12 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       </p>
       </div>
 
+      {nouvelle && (
+        <div class="bandeau-recompense" role="status">
+          <span><b>Nouvelle surprise gagnée : {nouvelle.nom} !</b> {nouvelle.jours} jours de révision d’affilée. {nouvelle.texte}</span>
+          <button class="icone" onClick={() => setNouvelle(null)} aria-label="Fermer">✕</button>
+        </div>
+      )}
       <section class="reprendre" aria-label="Exercice choisi">
         <Scene matieres={r.matieres} />
         <Scene matieres={r.matieres} petit />
@@ -352,7 +385,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                     ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
                     : <span class="ico" aria-hidden="true">{a.icone}</span>}
                   <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={contenu(m)} r={r} /></span></span>
-                  <span class="n">{contenu(m).length}</span>
+                  <span class="n">{contenu(m).filter(x => !x.genere).length}</span>
                 </button>
                 {!choisie
                   ? <button class="ajout" onClick={() => ajouterMatiere(m.nom)} title="Ajouter aux matières choisies" aria-label={`Ajouter ${a.titre} aux matières choisies`}>+</button>
@@ -369,7 +402,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc">
         <h2>Exercice</h2>
         <div class="tuiles">
-          {EXERCICES.filter(e => !e.nederlands || avecNederlands).map(e => {
+          {EXERCICES.filter(e => (!e.nederlands || avecNederlands) && pourLesMatieres(e)).map(e => {
             const n = aReviser(voc, r, e).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}

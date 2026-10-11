@@ -5,6 +5,7 @@ import { lireXlsx, type Onglet } from './xlsx'
 import { lire, ecrire } from './stockage'
 import { avecConjugaison } from './conjugaison'
 import { avecGetallen } from './getallen'
+import { avecExercicesGeneres } from './generes'
 import { langueMatiere } from './apparence'
 
 export const SHEET_ID = '11jHRMPgM1A3N8eBCXocn-eqs52uqaJCVtbFNq2U0K8Y'
@@ -32,6 +33,8 @@ export interface Mot {
   getal?: number
   /** question de cours : nl = la question, fr = la réponse (en néerlandais aussi) */
   vraag?: Vraag
+  /** une carte d'un exercice fabriqué par l'appli (Eeuwen, calcul mental, natures de mots) : son exercice */
+  genere?: 'eeuwen' | 'calcul' | 'natures'
   /** raté à une interro en classe (colonnes « Interro » et « Raté ») : l'appli le met « à revoir » */
   rate?: RateInterro
 }
@@ -255,7 +258,7 @@ const CLE = 'vocabulaire'
 /** Dernière copie téléchargée (pour démarrer tout de suite, et hors ligne). */
 export function vocabulaireEnCache(): Vocabulaire | null {
   const v = lire<Vocabulaire | null>(CLE, null)
-  return v && avecGetallen(avecConjugaison(v))
+  return v && avecExercicesGeneres(avecGetallen(avecConjugaison(v)))
 }
 
 /** Télécharge le tableau ; en cas d'échec, l'appelant garde la copie en cache. */
@@ -267,7 +270,7 @@ export async function telechargerVocabulaire(): Promise<Vocabulaire> {
   if (!rep.ok) throw new Error(`Le tableau n’a pas pu être lu (erreur ${rep.status}).`)
   const voc = vocabulaireDepuisXlsx(new Uint8Array(await rep.arrayBuffer()))
   ecrire(CLE, voc)
-  return avecGetallen(avecConjugaison(voc))
+  return avecExercicesGeneres(avecGetallen(avecConjugaison(voc)))
 }
 
 /** Ce que compte une matière (ou un chapitre) : ses mots, ou ses questions si elle n'a pas de mots. */

@@ -1,6 +1,6 @@
 // Une série d'exercices : quels mots, dans quel ordre, dans quel sens.
 import type { Mot } from './mots'
-import { exercice, type Reglages } from './reglages'
+import { exercice, type ExerciceId, type Reglages } from './reglages'
 import { fragilite } from './progression'
 import { simplifier } from './correction'
 import { langueDe } from './apparence'
@@ -10,6 +10,8 @@ export interface Carte {
   sens: 'fr-nl' | 'nl-fr'
   /** déjà reposée après une erreur : on ne la remet pas une troisième fois */
   reprise?: boolean
+  /** l'exercice de cette carte, s'il n'est pas celui des réglages (révision du jour) */
+  exercice?: ExerciceId
 }
 
 export function melanger<T>(t: T[], hasard = Math.random): T[] {

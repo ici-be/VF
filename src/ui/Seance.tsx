@@ -24,6 +24,7 @@ import { Interrogatif } from './exercices/Interrogatif'
 import { Primitifs } from './exercices/Primitifs'
 import { Questions } from './exercices/Questions'
 import { Getallen } from './exercices/Getallen'
+import { Calcul, Eeuwen, Natures } from './exercices/Generes'
 import { NomsCote } from './Matieres'
 import { nombre } from '../lib/texte'
 
@@ -98,7 +99,8 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     if (carte && ex.id !== 'defilement' && !carte.reprise && !resultats.has(carte.mot.id)) noter(carte.mot.id, annonce.current ?? 'faux')
     quitter()
   }
-  const ex = exercice(reglages.exercice)
+  // l'exercice de la carte (la révision du jour en mélange plusieurs), sinon celui des réglages
+  const ex = exercice(file[i]?.exercice ?? reglages.exercice)
   // pour les propositions du choix parmi 4 : tous les mots, ou toutes les questions
   const tous = voc.matieres.flatMap(m => (ex.surQuestions ? m.questions ?? [] : m.mots))
 
@@ -200,6 +202,9 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'primitifs' && <Primitifs key={i} {...props} />}
         {ex.id === 'questions' && <Questions key={i} {...props} />}
         {ex.id === 'getallen' && <Getallen key={i} {...props} />}
+        {ex.id === 'eeuwen' && <Eeuwen key={i} {...props} />}
+        {ex.id === 'calcul' && <Calcul key={i} {...props} />}
+        {ex.id === 'natures' && <Natures key={i} {...props} />}
       </main>
       {aSignaler && carte && (
         <FenetreSignalement mot={carte.mot} exercice={ex.nom} resultat={resultats.get(carte.mot.id) ?? annonce.current ?? undefined} fermer={() => setASignaler(false)} />
