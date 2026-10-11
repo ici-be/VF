@@ -27,6 +27,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // l'image de partage (aperçu des liens) ne sert pas dans l'appli
+        globIgnores: ['social.png'],
         runtimeCaching: [
           {
             // le nom de chaque mp3 change avec son texte : une fois en cache, il est bon pour toujours
