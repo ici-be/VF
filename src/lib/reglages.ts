@@ -131,7 +131,7 @@ export function pagesChoisies(voc: Vocabulaire, r: Reglages): { cle: string; de:
 
 /**
  * Les mots des matières et chapitres choisis (tous les chapitres d'une matière si aucun n'est coché pour elle).
- * Un seul chapitre choisi et ses pages limitées : seulement ces pages (les mots sans page restent).
+ * Un seul chapitre choisi et ses pages limitées : seulement ces pages (les mots sans page en sortent).
  */
 export function motsChoisis(voc: Vocabulaire, r: Reglages, questions = false): Mot[] {
   const mots = voc.matieres
@@ -142,7 +142,7 @@ export function motsChoisis(voc: Vocabulaire, r: Reglages, questions = false): M
       return coches.length ? tous.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : tous
     })
   const p = pagesChoisies(voc, r)
-  return p ? mots.filter(x => x.page === undefined || (x.page >= p.de && x.page <= p.a)) : mots
+  return p ? mots.filter(x => x.page !== undefined && x.page >= p.de && x.page <= p.a) : mots
 }
 
 /** Les questions de cours des matières et chapitres choisis. */

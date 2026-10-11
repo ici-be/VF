@@ -50,11 +50,11 @@ describe('pages d’un chapitre', () => {
     expect(chapitreSeul(v, r({ chapitres: [un, cleChapitre('Aard', '2')] }))).toBeNull()
     expect(bornesPages(v, 'Aard', '1')).toEqual([4, 20])
   })
-  it('seulement les pages retenues ; les mots sans page restent', () => {
+  it('seulement les pages retenues ; les mots sans page en sortent', () => {
     const choix = r({ chapitres: [un], pages: { [un]: [5, 15] } })
-    expect(motsChoisis(v, choix).map(m => m.nl)).toEqual(['rivier', 'meer', 'oud'])
+    expect(motsChoisis(v, choix).map(m => m.nl)).toEqual(['rivier', 'meer'])
     expect(questionsChoisies(v, choix)).toEqual([])
-    expect(motsChoisis(v, { ...choix, pages: { [un]: [15, 5] } }).map(m => m.nl)).toEqual(['rivier', 'meer', 'oud'])
+    expect(motsChoisis(v, { ...choix, pages: { [un]: [15, 5] } }).map(m => m.nl)).toEqual(['rivier', 'meer'])
   })
   it('les pages ne comptent plus quand plusieurs chapitres sont choisis', () => {
     expect(motsChoisis(v, r({ pages: { [un]: [5, 15] } }))).toHaveLength(5)
