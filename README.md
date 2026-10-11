@@ -57,12 +57,12 @@ Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs
 
 ## Matières en français
 
-**Français** et **Religion** (et tout onglet dont le nom commence par « FR ») sont des cours
+**Français**, **Religion** et **Mathématiques** (et tout onglet dont le nom commence par « FR ») sont des cours
 en français, pas en immersion : leurs mots et questions sont lus avec la voix française et
 corrigés en français, sans traduction.
 - Onglet des mots : colonnes **Mot** et **Définition** (la définition tient lieu de
   traduction), plus Exemple, Remarque, Chapitre, Page comme ailleurs.
-- Questions : dans « Vragen », avec Matière = `Français` ou `Religion`. Une matière peut
+- Questions : dans « Vragen », avec Matière = `Français`, `Religion` ou `Mathématiques`. Une matière peut
   n'avoir que des questions, sans onglet de mots.
 - Exercices : Questions de cours, Définitions, Textes à trous, Défilement (le mot, puis sa
   définition) et Mots croisés. Les exercices de traduction et de néerlandais (QCM, Écrit,

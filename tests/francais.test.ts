@@ -42,7 +42,9 @@ const reglages = (p: Partial<Reglages>): Reglages => ({
 
 describe('matières en français', () => {
   it('Français et Religion sont en français, sans préfixe ; « FR » pour les autres', () => {
-    expect(['Français', 'Religion', '🕊️ Religion', 'FR Latin', 'Frans'].map(langueMatiere)).toEqual(['fr', 'fr', 'fr', 'fr', 'fr'])
+    expect(['Français', 'Religion', '🕊️ Religion', 'FR Latin', 'Frans', 'Mathématiques', 'Maths'].map(langueMatiere)).toEqual(['fr', 'fr', 'fr', 'fr', 'fr', 'fr', 'fr'])
+    // le néerlandais « wiskunde » serait un cours en immersion
+    expect(langueMatiere('HW Wiskunde')).toBe('nl')
     expect(['HW Geschiedenis', 'Nederlands', 'NW Biologie', 'HW Socio-economie'].map(langueMatiere)).toEqual(['nl', 'nl', 'nl', 'nl'])
     expect(apparence('FR Latin').titre).toBe('Latin')
     expect(apparence('Français')).toMatchObject({ icone: '📖', titre: 'Français' })

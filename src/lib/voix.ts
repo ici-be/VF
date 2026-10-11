@@ -22,14 +22,23 @@ const ABREVIATIONS: [RegExp, string][] = [
 ]
 
 /** Le texte à lire : sans crochets ni précisions entre parenthèses, le trou d'une phrase à compléter lu comme une pause (identique à outils/voix.py). */
-export function texteALire(t: string): string {
+/** Un calcul en français (« 7 · 18 = 126 », « 60 : 2 ») : ses parenthèses sont lues, ses opérateurs dits en mots. */
+const ENSEMBLES: Record<string, string> = { ℕ: 'N', ℤ: 'Z', ℚ: 'Q', ℝ: 'R' }
+const CALCUL = /\d\s*[+·×=−]\s*[\d(]|\d : \d/
+
+export function texteALire(t: string, langue: 'fr' | 'nl' = 'nl'): string {
   for (const [abr, mot] of ABREVIATIONS) t = t.replace(abr, mot)
-  return t.normalize('NFC').replace(/\([^)]*\)/g, ' ').replace(/[\[\]]/g, '').replace(/_{3,}/g, '…').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
+  // les ensembles de nombres (ℕ, ℤ…) : lus comme leur lettre, la voix ne connaît pas le symbole
+  t = t.normalize('NFC').replace(/[ℕℤℚℝ]/g, c => ENSEMBLES[c])
+  t = langue === 'fr' && CALCUL.test(t)
+    ? t.replace(/\s*[·×]\s*/g, ' fois ').replace(/(\d) : (?=[\d(])/g, '$1 divisé par ').replace(/\s*−\s*/g, ' moins ')
+    : t.replace(/\([^)]*\)/g, ' ')
+  return t.replace(/[\[\]]/g, '').replace(/_{3,}/g, '…').replace(/\s*\/\s*/g, ', ').replace(/\s+/g, ' ').trim()
 }
 
 /** Nom du fichier mp3 d'un texte (identique à empreinte() dans outils/voix.py). */
 export async function empreinte(langue: 'fr' | 'nl', texte: string): Promise<string> {
-  const cle = new TextEncoder().encode(`${VOIX[langue]}|${VITESSE}|${texteALire(texte)}`)
+  const cle = new TextEncoder().encode(`${VOIX[langue]}|${VITESSE}|${texteALire(texte, langue)}`)
   const h = new Uint8Array(await crypto.subtle.digest('SHA-1', cle))
   return Array.from(h.slice(0, 8), b => b.toString(16).padStart(2, '0')).join('')
 }
@@ -95,7 +104,7 @@ let arreterEnCours: (() => void) | null = null
  */
 export function parler(texte: string, langue: 'fr' | 'nl', vitesse = 1): Promise<void> {
   taire()
-  const t = texteALire(texte)
+  const t = texteALire(texte, langue)
   if (!t) return Promise.resolve()
   return new Promise(resolve => {
     let termine = false

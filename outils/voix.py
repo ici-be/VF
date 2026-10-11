@@ -41,7 +41,7 @@ COLONNES = {
 }
 # une matière en français (comme langueMatiere dans src/lib/apparence.ts) : mot, définition,
 # exemple et questions sont lus avec la voix française ; le mot est dans la colonne « Mot »
-EN_FRANCAIS = re.compile(r'godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b', re.I)
+EN_FRANCAIS = re.compile(r'godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b|math', re.I)
 MOT_FR = ['mot', 'terme', 'notion', 'mot-clé']
 EMOJI_DEBUT = re.compile(r'^(?:[\U0001F000-\U0001FAFF\u2600-\u27BF]|[\U0001F1E6-\U0001F1FF]{2})\ufe0f?\s*')
 
@@ -78,12 +78,23 @@ def nombre(v: str) -> str:
     return str(int(n)) if n.is_integer() else repr(n)
 
 
-def texte_a_lire(t: str) -> str:
+# un calcul en français (« 7 · 18 = 126 », « 60 : 2 ») : ses parenthèses sont lues, ses opérateurs dits en mots
+ENSEMBLES = str.maketrans({'ℕ': 'N', 'ℤ': 'Z', 'ℚ': 'Q', 'ℝ': 'R'})
+CALCUL = re.compile(r'\d\s*[+·×=−]\s*[\d(]|\d : \d')
+
+
+def texte_a_lire(t: str, langue: str = 'nl') -> str:
     """Identique à texteALire() dans src/lib/voix.ts."""
     for abr, mot in ABREVIATIONS:
         t = re.sub(abr, mot, t)
     t = unicodedata.normalize('NFC', t)
-    t = re.sub(r'\([^)]*\)', ' ', t)
+    t = t.translate(ENSEMBLES)   # ℕ, ℤ… : lus comme leur lettre
+    if langue == 'fr' and CALCUL.search(t):
+        t = re.sub(r'\s*[·×]\s*', ' fois ', t)
+        t = re.sub(r'(\d) : (?=[\d(])', r'\1 divisé par ', t)
+        t = re.sub(r'\s*−\s*', ' moins ', t)
+    else:
+        t = re.sub(r'\([^)]*\)', ' ', t)
     t = re.sub(r'[\[\]]', '', t)
     t = re.sub(r'_{3,}', '…', t)
     t = re.sub(r'\s*/\s*', ', ', t)
@@ -92,7 +103,7 @@ def texte_a_lire(t: str) -> str:
 
 def empreinte(langue: str, texte: str) -> str:
     """Identique à empreinte() dans src/lib/voix.ts."""
-    cle = f'{VOIX[langue]}|{VITESSE}|{texte_a_lire(texte)}'
+    cle = f'{VOIX[langue]}|{VITESSE}|{texte_a_lire(texte, langue)}'
     return hashlib.sha1(cle.encode('utf-8')).hexdigest()[:16]
 
 
@@ -152,7 +163,7 @@ def textes(octets: bytes) -> set[tuple[str, str]]:
             for k in ('definition', 'exemple'):
                 if val(k):
                     res.add((langue, val(k)))
-    return {(lg, t) for lg, t in res if texte_a_lire(t)}
+    return {(lg, t) for lg, t in res if texte_a_lire(t, lg)}
 
 
 def textes_questions(lignes: list[list[str]]) -> set[tuple[str, str]]:
@@ -200,7 +211,7 @@ async def creer(langue: str, texte: str, fichier: Path, limite: asyncio.Semaphor
         for essai in range(3):
             try:
                 tmp = fichier.with_suffix('.tmp')
-                await edge_tts.Communicate(texte_a_lire(texte), VOIX[langue], rate=VITESSE).save(str(tmp))
+                await edge_tts.Communicate(texte_a_lire(texte, langue), VOIX[langue], rate=VITESSE).save(str(tmp))
                 tmp.rename(fichier)
                 return True
             except Exception as e:  # coupure réseau, limite de débit…

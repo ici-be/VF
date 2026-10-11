@@ -12,7 +12,7 @@ interface Apparence {
   mascotte?: Mascotte
 }
 
-/** La langue du cours : néerlandais (immersion), ou français (Français, Religion, onglets « FR … »). */
+/** La langue du cours : néerlandais (immersion), ou français (Français, Religion, Mathématiques, onglets « FR … »). */
 export type LangueCours = 'nl' | 'fr'
 
 const CONNUES: [RegExp, string, string, Mascotte?][] = [
@@ -37,7 +37,7 @@ const CONNUES: [RegExp, string, string, Mascotte?][] = [
 ]
 
 // les matières données en français (pas en immersion) : leurs mots et questions sont en français
-const EN_FRANCAIS = /godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b/i
+const EN_FRANCAIS = /godsdienst|religi|levensbeschouw|morale?|fran[cç]ais|\bfrans\b|math/i
 const PREFIXE_FR = /^FR\s+/
 
 const EMOJI_DEBUT = /^(\p{Extended_Pictographic}|\p{Regional_Indicator}{2})️?\s*/u
