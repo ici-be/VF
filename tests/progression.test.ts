@@ -38,11 +38,13 @@ import { noteSur20 } from '../src/lib/progression'
 describe('note sur 20', () => {
   beforeEach(() => _reinitialiser())
   it('la part de ce qui est su, au demi-point', () => {
-    const mots = ['a1', 'a2', 'a3', 'a4'].map(mot)
-    expect(noteSur20(mots)).toBe(0)
+    const mots = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'].map(mot)
+    expect(noteSur20(mots)).toBeNull()                          // rien de vu : pas de note
     for (let i = 0; i < 3; i++) noter('a1', 'juste', t0 + i)   // su
     noter('a2', 'juste', t0)                                    // 1/3
-    expect(noteSur20(mots)).toBe(6.5)                           // (1 + 1/3) / 4 × 20 = 6,67 → 6,5
+    noter('a3', 'faux', t0)                                     // 0
+    noter('a4', 'faux', t0)                                     // 0
+    expect(noteSur20(mots)).toBe(6.5)                           // a5, a6 jamais vus : (1 + 1/3) / 4 × 20 = 6,67 → 6,5
     expect(noteSur20([])).toBeNull()
   })
 })

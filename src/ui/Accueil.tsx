@@ -6,7 +6,7 @@ import {
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence } from '../lib/apparence'
-import { motsARevoir, noteSur20, suivi } from '../lib/progression'
+import { motsARevoir, noteSur20 } from '../lib/progression'
 import type { Vue } from './Liste'
 import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
@@ -38,7 +38,7 @@ const ORDRES: { id: Ordre; nom: string; aide: string }[] = [
 /** La note de maîtrise d'un groupe de mots, s'il a déjà été travaillé. */
 function Note({ mots, r }: { mots: Mot[]; r: Reglages }) {
   // les notes ne s'affichent que si on l'a demandé dans les réglages
-  const n = r.notes && mots.some(m => suivi(m.id)) ? noteSur20(mots) : null
+  const n = r.notes ? noteSur20(mots) : null
   return n === null ? null : (
     <span class={`note ${niveauNote(n)}`} title="Ce que tu sais déjà : un mot compte comme su après 3 bonnes réponses sans erreur">{note(n)}</span>
   )

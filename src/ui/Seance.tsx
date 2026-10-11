@@ -71,14 +71,21 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   // bonnes réponses d'affilée (« presque » compte) ; une erreur remet à zéro
   const [combo, setCombo] = useState(0)
   const meilleurCombo = useRef(0)
-  const annonce = useRef(false)   // le résultat de la carte en cours a-t-il déjà compté pour le combo ?
+  const annonce = useRef<Resultat | null>(null)   // le résultat de la carte en cours, s'il a déjà compté pour le combo
   const compter = (r: Resultat) => {
     const c = r === 'faux' ? 0 : combo + 1
     setCombo(c)
     meilleurCombo.current = Math.max(meilleurCombo.current, c)
     if (c > 0 && c % 10 === 0) confettis(80)
   }
-  const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = true; compter(r) } }
+  const annoncer = (r: Resultat) => { if (!annonce.current) { annonce.current = r; compter(r) } }
+  // arrêter en cours de route : la carte affichée compte (ratée si on n'y a pas répondu),
+  // les cartes qui restaient dans la série ne comptent pas
+  const arreter = () => {
+    const carte = file[i]
+    if (carte && ex.id !== 'defilement' && !carte.reprise && !resultats.has(carte.mot.id)) noter(carte.mot.id, annonce.current ?? 'faux')
+    quitter()
+  }
   const ex = exercice(reglages.exercice)
   // pour les propositions du choix parmi 4 : tous les mots, ou toutes les questions
   const tous = voc.matieres.flatMap(m => (ex.surQuestions ? m.questions ?? [] : m.mots))
@@ -118,7 +125,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       // un mot raté revient une fois en fin de série
       if (r === 'faux' && !carte.reprise) nouvelleFile = [...file, { ...carte, reprise: true }]
     }
-    annonce.current = false
+    annonce.current = null
     setResultats(res)
     setFile(nouvelleFile)
     if (i + 1 < nouvelleFile.length) { setI(i + 1); return }
@@ -141,7 +148,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   return (
     <>
       <div class="barre">
-        <button class="icone" onClick={quitter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
+        <button class="icone" onClick={arreter} aria-label="Quitter l’exercice" title="Quitter">✕</button>
         <span class="quoi"><IconeExercice id={ex.id} taille={16} />{ex.nom}{ex.beta ? ' (bêta)' : ''} · <NomsCote noms={voc.matieres.map(m => m.nom).filter(n => serie.some(c => c.mot.matiere === n))} /></span>
         {combo >= 3 && <span key={combo} class={`combo ${combo % 5 === 0 ? 'palier' : ''}`} title="Bonnes réponses d’affilée">🔥 ×{combo}</span>}
         {ex.id !== 'defilement' && <span class="compte" title="Bonnes réponses">✓ {justes}</span>}
@@ -169,7 +176,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         <div class="bandeau-pause" role="status">
           <span class="quoi-pause"><b>En pause</b> · {ex.surQuestions ? nombre(i, 'question vue', 'questions vues') : nombre(i, 'mot vu', 'mots vus')} sur {file.length}</span>
           <button class="go" autoFocus onClick={() => setPause(false)}>Reprendre ▶</button>
-          <button class="second" onClick={quitter}>Arrêter</button>
+          <button class="second" onClick={arreter}>Arrêter</button>
         </div>
       )}
     </>
