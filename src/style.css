@@ -469,6 +469,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .mascotte .drapeau { transform-box: fill-box; transform-origin: 0 50%; }
 .mascotte .plume { transform-box: fill-box; transform-origin: 0 100%; }
 .mascotte .chapeau { transform-box: fill-box; transform-origin: 50% 100%; }
+.mascotte .laurier { transform-box: fill-box; transform-origin: 50% 100%; }
+.mascotte .perruque { transform-box: view-box; transform-origin: 60px 44px; }
 .mascotte .loupe { transform-box: view-box; transform-origin: 37px 88px; }
 .mascotte .bulle text { font-family: var(--display); font-weight: 800; }
 .mascotte .fiole { transform-box: view-box; transform-origin: 36px 99px; }

@@ -4,7 +4,7 @@
 // Raccourci : S pour une surprise au hasard (sur une mascotte visible au hasard), Maj+S pour passer
 // en revue celles de la mascotte du bloc « Commencer », dans un ordre au hasard (toutes avant de
 // recommencer). Sur téléphone (et à la souris) : toucher cette mascotte fait la même chose.
-// Onze surprises communes (dont six avec le flambeau), et deux propres à chaque mascotte.
+// Treize surprises communes (dont sept avec le flambeau, dont la gigue), et deux propres à chaque mascotte.
 import type { Mascotte } from './mascottes'
 
 const NS = 'http://www.w3.org/2000/svg'
@@ -121,6 +121,116 @@ interface Surprise {
   /** les mascottes à qui cette surprise commune ne va pas */
   sauf?: Mascotte[]
   jouer: (svg: SVGSVGElement) => Promise<void>
+}
+
+// ---------- la gigue (danse irlandaise) : le haut du corps raide, tout dans les jambes ----------
+
+const GIGUE_TEMPS = 300                       // un pas
+const GIGUE_PAS = 8                           // huit pas, puis le grand saut
+const GIGUE_D = GIGUE_TEMPS * GIGUE_PAS + 1100
+const NOTE = (c: string) => `<g fill="${c}" stroke="${TRAIT}" stroke-width="1"><ellipse cx="0" cy="0" rx="3.4" ry="2.6" transform="rotate(-20)"/><path d="M3 -1 L3 -15 Q8 -13 9 -8 Q6 -11 4.5 -11 L4.5 -1 Z"/></g>`
+const TREFLE = `<g stroke="${TRAIT}" stroke-width=".9" fill="#3aa05a"><circle cx="0" cy="-4" r="3.4"/><circle cx="-3.6" cy="1" r="3.4"/><circle cx="3.6" cy="1" r="3.4"/><path d="M0 1 Q1 6 3 9" fill="none" stroke="#2a7a40" stroke-width="1.6"/></g>`
+/** Un éclat (étoile qui tourne et s'efface), à l'instant voulu, de la couleur voulue. */
+function eclair(svg: SVGSVGElement, x: number, y: number, taille: number, couleur: string, delai: number) {
+  apres(svg, delai, () => {
+    const g = ajout(svg, `<g transform="translate(${x} ${y}) scale(${taille})"><path class="f" d="M0 -9 L2.5 -2.5 L9 0 L2.5 2.5 L0 9 L-2.5 2.5 L-9 0 L-2.5 -2.5 Z" fill="${couleur}" stroke="${TRAIT}" stroke-width="1.2" stroke-linejoin="round"/></g>`)
+    anim(g.querySelector('.f'), [{ transform: 'scale(.2) rotate(0)', opacity: 1 }, { transform: 'scale(1.4) rotate(90deg)', opacity: 0 }], { duration: 450, easing: 'ease-out' }).finally(() => g.remove())
+  })
+}
+
+/**
+ * Une gigue : huit petits sauts raides (coup de pied d'un côté, de l'autre, pied croisé derrière), notes et
+ * trèfles qui s'envolent, puis le grand saut, talons claqués en l'air. Chaque mascotte y ajoute sa touche ;
+ * avec le flambeau, il est lancé au grand saut et rattrapé à la réception.
+ */
+function gigue(svg: SVGSVGElement, { flambeau = false, delai = 0 } = {}): Promise<void> {
+  const p = parties(svg), m = svg.dataset.mascotte as Mascotte
+  const q = (sel: string) => svg.querySelector(sel)
+  const T = GIGUE_TEMPS, N = GIGUE_PAS, D = GIGUE_D
+  const h = m === 'grenouille' ? 2 : 1                    // la grenouille saute deux fois plus haut
+  const o: KeyframeAnimationOptions = { duration: D, delay: delai, easing: 'linear' }
+  const t = (i: number) => (i * T) / D
+  const fin = (N * T) / D
+
+  const perso: Keyframe[] = [{ transform: 'translateY(0) scale(1,1)', offset: 0 }]
+  for (let i = 0; i < N; i++) {
+    perso.push({ transform: `translateY(${-7 * h}px) scale(1,1)`, offset: t(i) + .4 * T / D, easing: 'ease-in' })
+    perso.push({ transform: 'translateY(0) scale(1.03,.97)', offset: t(i + 1) - .05 * T / D, easing: 'ease-out' })
+  }
+  perso.push({ transform: 'translateY(3px) scale(1.06,.9)', offset: fin + .08, easing: 'cubic-bezier(.2,.8,.3,1)' })
+  perso.push({ transform: `translateY(${-30 * h}px) scale(.97,1.05)`, offset: fin + .17, easing: 'ease-in' })
+  perso.push({ transform: 'translateY(0) scale(1.07,.92)', offset: fin + .25, easing: 'ease-out' })
+  perso.push({ transform: 'translateY(0) scale(1,1)', offset: 1 })
+  anim(svg.querySelector('.ombre-sol'), perso.map(k => ({ offset: k.offset, transform: String(k.transform).includes('-') ? 'scale(.75)' : 'scale(1)' })), o)
+
+  // les jambes : à gauche, à droite, croisée derrière… puis ouvertes en l'air et talons claqués
+  const motif = [[22, 0], [0, -22], [-10, 0], [0, 10], [22, 0], [0, -22], [26, 0], [0, -26]]
+  ;([[p.jg, 0], [p.jd, 1]] as const).forEach(([jambe, k]) => {
+    const kf: Keyframe[] = [{ transform: 'rotate(0)', offset: 0 }]
+    motif.forEach((a, i) => {
+      kf.push({ transform: `rotate(${a[k]}deg)`, offset: t(i) + .45 * T / D })
+      kf.push({ transform: 'rotate(0)', offset: t(i + 1) - .02 * T / D })
+    })
+    kf.push({ transform: `rotate(${k ? -24 : 24}deg)`, offset: fin + .13 }, { transform: `rotate(${k ? 8 : -8}deg)`, offset: fin + .17 },
+      { transform: `rotate(${k ? -6 : 6}deg)`, offset: fin + .19 }, { transform: 'rotate(0)', offset: fin + .25 }, { transform: 'rotate(0)', offset: 1 })
+    anim(jambe, kf, o)
+  })
+  // le regard fixe, menton levé
+  anim(p.yeux, [{ transform: 'translateY(0)' }, { transform: 'translateY(-1px)', offset: .05 }, { transform: 'translateY(-1px)', offset: .95 }, { transform: 'translateY(0)' }], o)
+  // notes et trèfles au rythme, de chaque côté
+  for (let i = 0; i < N; i += 2) {
+    const gauche = (i / 2) % 2 === 0
+    envol(svg, i % 4 === 0 ? TREFLE : NOTE(['#1f5fbf', '#c0506a', '#2f8c88'][(i / 2) % 3]), gauche ? 30 : 92, 60, { dx: gauche ? -14 : 14, dy: -40, duree: 1300, delai: delai + i * T + 100, echelle: 1.2 })
+  }
+  // les talons qui claquent, puis la réception
+  eclair(svg, 60, 112, .8, '#fff6c8', delai + D * (fin + .18))
+  eclair(svg, 46, 140, .9, '#ffd23f', delai + D * (fin + .25))
+  eclair(svg, 76, 138, .7, '#ffd23f', delai + D * (fin + .27))
+
+  if (flambeau) anim(p.flambeau, [
+    { transform: 'translate(0,0) rotate(0)', offset: 0 }, { transform: 'translate(0,0) rotate(0)', offset: fin + .1 },
+    { transform: 'translate(-6px,-34px) rotate(360deg)', offset: fin + .19, easing: 'ease-out' },
+    { transform: 'translate(0,0) rotate(720deg)', offset: fin + .28, easing: 'ease-in' }, { transform: 'translate(0,0) rotate(720deg)', offset: 1 },
+  ], o)
+
+  // la touche de chacun : une petite secousse à chaque pas
+  const aChaquePas = (f: (i: number) => string) => {
+    const kf: Keyframe[] = [{ transform: 'none', offset: 0 }]
+    for (let i = 0; i < N; i++) kf.push({ transform: f(i), offset: t(i) + .5 * T / D }, { transform: 'none', offset: t(i + 1) })
+    return [...kf, { transform: 'none', offset: 1 }]
+  }
+  if (m === 'renard') anim(q('.queue'), aChaquePas(i => `rotate(${i % 2 ? -14 : 18}deg)`), o)
+  if (m === 'chevalier') {
+    anim(q('.drapeau'), aChaquePas(i => `scaleX(${i % 2 ? .85 : 1.08}) skewY(${i % 2 ? -8 : 8}deg)`), o)
+    for (let i = 0; i < N; i++) eclair(svg, i % 2 ? 72 : 48, 118, .45, '#ffffff', delai + (i + 1) * T - 20)
+  }
+  if (m === 'colomb') anim(q('.chapeau'), aChaquePas(() => 'translateY(-5px) rotate(-6deg)'), { ...o, delay: delai + T * .35 })
+  if (m === 'detective') anim(q('.loupe'), aChaquePas(i => `rotate(${i % 2 ? 12 : -16}deg)`), o)
+  if (m === 'moine') anim(p.corps, aChaquePas(i => `skewX(${i % 2 ? 4 : -4}deg)`), o)
+  if (m === 'pythagore') anim(q('.laurier'), aChaquePas(() => 'translateY(-4px) rotate(4deg)'), { ...o, delay: delai + T * .3 })
+  if (m === 'moliere') svg.querySelectorAll('.perruque').forEach(g => anim(g, [
+    ...aChaquePas(() => 'translateY(-4px)').slice(0, -1),
+    { transform: 'translateY(-10px)', offset: fin + .19 }, { transform: 'translate(1px,1px) rotate(-9deg)', offset: fin + .25 },
+    { transform: 'translate(1px,1px) rotate(-9deg)', offset: .975 }, { transform: 'none', offset: 1 },
+  ], { ...o, delay: delai + T * .25 }))
+  return anim(p.perso, perso, o)
+}
+
+/**
+ * La gigue de toute la troupe : les autres mascottes de la même scène (plusieurs matières choisies)
+ * dansent avec celle-ci, en synchro ou en canon (deux pas de décalage chacune).
+ */
+async function gigueEnTroupe(svg: SVGSVGElement, flambeau: boolean) {
+  const scene = svg.closest('.scene-mascottes, .scene-mini')
+  const autres = scene ? [...scene.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]')].filter(x => x !== svg && !x.dataset.surprise && !x.dataset.saute) : []
+  const canon = autres.length > 0 && Math.random() < .5
+  autres.forEach((x, i) => {
+    x.dataset.surprise = 'gigue'
+    minuteries.set(x, [])
+    gigue(x, { flambeau: flambeau && tientLeFlambeau(x), delai: canon ? (i + 1) * GIGUE_TEMPS * 2 : 0 })
+      .finally(() => { if (x.dataset.surprise === 'gigue') { minuteries.delete(x); delete x.dataset.surprise } })
+  })
+  await gigue(svg, { flambeau })
 }
 
 export const SURPRISES: Surprise[] = [
@@ -493,6 +603,10 @@ export const SURPRISES: Surprise[] = [
     anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(0,-2px)', offset: .3 }, { transform: 'translate(0,-2px) scale(1.4)', offset: .42 }, { transform: 'translate(0,-2px) scale(1.4)', offset: .72 }, { transform: 'scaleY(.3)', offset: .8 }, { transform: 'scaleY(.3)', offset: .92 }, { transform: 'none' }], D)
     await anim(p.perso, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)', offset: .34 }, { transform: 'translateY(3px) scale(1.04,.94)', offset: .38 }, { transform: 'translateY(-6px)', offset: .46 }, { transform: 'translateY(0) scale(1.03,.96)', offset: .54 }, { transform: 'translateY(0)', offset: .6 }, { transform: 'translateY(0)' }], D)
   } },
+
+  // ---------- la gigue (danse irlandaise), pour toutes les mascottes ; la troupe danse ensemble ----------
+  { id: 'gigue', enPied: true, async jouer(svg) { await gigueEnTroupe(svg, false) } },
+  { id: 'gigue-flambeau', flambeau: true, enPied: true, async jouer(svg) { await gigueEnTroupe(svg, true) } },
 ]
 
 /** Joue une surprise sur le dessin (s'il n'est pas déjà occupé). */
