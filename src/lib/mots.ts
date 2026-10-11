@@ -21,6 +21,8 @@ export interface Mot {
   remarque: string
   /** date d'ajout par /cours (AAAA-MM-JJ), absente si inconnue */
   ajoute?: string
+  /** page du cours (colonne « Page »), absente si inconnue */
+  page?: number
   /** pour le chapitre Conjugaison : l'infinitif du verbe (voir conjugaison.ts) */
   verbe?: string
   /** pour le chapitre Getallen : la valeur du mot (twintig → 20, voir getallen.ts) */
@@ -72,6 +74,9 @@ export function dateAjout(v: string): string {
 }
 
 const norm = (s: string) => s.trim().toLowerCase()
+const PAGE = ['page', 'pagina', 'blz', 'blz.']
+/** « 12 » → 12 ; vide ou illisible → rien */
+const lirePage = (v: string) => { const n = parseInt(v, 10); return Number.isFinite(n) ? { page: n } : {} }
 
 export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
   const entete = onglet.lignes.findIndex(l => l.some(c => COLONNES.nl.includes(norm(c))))
@@ -81,6 +86,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
     Object.entries(COLONNES).map(([cle, noms]) => [cle, titres.findIndex(t => noms.includes(t))]),
   ) as Record<keyof typeof COLONNES, number>
   if (col.fr < 0) return null
+  const colPage = titres.findIndex(t => PAGE.includes(t))
 
   const mots: Mot[] = []
   const chapitres: string[] = []
@@ -102,6 +108,7 @@ export function matiereDepuisOnglet(onglet: Onglet): Matiere | null {
       det: det === 'de' || det === 'het' ? det : '',
       definition: val('definition'), exemple: val('exemple'), remarque: val('remarque'),
       ...(ajoute && { ajoute }),
+      ...(colPage >= 0 && lirePage(ligne[colPage] ?? '')),
     })
   }
   // « Sans chapitre » toujours en dernier
@@ -119,7 +126,7 @@ export function derniersAjouts(voc: Vocabulaire): { date: string; mots: Mot[] } 
 const COLONNES_QUESTIONS = {
   matiere: ['matière', 'matiere', 'vak'],
   chapitre: COLONNES.chapitre,
-  page: ['page', 'pagina', 'blz', 'blz.'],
+  page: PAGE,
   question: ['question', 'vraag'],
   reponse: ['réponse', 'reponse', 'antwoord'],
   leurres: ['leurres', 'mauvaises réponses', 'fout'],
@@ -152,6 +159,7 @@ export function questionsDepuisOnglet(onglet: Onglet): Mot[] | null {
       det: '', definition: '', exemple: '', remarque: '',
       vraag: { leurres: val('leurres').split('|').map(x => x.trim()).filter(Boolean), page: val('page'), elements: nombre ? elements : [], nombre },
       ...(ajoute && { ajoute }),
+      ...lirePage(val('page')),
     })
   }
   return res

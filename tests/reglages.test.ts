@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Mot, Vocabulaire } from '../src/lib/mots'
-import { aReviser, cleChapitre, motsChoisis, questionsChoisies, type Reglages } from '../src/lib/reglages'
+import { aReviser, bornesPages, chapitreSeul, cleChapitre, motsChoisis, questionsChoisies, type Reglages } from '../src/lib/reglages'
 
 const mot = (nl: string, chapitre: string, vraag = false): Mot => ({
   id: nl, matiere: 'Aard', chapitre, nl, det: '', fr: nl, definition: '', exemple: '', remarque: '',
@@ -10,7 +10,7 @@ const voc: Vocabulaire = {
   matieres: [{ nom: 'Aard', chapitres: ['1', '2'], mots: [mot('zee', '1'), mot('berg', '2')], questions: [mot('Wat is migratie?', '1', true), mot('Wat is TOLES?', '2', true)] }],
   misAJour: 0,
 }
-const r = (p: Partial<Reglages>) => ({ matieres: ['Aard'], chapitres: [], exercice: 'qcm', ...p }) as Reglages
+const r = (p: Partial<Reglages>) => ({ matieres: ['Aard'], chapitres: [], exercice: 'qcm', pages: {}, ...p }) as Reglages
 
 describe('mots et questions à réviser', () => {
   it('les questions suivent le choix de matière et de chapitres, sans se mêler aux mots', () => {
@@ -32,5 +32,31 @@ describe('exercices de Nederlands', () => {
     const choix = r({ matieres: ['Nederlands'], chapitres: [cleChapitre('Nederlands', '1')] })
     expect(aReviser(ned, { ...choix, exercice: 'conjugaison' }).map(m => m.nl)).toEqual(['zijn'])
     expect(aReviser(ned, { ...choix, exercice: 'qcm' }).map(m => m.nl)).toEqual(['klinker'])
+  })
+})
+
+describe('pages d’un chapitre', () => {
+  const p = (m: Mot, page?: number): Mot => ({ ...m, ...(page !== undefined && { page }) })
+  const v: Vocabulaire = {
+    matieres: [{ nom: 'Aard', chapitres: ['1', '2'],
+      mots: [p(mot('zee', '1'), 4), p(mot('rivier', '1'), 9), p(mot('meer', '1'), 15), mot('oud', '1'), p(mot('berg', '2'), 30)],
+      questions: [p(mot('Wat is migratie?', '1', true), 20)] }],
+    misAJour: 0,
+  }
+  const un = cleChapitre('Aard', '1')
+  it('un seul chapitre choisi : ses bornes, mots et questions confondus', () => {
+    expect(chapitreSeul(v, r({}))).toBeNull()                                  // les deux chapitres
+    expect(chapitreSeul(v, r({ chapitres: [un] }))?.chapitre).toBe('1')
+    expect(chapitreSeul(v, r({ chapitres: [un, cleChapitre('Aard', '2')] }))).toBeNull()
+    expect(bornesPages(v, 'Aard', '1')).toEqual([4, 20])
+  })
+  it('seulement les pages retenues ; les mots sans page restent', () => {
+    const choix = r({ chapitres: [un], pages: { [un]: [5, 15] } })
+    expect(motsChoisis(v, choix).map(m => m.nl)).toEqual(['rivier', 'meer', 'oud'])
+    expect(questionsChoisies(v, choix)).toEqual([])
+    expect(motsChoisis(v, { ...choix, pages: { [un]: [15, 5] } }).map(m => m.nl)).toEqual(['rivier', 'meer', 'oud'])
+  })
+  it('les pages ne comptent plus quand plusieurs chapitres sont choisis', () => {
+    expect(motsChoisis(v, r({ pages: { [un]: [5, 15] } }))).toHaveLength(5)
   })
 })

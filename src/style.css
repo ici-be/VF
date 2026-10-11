@@ -669,3 +669,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .feuille-interro .reponses .p-cours { color: #444; font-size: 9pt; }
 }
 .resume .imprimer-questions { align-self: flex-start; margin-top: 4px; font-size: .9rem; text-align: left; }
+
+/* ---------- pages du chapitre (un seul chapitre choisi) ---------- */
+.pages-chapitre { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: .92rem; }
+.pages-chapitre label { font-weight: 700; color: var(--muted); }
+.pages-chapitre input { width: 4.2em; padding: 5px 6px; border-radius: 8px; border: 2px solid var(--line); background: var(--panel); color: var(--fg); font: inherit; font-variant-numeric: tabular-nums; text-align: center; }
+.pages-chapitre input:focus { border-color: var(--blue); outline: none; }
+.pages-chapitre.limite input { border-color: var(--accent); }
+.pages-chapitre .astuce-pages { color: var(--muted); font-size: .85rem; }
+.pages-chapitre .lien { font-size: .85rem; }

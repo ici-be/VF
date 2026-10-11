@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { derniersAjouts, type Mot, type Vocabulaire } from '../lib/mots'
-import { exercice, motsChoisis, questionsChoisies, type Reglages } from '../lib/reglages'
+import { exercice, motsChoisis, pagesChoisies, questionsChoisies, type Reglages } from '../lib/reglages'
 import { motsARevoir, type Suivi } from '../lib/progression'
 import { construireSerie, type Carte } from '../lib/seance'
 import { sansAccents } from '../lib/correction'
@@ -76,10 +76,12 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const colonnes = vue === 'revoir' ? 4 : 3
 
   // titre de la page imprimée : « Biologie / Biologie — 1. De ecosystemen »
+  const pages = pagesChoisies(voc, reglages)
   const titreMatieres = reglages.matieres.map(n => {
     const a = apparence(n)
     const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
-    return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres: ch.length ? ch.join(', ') : 'tous les chapitres' }
+    const chapitres = (ch.length ? ch.join(', ') : 'tous les chapitres') + (pages ? `, p. ${pages.de}–${pages.a}` : '')
+    return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres }
   })
   const titreImpression = feuille ? `Interro – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}` : vue === 'nouveaux'
     ? `Nouveaux mots – ${dateNouveaux}`

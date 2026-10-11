@@ -17,7 +17,7 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Exemple | une phrase ; la partie à trouver dans les textes à trous va entre crochets : `Het bevolkingsaantal [neemt af]` |
 | Remarque | le reste : pluriel, synonyme, contraire, forme… |
 | Chapitre | le chapitre (vide = « Sans chapitre ») |
-| Page | la page du cours (ignorée par l'appli ; sert à garder l'ordre du cours) |
+| Page | la page du cours : quand un seul chapitre est choisi, l'accueil permet de ne réviser que certaines pages (« Pages 5 à 12 », pour une interro sur une partie du chapitre ; les mots sans page restent) |
 | Ajouté | la date d'ajout par `/cours` (AAAA-MM-JJ) : les mots de la date la plus récente sont les « Nouveaux » de l'appli |
 
 Les **questions de cours** sont dans l'onglet « Vragen » (créé par `/cours`) : colonnes

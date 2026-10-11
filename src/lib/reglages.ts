@@ -73,6 +73,8 @@ export interface Reglages {
   temps: Temps | 'mix'
   /** afficher les notes sur 20 (matières, chapitres, fin de série) */
   notes: boolean
+  /** pages du cours retenues dans un chapitre (`${matière}␟${chapitre}` → [de, à]) ; absent = tout le chapitre */
+  pages: Record<string, [number, number]>
 }
 
 export const SEP = '␟'
@@ -80,7 +82,7 @@ export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP 
 
 const DEFAUT: Reglages = {
   matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
-  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', notes: false,
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', notes: false, pages: {},
 }
 
 /** Réglages enregistrés, nettoyés de ce qui n'existe plus dans le tableau. */
@@ -94,6 +96,7 @@ export function chargerReglages(voc: Vocabulaire | null): Reglages {
     const existants = new Set(voc.matieres.flatMap(m => m.chapitres.map(c => cleChapitre(m.nom, c))))
     // les chapitres des autres matières restent mémorisés, pour quand on y revient
     r.chapitres = r.chapitres.filter(c => existants.has(c))
+    r.pages = Object.fromEntries(Object.entries(r.pages).filter(([c]) => existants.has(c)))
   }
   return r
 }
@@ -102,15 +105,44 @@ export function enregistrerReglages(r: Reglages): void {
   ecrire('reglages', r)
 }
 
-/** Les mots des matières et chapitres choisis (tous les chapitres d'une matière si aucun n'est coché pour elle). */
+/** Le chapitre choisi quand il n'y en a qu'un (une seule matière, un seul chapitre coché ou existant). */
+export function chapitreSeul(voc: Vocabulaire, r: Reglages): { matiere: string; chapitre: string; cle: string } | null {
+  if (r.matieres.length !== 1) return null
+  const m = voc.matieres.find(x => x.nom === r.matieres[0])
+  if (!m) return null
+  const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
+  const chapitre = coches.length === 1 ? coches[0].slice(m.nom.length + SEP.length) : !coches.length && m.chapitres.length === 1 ? m.chapitres[0] : null
+  return chapitre === null ? null : { matiere: m.nom, chapitre, cle: cleChapitre(m.nom, chapitre) }
+}
+
+/** Première et dernière page connues d'un chapitre (mots et questions) ; null si aucune page. */
+export function bornesPages(voc: Vocabulaire, matiere: string, chapitre: string): [number, number] | null {
+  const m = voc.matieres.find(x => x.nom === matiere)
+  const pages = [...(m?.mots ?? []), ...(m?.questions ?? [])].filter(x => x.chapitre === chapitre && x.page !== undefined).map(x => x.page!)
+  return pages.length ? [Math.min(...pages), Math.max(...pages)] : null
+}
+
+/** Les pages retenues, quand un seul chapitre est choisi et qu'on en a limité les pages. */
+export function pagesChoisies(voc: Vocabulaire, r: Reglages): { cle: string; de: number; a: number } | null {
+  const seul = chapitreSeul(voc, r)
+  const p = seul && r.pages[seul.cle]
+  return p ? { cle: seul.cle, de: Math.min(...p), a: Math.max(...p) } : null
+}
+
+/**
+ * Les mots des matières et chapitres choisis (tous les chapitres d'une matière si aucun n'est coché pour elle).
+ * Un seul chapitre choisi et ses pages limitées : seulement ces pages (les mots sans page restent).
+ */
 export function motsChoisis(voc: Vocabulaire, r: Reglages, questions = false): Mot[] {
-  return voc.matieres
+  const mots = voc.matieres
     .filter(m => r.matieres.includes(m.nom))
     .flatMap(m => {
       const tous = questions ? m.questions ?? [] : m.mots
       const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
       return coches.length ? tous.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : tous
     })
+  const p = pagesChoisies(voc, r)
+  return p ? mots.filter(x => x.page === undefined || (x.page >= p.de && x.page <= p.a)) : mots
 }
 
 /** Les questions de cours des matières et chapitres choisis. */

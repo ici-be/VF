@@ -2,7 +2,7 @@
 // du menu (plus d'icônes). Et la liste des matières choisies, avec leurs chapitres.
 import type { Vocabulaire } from '../lib/mots'
 import { apparence } from '../lib/apparence'
-import { cleChapitre, type Reglages } from '../lib/reglages'
+import { cleChapitre, pagesChoisies, type Reglages } from '../lib/reglages'
 
 export const nomChapitre = (c: string) => (/^\d+(\.\d+)?$/.test(c) ? `Chapitre ${c}` : c)
 
@@ -22,6 +22,7 @@ export function NomsCote({ noms }: { noms: string[] }) {
 
 /** Les matières choisies, chacune avec ses chapitres s'ils sont restreints (dans l'ordre du tableau). */
 export function NomsMatieres({ voc, r }: { voc: Vocabulaire; r: Reglages }) {
+  const p = pagesChoisies(voc, r)
   return (
     <>
       {r.matieres.map(m => {
@@ -29,7 +30,7 @@ export function NomsMatieres({ voc, r }: { voc: Vocabulaire; r: Reglages }) {
         const ch = ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
         return (
           <span class="nom-matiere">
-            <NomMatiere nom={m} />{ch.length > 0 && <span class="chapitres-choisis">{ch.join(', ')}</span>}
+            <NomMatiere nom={m} />{(ch.length > 0 || p) && <span class="chapitres-choisis">{[ch.join(', '), p && `p. ${p.de}–${p.a}`].filter(Boolean).join(' · ')}</span>}
           </span>
         )
       })}

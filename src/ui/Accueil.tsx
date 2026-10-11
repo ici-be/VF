@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 import {
-  EXERCICES, aReviser, cleChapitre, exercice, motsChoisis, SEP,
+  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, motsChoisis, SEP,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
@@ -41,6 +41,43 @@ function Note({ mots, r }: { mots: Mot[]; r: Reglages }) {
   const n = r.notes ? noteSur20(mots) : null
   return n === null ? null : (
     <span class={`note ${niveauNote(n)}`} title="Ce que tu sais déjà : un mot compte comme su après 3 bonnes réponses sans erreur">{note(n)}</span>
+  )
+}
+
+/** Les pages du chapitre choisi sur lesquelles porte l'exercice : « Pages [5] à [12] ». */
+function Pages({ cle, bornes, r, maj, n, unite }: {
+  cle: string
+  bornes: [number, number]
+  r: Reglages
+  maj: (p: Partial<Reglages>) => void
+  n: number
+  unite: string
+}) {
+  const [min, max] = bornes
+  const [de, a] = r.pages[cle] ?? bornes
+  const limite = !!r.pages[cle]
+  const changer = (i: 0 | 1, champ: HTMLInputElement) => {
+    const p: [number, number] = [de, a]
+    p[i] = Math.min(max, Math.max(min, Math.round(Number(champ.value)) || bornes[i]))
+    if (p[0] > p[1]) p.reverse()
+    champ.value = String(p[i])   // une page hors du chapitre est ramenée dans ses bornes
+    const pages = { ...r.pages }
+    // tout le chapitre : rien à retenir
+    if (p[0] <= min && p[1] >= max) delete pages[cle]
+    else pages[cle] = p
+    maj({ pages })
+  }
+  return (
+    <div class={`pages-chapitre ${limite ? 'limite' : ''}`}>
+      <label for="page-de">Pages</label>
+      <input id="page-de" type="number" inputMode="numeric" min={min} max={max} value={de} onChange={e => changer(0, e.target as HTMLInputElement)} aria-label="Première page" />
+      <span>à</span>
+      <input type="number" inputMode="numeric" min={min} max={max} value={a} onChange={e => changer(1, e.target as HTMLInputElement)} aria-label="Dernière page" />
+      {limite
+        ? <button class="lien" onClick={() => { const pages = { ...r.pages }; delete pages[cle]; maj({ pages }) }}>tout le chapitre (p. {min}–{max})</button>
+        : <span class="astuce-pages">tout le chapitre</span>}
+      {limite && <span class="astuce-pages">{nombre(n, unite)}</span>}
+    </div>
   )
 }
 
@@ -121,6 +158,9 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const basculerChapitre = (cle: string) =>
     maj({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
   const tousChapitres = (matiere: string) => maj({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
+  // un seul chapitre choisi : on peut n'en garder que quelques pages (la prochaine interro)
+  const seul = chapitreSeul(voc, r)
+  const bornes = seul && bornesPages(voc, seul.matiere, seul.chapitre)
 
   const blocChapitres = (
       <section class="bloc">
@@ -144,6 +184,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   )
                 })}
               </div>
+              {seul?.matiere === m.nom && bornes && <Pages cle={seul.cle} bornes={bornes} r={r} maj={maj} n={dispo} unite={unite} />}
             </div>
           )
         })}

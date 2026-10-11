@@ -43,6 +43,10 @@ describe('lecture du tableau', () => {
   it('ignore un onglet sans colonnes reconnues', () => {
     expect(matiereDepuisOnglet({ nom: 'Notes', lignes: [['bla', 'bla']] })).toBeNull()
   })
+  it('lit la page de chaque mot, si elle est connue', () => {
+    const avecPages = matiereDepuisOnglet({ nom: 'A', lignes: [['Page', 'Néerlandais', 'Français'], ['12', 'zee', 'la mer'], ['', 'berg', 'la montagne']] })!
+    expect(avecPages.mots.map(m => m.page)).toEqual([12, undefined])
+  })
   it('donne un identifiant unique aux doublons de chapitres différents', () => {
     const m = matiereDepuisOnglet({ nom: 'A', lignes: [['Néerlandais', 'Français', 'Chapitre'], ['rivier', 'la rivière', '1'], ['rivier', 'la rivière', '2']] })!
     expect(new Set(m.mots.map(x => x.id)).size).toBe(2)
