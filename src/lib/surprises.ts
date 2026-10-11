@@ -226,9 +226,10 @@ async function gigueEnTroupe(svg: SVGSVGElement, flambeau: boolean) {
   const canon = autres.length > 0 && Math.random() < .5
   autres.forEach((x, i) => {
     x.dataset.surprise = 'gigue'
-    minuteries.set(x, [])
+    const jeton: number[] = []
+    minuteries.set(x, jeton)
     gigue(x, { flambeau: flambeau && tientLeFlambeau(x), delai: canon ? (i + 1) * GIGUE_TEMPS * 2 : 0 })
-      .finally(() => { if (x.dataset.surprise === 'gigue') { minuteries.delete(x); delete x.dataset.surprise } })
+      .finally(() => { if (minuteries.get(x) === jeton) { minuteries.delete(x); delete x.dataset.surprise } })
   })
   await gigue(svg, { flambeau })
 }
@@ -613,10 +614,13 @@ export const SURPRISES: Surprise[] = [
 export async function surprendre(svg: SVGSVGElement, s: Surprise): Promise<void> {
   if (svg.dataset.saute || svg.dataset.surprise) return
   svg.dataset.surprise = s.id
-  minuteries.set(svg, [])
+  // les minuteries de cette surprise-ci servent de jeton : une surprise interrompue, qui finit après
+  // qu'une autre a commencé, n'efface pas la marque de la nouvelle
+  const jeton: number[] = []
+  minuteries.set(svg, jeton)
   await s.jouer(svg)
   // les petits dessins encore en vol finissent tranquillement
-  if (svg.dataset.surprise === s.id) { minuteries.delete(svg); delete svg.dataset.surprise }
+  if (minuteries.get(svg) === jeton) { minuteries.delete(svg); delete svg.dataset.surprise }
 }
 
 /** Arrête net la surprise en cours (par exemple quand la mascotte doit sauter de joie). */
@@ -688,10 +692,20 @@ function prochaine(svg: SVGSVGElement): Surprise {
   return r.derniere
 }
 
-/** Toucher (ou cliquer) la mascotte du bloc « Commencer » : sa prochaine surprise. */
+/**
+ * Toucher (ou cliquer) la mascotte du bloc « Commencer » : sa prochaine surprise. Plusieurs mascottes
+ * dans la scène (plusieurs matières choisies) : toujours la gigue de toute la troupe, en synchro ou en canon.
+ */
 function toucher(e: Event) {
   const svg = (e.target as Element | null)?.closest?.<SVGSVGElement>('.reprendre svg.mascotte[data-mascotte]')
   if (!svg || svg.closest('.en-course')) return
+  const troupe = [...(svg.closest('.scene-mascottes, .scene-mini')?.querySelectorAll<SVGSVGElement>('svg.mascotte[data-mascotte]') ?? [])]
+  if (troupe.length > 1) {
+    troupe.forEach(interrompre)
+    if (troupe.some(x => x.dataset.saute)) return
+    surprendre(svg, SURPRISES.find(x => x.id === 'gigue')!)
+    return
+  }
   interrompre(svg)
   if (!svg.dataset.saute) surprendre(svg, prochaine(svg))
 }
