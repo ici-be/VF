@@ -637,3 +637,35 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .regle-nombres td.chiffres { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
 .regle-nombres td small { display: block; color: var(--muted); }
 .regle-nombres ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 3px; }
+
+/* ---------- feuille d'interro (questions de cours) : à imprimer seulement ---------- */
+.feuille-interro { display: none; }
+@media print {
+  .page.liste.mode-feuille > :not(.feuille-interro) { display: none !important; }
+  .page.liste.mode-feuille > .feuille-interro { display: block !important; }
+  .feuille-interro { font-size: 11pt; line-height: 1.35; }
+  .feuille-interro header { margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 1.5pt solid #000; }
+  .feuille-interro h1 { font: 800 16pt/1.1 var(--display); margin: 0 0 1mm; }
+  .feuille-interro .sujet { margin: 0; font-size: 11pt; }
+  .feuille-interro .eleve { display: flex; gap: 10mm; margin: 0 0 6mm; }
+  .feuille-interro .eleve span { flex: 1; border-bottom: .6pt solid #000; padding-bottom: 5mm; font-weight: 700; }
+  .feuille-interro .eleve span:last-child { flex: 0 0 55mm; }
+  .feuille-interro h2 { font: 700 11pt/1.2 var(--body); margin: 5mm 0 2mm; padding-bottom: 1mm; border-bottom: 1pt solid #000; break-after: avoid; }
+  .feuille-interro .question { break-inside: avoid; margin: 0 0 5mm; }
+  .feuille-interro .question p { margin: 0 0 1mm; }
+  .feuille-interro .question i { color: #444; }
+  /* les lignes d'écriture : pointillés espacés de 8 mm */
+  .feuille-interro .lignes { margin: 0; padding: 0; }
+  .feuille-interro .lignes span, .feuille-interro .lignes li { display: block; height: 8mm; border-bottom: .5pt dotted #777; }
+  .feuille-interro ol.lignes { padding-left: 7mm; list-style: decimal; }
+  .feuille-interro ol.lignes li { display: list-item; }
+  .feuille-interro ol.lignes li::marker { font-size: 9pt; color: #444; }
+  /* le corrigé : toujours sur une nouvelle page */
+  .feuille-interro .reponses { break-before: page; font-size: 10pt; }
+  .feuille-interro .reponses ol { margin: 0; padding-left: 7mm; display: flex; flex-direction: column; gap: 2.5mm; }
+  .feuille-interro .reponses li { break-inside: avoid; }
+  .feuille-interro .reponses .q { display: block; color: #444; font-size: 9pt; }
+  .feuille-interro .reponses .r { font-weight: 700; }
+  .feuille-interro .reponses .p-cours { color: #444; font-size: 9pt; }
+}
+.resume .imprimer-questions { align-self: flex-start; margin-top: 4px; font-size: .9rem; text-align: left; }

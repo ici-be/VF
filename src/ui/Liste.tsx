@@ -12,6 +12,7 @@ import { nombre } from '../lib/texte'
 import { estPrimitif, NB_PRIMITIFS, PRIMITIFS, verbe } from '../lib/conjugaison'
 import { apparence } from '../lib/apparence'
 import { accord } from '../lib/texte'
+import { FeuilleInterro } from './FeuilleInterro'
 
 export type Vue = 'tous' | 'revoir' | 'primitifs' | 'nouveaux' | 'questions'
 
@@ -36,6 +37,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
   const [cherche, setCherche] = useState('')
   const [tri, setTri] = useState<Tri>('chapitre')
   const [vue, setVue] = useState<Vue>(vueInitiale)
+  // imprimer la feuille d'interro (questions + lignes, réponses à part) plutôt que la liste
+  const [feuille, setFeuille] = useState(false)
   const simple = (s: string) => sansAccents(s.toLowerCase())
   const q = simple(cherche.trim())
   const choisis = motsChoisis(voc, reglages)
@@ -78,7 +81,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
     return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres: ch.length ? ch.join(', ') : 'tous les chapitres' }
   })
-  const titreImpression = vue === 'nouveaux'
+  const titreImpression = feuille ? `Interro – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}` : vue === 'nouveaux'
     ? `Nouveaux mots – ${dateNouveaux}`
     : `${vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire'} – ${titreMatieres.map(t => `${t.nom} – ${t.chapitres}`).join(' + ')}`
   // le titre du document sert de nom au PDF enregistré depuis la fenêtre d'impression
@@ -90,10 +93,18 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
     addEventListener('afterprint', apres)
     return () => { removeEventListener('beforeprint', pendant); removeEventListener('afterprint', apres); document.title = avant }
   }, [titreImpression])
+  // la feuille est rendue avant d'ouvrir la fenêtre d'impression, puis on revient à la liste
+  useEffect(() => {
+    if (!feuille) return
+    const fini = () => setFeuille(false)
+    addEventListener('afterprint', fini)
+    print()
+    return () => removeEventListener('afterprint', fini)
+  }, [feuille])
   const aujourdhui = new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
-    <main class="page liste">
+    <main class={`page liste ${feuille ? 'mode-feuille' : ''}`}>
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
         <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
@@ -104,6 +115,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
         <header class="entete">
           <button class="icone" onClick={retour} aria-label="Retour au menu">←</button>
           <h1>{vue === 'revoir' ? 'Mots à revoir' : vue === 'primitifs' ? 'Temps primitifs' : vue === 'nouveaux' ? 'Nouveaux mots' : vue === 'questions' ? 'Questions de cours' : 'Liste des mots'}</h1>
+          {vue === 'questions' && mots.length > 0 && <button class="second" onClick={() => setFeuille(true)} title="Les questions avec des lignes pour répondre, les réponses sur une page à part">📝 Feuille d’interro</button>}
           <button class="second" onClick={() => print()} title="Imprimer (Ctrl+P)">🖨 Imprimer</button>
         </header>
         <p class="etat">{vue === 'nouveaux' ? 'Toutes les matières, quel que soit le choix du menu.' : <span><NomsMatieres voc={voc} r={reglages} /> · la matière et les chapitres se choisissent dans le menu.</span>}</p>
@@ -200,6 +212,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer }: Props) {
             </table>
           </div>
         )}
+      {vue === 'questions' && feuille && <FeuilleInterro questions={mots} titre="Questions de cours" sujets={titreMatieres} />}
     </main>
   )
 }

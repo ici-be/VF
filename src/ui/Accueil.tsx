@@ -251,6 +251,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', getallen: 'la matière Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>
             : r.matieres.length === 1 && <p class="description-exercice">{ex.description}</p>}
+          {ex.id === 'questions' && dispo > 0 && <button class="lien imprimer-questions" onClick={() => liste('questions')}>📝 Imprimer une feuille d’interro</button>}
         </div>
         <button class="go lancer" onClick={commencer} disabled={dispo === 0}>
           <span class="textes">

@@ -26,6 +26,9 @@ Matière (le nom exact de l'onglet des mots), Chapitre, Page, Question, Réponse
 (pour les énumérations : `Titel | Oriëntatie | Legende | Schaal`, variantes séparées par
 `/`, et combien en donner si la question en demande moins), et Ajouté. Elles servent
 à l'exercice « Questions de cours » et à l'onglet « Questions » de la liste des mots.
+Cet onglet imprime aussi une **feuille d'interro** : les questions numérotées avec des
+lignes pour répondre à la main (selon la longueur de la réponse, une par élément pour les
+énumérations), puis les réponses sur une page à part.
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
