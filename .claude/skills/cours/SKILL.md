@@ -59,6 +59,11 @@ demander quand même ; l'appli accepte un mot dans deux chapitres).
   `Afkorting: …`, `Vb. …`, comparatif (`Ouder = plus âgé`), phrases séparées par `. `.
 - **Définition** : en néerlandais, reprise **du cours** (raccourcie si besoin), sans point final.
   Vide si le cours n'en donne pas.
+  **Sans le mot défini ni ses formes** (aucun mot de 4 lettres ou plus du terme, même le nom
+  commun d'une famille : « angle » pour « angle aigu », « droites » pour « droites parallèles ») :
+  l'exercice Définitions les remplace par « … » et la phrase devient bizarre. Reformuler
+  (« Son amplitude est comprise entre 0° et 90° », « Elles n'ont aucun point d'intersection »).
+  `python3 outils/verifier.py` les signale.
 - **Exemple** : une phrase du cours où le mot est utile, la partie à trouver entre crochets :
   `Het bevolkingsaantal [neemt af]`. Seulement pour les verbes, adjectifs, expressions,
   ou quand la phrase aide vraiment.

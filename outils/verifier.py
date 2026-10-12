@@ -13,6 +13,7 @@ Ce qui est cherché :
 Les corrections se font ensuite avec `cours.py corriger`, `cours.py supprimer` (voir /signalements).
 """
 import re
+import unicodedata
 import sys
 import urllib.request
 from collections import Counter, defaultdict
@@ -33,6 +34,17 @@ def ressemble_a_une_date(v: str) -> bool:
 def colonnes(titres: list[str], noms: dict[str, list[str]]) -> dict[str, int]:
     t = [x.strip().lower() for x in titres]
     return {k: next((i for i, x in enumerate(t) if x in n), -1) for k, n in noms.items()}
+
+
+def _racine(s: str) -> str:
+    return ''.join(c for c in unicodedata.normalize('NFD', s.lower()) if unicodedata.category(c) != 'Mn')
+
+
+def mots_masques(texte: str, mot: str) -> list[str]:
+    """Les mots du texte que l'exercice Définitions cache (« … ») : comme masquer() dans src/lib/trous.ts."""
+    cles = [_racine(w) for w in mot.split() if len(_racine(w)) >= 4]
+    return [t for t in re.findall(r"[\w'’-]+", texte)
+            if any(_racine(t).startswith(c[:max(4, len(c) - 2)]) for c in cles)]
 
 
 def verifier_mots(nom: str, lignes: list[list[str]], pb: list[str]):
@@ -59,6 +71,9 @@ def verifier_mots(nom: str, lignes: list[list[str]], pb: list[str]):
         for k in ('nl', 'fr', 'definition', 'exemple', 'remarque'):
             if v(l, k) and ressemble_a_une_date(v(l, k)):
                 pb.append(f'[{nom}] « {mot} », colonne {k} : « {v(l, k)} » ressemble à une date convertie par Sheets')
+        masques = mots_masques(v(l, 'definition'), mot)
+        if masques:
+            pb.append(f'[{nom}] « {mot} » : la définition contient {", ".join(masques)}, remplacé(s) par « … » dans l’exercice Définitions')
         ex = v(l, 'exemple')
         if ex.count('[') != ex.count(']'):
             pb.append(f'[{nom}] « {mot} » : crochets mal fermés dans l’exemple « {ex} »')
