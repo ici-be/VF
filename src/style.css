@@ -210,6 +210,23 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .tableau .extra { color: var(--muted); font-size: .88rem; display: block; }
 .tableau .extra i { font-style: normal; font-weight: 700; color: var(--fg); }
 .ecouter { border: 0; background: none; padding: 0 4px; color: var(--blue); }
+/* les dessins des définitions (géométrie) : sur fond clair, même en mode sombre (tracés à l'encre) */
+.dessin { display: block; flex: none; width: 144px; height: 108px; background: #fbfcfe; border: 1px solid #e3e8ef; border-radius: 10px; }
+.dessin.grand { width: min(300px, 100%); height: auto; aspect-ratio: 4 / 3; border-radius: 14px; }
+.def-avec-dessin { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+.carte-dessin { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.carte-texte { display: contents; }
+.carte-dessin .carte-texte { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+@media (min-width: 700px) {
+  .carte-dessin { flex-direction: row; justify-content: center; gap: 28px; }
+  .carte-dessin .carte-texte { align-items: flex-start; text-align: left; max-width: 380px; }
+}
+@media (max-width: 560px) {
+  .def-avec-dessin { flex-direction: column; gap: 6px; }
+  .def-avec-dessin .dessin { width: 112px; height: 84px; }
+  .dessin.grand { width: min(220px, 70%); }
+}
+@media print { .dessin { width: 30mm; height: 22.5mm; border: 0; } }
 .cellule-mot { display: flex; align-items: flex-start; gap: 4px; }
 .cellule-mot .terme { min-width: 0; }
 .cellule-mot .actions-mot { flex: none; display: inline-flex; align-items: center; white-space: nowrap; }

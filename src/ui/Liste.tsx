@@ -16,6 +16,7 @@ import { accord } from '../lib/texte'
 import { FeuilleInterro } from './FeuilleInterro'
 import { Glose } from './Glose'
 import { BoutonSignaler, FenetreSignalement } from './Signaler'
+import { Dessin, dessinDe } from './Dessin'
 import { PhraseATrou } from './exercices/Questions'
 import { TROU } from '../lib/mots'
 
@@ -234,8 +235,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                         </div>
                       </td>
                       <td>
-                        {l.fr}
-                        <Details m={l} />
+                        {dessinDe(l)
+                          ? <div class="def-avec-dessin"><div>{l.fr}<Details m={l} /></div><Dessin m={l} /></div>
+                          : <>{l.fr}<Details m={l} /></>}
                       </td>
                       {/* à l'impression, les détails passent dans leur propre colonne (une ligne par mot) */}
                       <td class="details"><Details m={l} /></td>

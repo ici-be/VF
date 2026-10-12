@@ -186,3 +186,8 @@ python3 outils/cours.py envoyer "<fichier - questions.tsv>" --onglet Vragen
 ```
 
 Puis les voix (section 7) : `voix.py` lit ces mots et questions avec la voix française.
+
+**Géométrie** : les notions qui se dessinent (droites, angles, constructions) ont un petit dessin,
+montré dans la liste des mots et l'exercice Définitions. Pour un nouveau chapitre de géométrie,
+proposer des dessins dans `outils/dessins.py` (clé = le mot exact du tableau), relancer le script,
+vérifier dans l'appli, puis commit et push.

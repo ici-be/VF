@@ -213,4 +213,5 @@ Les appareils reçoivent la nouvelle version au lancement suivant.
 - `src/lib/` : la logique sans interface (lecture du tableau, correction, progression, séries)
 - `src/ui/` : les écrans (accueil, exercices, fin, liste)
 - `outils/voix.py` : prépare les voix (mp3)
+- `outils/dessins.py` : les dessins des définitions de géométrie (`src/data/dessins.json`), montrés dans la liste des mots et l'exercice Définitions
 - `outils/ajouter-definitions.gs` : script ponctuel pour le tableau (colonnes Définition / Exemple)
