@@ -177,7 +177,7 @@ Pour ajouter ou corriger un verbe : modifier `outils/conjugaisons.ts`, puis
 ```sh
 node --experimental-strip-types outils/conjugaisons.ts
 npm test                 # tests/conjugaisons.test.ts vérifie des formes connues
-python3 outils/voix.py   # voix des nouvelles formes (sinon GitHub le fait dans l'heure)
+python3 outils/voix.py   # voix des nouvelles formes
 ```
 
 ## Le chapitre Getallen
@@ -195,10 +195,11 @@ le nombre décomposé et la règle.
 ## Les voix
 
 Les mots sont lus par des voix belges (edge-tts : `nl-BE-DenaNeural`, `fr-BE-CharlineNeural`),
-préparées en mp3 par `outils/voix.py` dans `public/audio/`. GitHub relance ce script
-toutes les heures : un mot ajouté dans le tableau a sa voix dans l'heure. En attendant,
-il est lu par la voix du navigateur. Pour ne pas attendre : onglet *Actions* →
-*Publier* → *Run workflow*. Pour changer de voix : `VOIX` et `VITESSE` dans
+préparées en mp3 par `outils/voix.py` dans `public/audio/`. Depuis octobre 2026, le serveur
+de voix de Microsoft refuse les serveurs de GitHub (erreur 403) : le script est lancé sur
+l'ordinateur avant chaque commit, et les nouvelles voix partent avec le push. GitHub essaie
+encore toutes les heures (au cas où Microsoft les accepterait de nouveau) ; un échec ne bloque
+pas la publication. En attendant sa voix, un mot est lu par la voix du navigateur. Pour changer de voix : `VOIX` et `VITESSE` dans
 `outils/voix.py` **et** dans `src/lib/voix.ts` (le test `tests/voix.test.ts` vérifie
 qu'ils calculent les mêmes noms de fichiers).
 
