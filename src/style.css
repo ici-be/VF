@@ -788,7 +788,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .lien-nav .n { background: var(--blue-bg); color: var(--blue); font-size: .78rem; border-radius: 999px; padding: 0 7px; }
 .nav-haut .go.jour { border-radius: 999px; height: 48px; padding: 0 18px; gap: 8px; font-size: 15px; justify-content: flex-start; }
 .nav-bas, .espace-nav-bas { display: none; }
-@media (max-width: 699px) {
+/* téléphone, et l'appli installée (PWA) quelle que soit la largeur de sa fenêtre : la barre d'onglets en bas */
+@media (max-width: 699px), (display-mode: standalone), (display-mode: window-controls-overlay) {
   .nav-haut { display: none; }
   .espace-nav-bas { display: block; height: calc(72px + env(safe-area-inset-bottom, 0px)); }
   .nav-bas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
@@ -801,6 +802,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .nav-bas .ic { position: relative; display: grid; }
   .nav-bas .badge { position: absolute; top: -6px; left: 14px; min-width: 10px; text-align: center; background: var(--accent); color: var(--accent-fg); font-size: .66rem; line-height: 1.35; border-radius: 999px; padding: 0 5px; border: 2px solid var(--panel); }
   .nav-bas .badge.bleu { background: var(--blue); color: var(--blue-fg); }
+}
+/* fenêtre large (appli installée sur ordinateur) : les onglets restent groupés au centre */
+@media (min-width: 700px) and (display-mode: standalone), (min-width: 700px) and (display-mode: window-controls-overlay) {
+  .nav-bas { padding-inline: calc((100% - 560px) / 2); }
 }
 @media print { .nav-bas, .espace-nav-bas { display: none !important; } }
 
