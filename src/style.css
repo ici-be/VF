@@ -115,7 +115,9 @@ button { cursor: pointer; }
 /* ---------- exercice ---------- */
 .barre { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--bg); padding: 10px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
 .barre .quoi { flex: 1; min-width: 0; font-size: .9rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.barre .compte { font-variant-numeric: tabular-nums; font-weight: 700; }
+.barre .compte { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.barre > :not(.quoi) { flex-shrink: 0; }
+@media (max-width: 420px) { .barre { gap: 6px; padding-inline: 12px; } .barre .icone { min-width: 38px; height: 40px; padding: 0 8px; } .barre .bouton-pause { margin-left: 4px; } }
 .icone { border: 1.5px solid var(--line); background: var(--panel); border-radius: 10px; min-width: 44px; height: 44px; display: inline-grid; place-items: center; padding: 0 10px; font-weight: 700; }
 .progres { height: 5px; background: var(--panel-2); }
 .progres > div { height: 100%; background: var(--accent); transition: width .3s; }
@@ -739,6 +741,11 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 
 /* le bouton pause un peu à l'écart de la flèche « question précédente » (pas de pause par mégarde) */
 .barre .bouton-pause { margin-left: 10px; }
+/* le son, à côté : grisé quand l'exercice n'a pas de voix (un clic le dit, en petit) */
+.son-seance { position: relative; display: inline-flex; }
+.barre .bouton-son.fige { opacity: .45; }
+.bulle-son { position: absolute; top: calc(100% + 6px); right: 0; z-index: 5; white-space: nowrap; font-size: .8rem; padding: 4px 8px; border-radius: 8px;
+  background: var(--panel); color: var(--muted); border: 1px solid var(--line); box-shadow: var(--shadow); }
 
 /* toucher la mascotte du bloc « Commencer » : une surprise */
 .reprendre .acteur { cursor: pointer; }

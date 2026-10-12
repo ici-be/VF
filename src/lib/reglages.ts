@@ -31,6 +31,8 @@ export interface Exercice {
   nederlands?: boolean
   /** un exercice fabriqué par l'appli pour une matière (Eeuwen, calcul mental, natures) : affiché si elle est choisie */
   pourMatiere?: RegExp
+  /** sans voix (pas de mp3 pour ce qu'il invente) : le bouton du son le dit ; « toujours » : la voix fait l'exercice (dictée, oral) */
+  son?: 'muet' | 'toujours'
   /** ce qu'on compte sous « Commencer » (« 6 calculs ») : sinon « mot », ou « question » pour les questions de cours */
   unite?: string
   /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
@@ -45,21 +47,21 @@ export const EXERCICES: Exercice[] = [
   { id: 'defilement', nom: 'Défilement', description: 'Le mot, puis la réponse après quelques secondes. Je réponds dans ma tête.', avecSens: true, avecVitesse: true, enFrancais: true, accepte: () => true },
   { id: 'qcm', nom: 'QCM', description: 'Choisir la bonne traduction parmi quatre.', avecSens: true, avecVitesse: false, accepte: () => true },
   { id: 'ecrit', nom: 'Écrit', description: 'Taper la traduction au clavier.', avecSens: true, avecVitesse: false, accepte: () => true },
-  { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, accepte: () => true },
+  { id: 'dictee', nom: 'Dictée', description: 'J’entends le mot néerlandais, je l’écris sans faute.', avecSens: false, avecVitesse: false, son: 'toujours', accepte: () => true },
   { id: 'definitions', nom: 'Définitions', description: 'Lire la définition, trouver le mot.', avecSens: false, avecVitesse: false, avecRepondre: true, enFrancais: true, accepte: m => m.definition !== '' },
   { id: 'trous', nom: 'Textes à trous', description: 'Compléter la phrase avec le bon mot.', avecSens: false, avecVitesse: false, enFrancais: true, accepte: aDesTrous },
   { id: 'questions', nom: 'Questions de cours', description: 'Une question du cours : choisir la bonne réponse, ou y répondre dans sa tête puis vérifier.', avecSens: false, avecVitesse: false, avecRepondre: true, surQuestions: true, enFrancais: true, accepte: m => !!m.vraag },
   { id: 'motscroises', nom: 'Mots croisés', description: 'Jeu : remplir la grille avec les mots, la traduction (ou la définition) en indice.', avecSens: false, avecVitesse: false, jeu: true, enFrancais: true, accepte: m => lettresDe(m.nl) !== null },
   { id: 'dehet', nom: 'de ou het ?', description: 'Trouver l’article des noms.', avecSens: false, avecVitesse: false, accepte: m => m.det !== '' },
   // à la fin : l'oral, encore en rodage, puis ce qui ne vaut que pour Nederlands (chapitres Conjugaison et Getallen)
-  { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, beta: true, accepte: () => true },
+  { id: 'oral', nom: 'Oral', description: 'Le mot est lu, je réponds à voix haute au micro.', avecSens: true, avecVitesse: false, son: 'toujours', beta: true, accepte: () => true },
   { id: 'conjugaison', nom: 'Conjugaison', description: 'Le verbe à conjuguer à toutes les personnes (ik, jij, hij…), puis valider.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, nederlands: true, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
-  { id: 'eeuwen', nom: 'Eeuwen', description: 'Een jaartal → de eeuw of het tijdvak, een eeuw → haar jaren (1789 → 18de eeuw, nieuwste tijd).', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /geschiedenis|histoire/i, accepte: m => m.genere === 'eeuwen' },
-  { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, exposants, parenthèses, distributivité, calcul astucieux, coder et décoder, propriétés, vocabulaire.', avecSens: false, avecVitesse: false, enFrancais: true, unite: 'calcul', pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
-  { id: 'natures', nom: 'Natures des mots', description: 'Dans une phrase, trouver la nature du mot souligné : nom, déterminant, adjectif, verbe, pronom…', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /fran[cç]ais|\bfrans\b/i, accepte: m => m.genere === 'natures' },
-  { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, accepte: m => !!m.getal },
+  { id: 'eeuwen', nom: 'Eeuwen', description: 'Een jaartal → de eeuw of het tijdvak, een eeuw → haar jaren (1789 → 18de eeuw, nieuwste tijd).', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, pourMatiere: /geschiedenis|histoire/i, accepte: m => m.genere === 'eeuwen' },
+  { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, exposants, parenthèses, distributivité, calcul astucieux, coder et décoder, propriétés, vocabulaire.', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, unite: 'calcul', pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
+  { id: 'natures', nom: 'Natures des mots', description: 'Dans une phrase, trouver la nature du mot souligné : nom, déterminant, adjectif, verbe, pronom…', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, pourMatiere: /fran[cç]ais|\bfrans\b/i, accepte: m => m.genere === 'natures' },
+  { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, son: 'muet', accepte: m => !!m.getal },
 ]
 
 // les exercices propres au néerlandais (traduction, de/het, dictée, oral…) ne prennent pas

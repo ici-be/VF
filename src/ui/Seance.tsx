@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { Mot, Vocabulaire } from '../lib/mots'
 import { exercice, type Reglages } from '../lib/reglages'
-import { ArrowLeft } from 'lucide-preact'
+import { ArrowLeft, Volume2, VolumeX } from 'lucide-preact'
 import { BoutonSignaler, FenetreSignalement } from './Signaler'
 import { langueDe } from '../lib/apparence'
 import { IconeExercice } from './icones'
@@ -186,6 +186,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {carte && carte.mot.getal === undefined && <BoutonSignaler onClick={() => setASignaler(true)} />}
         <button class="icone" onClick={precedente} disabled={i === 0} aria-label="Question précédente" title="Revenir à la question précédente"><ArrowLeft size={16} strokeWidth={2.4} /></button>
         <button class="icone bouton-pause" onClick={() => setPause(p => !p)} aria-label={pause ? 'Reprendre' : 'Pause'} title={pause ? 'Reprendre (Échap)' : 'Pause (Échap)'}>{pause ? '▶' : '⏸'}</button>
+        <BoutonSon ex={ex} reglages={reglages} setReglages={setReglages} />
       </div>
       <div class="progres"><div style={{ width: `${(i / file.length) * 100}%` }} /></div>
       <main class={`scene ${pause ? 'en-pause' : ''}`}>
@@ -226,4 +227,30 @@ function vocalesConjugaison(inf: string, temps: Reglages['temps']) {
   if (!v) return []
   const ts = temps === 'mix' ? TEMPS.map(t => t.id) : [temps]
   return [v.lecturePrimitifs, ...ts.flatMap(t => [v.lecture[t], ...v.questionsTexte[t]])].map(texte => ({ texte, langue: 'nl' as const }))
+}
+
+/**
+ * Le son de l'appli, à droite de la pause : un clic le coupe ou le remet (comme la case « Lire les mots à voix haute »).
+ * Un exercice sans voix (Eeuwen, Calcul mental…) le dit discrètement ; la dictée et l'oral gardent toujours la voix.
+ */
+function BoutonSon({ ex, reglages, setReglages }: { ex: ReturnType<typeof exercice>; reglages: Reglages; setReglages: (r: Reglages) => void }) {
+  const [dit, setDit] = useState('')
+  useEffect(() => { if (!dit) return; const t = setTimeout(() => setDit(''), 2500); return () => clearTimeout(t) }, [dit])
+  const actif = ex.son === 'toujours' || (ex.son !== 'muet' && reglages.voix)
+  const titre = ex.son === 'muet' ? 'Pas de son pour cet exercice'
+    : ex.son === 'toujours' ? 'Le son reste allumé : cet exercice se fait à l’oreille'
+    : reglages.voix ? 'Couper le son' : 'Remettre le son'
+  const clic = () => {
+    if (ex.son) { setDit(ex.son === 'muet' ? 'Pas de son ici' : 'Son indispensable ici'); return }
+    if (reglages.voix) taire()
+    setReglages({ ...reglages, voix: !reglages.voix })
+  }
+  return (
+    <span class="son-seance">
+      <button class={`icone bouton-son ${ex.son ? 'fige' : ''}`} onClick={clic} aria-label={titre} aria-pressed={ex.son ? undefined : reglages.voix} title={titre}>
+        {actif ? <Volume2 size={16} strokeWidth={2.4} /> : <VolumeX size={16} strokeWidth={2.4} />}
+      </button>
+      {dit && <span class="bulle-son" role="status">{dit}</span>}
+    </span>
+  )
 }
