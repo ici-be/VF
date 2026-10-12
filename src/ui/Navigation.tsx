@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'preact/hooks'
 import { CalendarCheck, ChartColumn, House, List, Sparkles } from 'lucide-preact'
 import { derniersAjouts, type Vocabulaire } from '../lib/mots'
 
@@ -27,12 +28,24 @@ const TITRE_SUIVI = 'Régularité, récompenses, ce qui est su, erreurs qui revi
 /** Dans l'en-tête de l'accueil (ordinateur, tablette). */
 export function NavHaut({ voc, aller, nbDuJour }: { voc: Vocabulaire; aller: Aller; nbDuJour: number }) {
   const nouveaux = nouveauxRecents(voc)
+  // chaque lien arrondi au pixel entier : sinon icônes et textes tombent entre deux pixels (flous dans Firefox)
+  const nav = useRef<HTMLElement>(null)
+  useLayoutEffect(() => {
+    const arrondir = () => nav.current?.querySelectorAll<HTMLElement>('button').forEach(b => {
+      b.style.width = ''
+      b.style.width = `${Math.ceil(b.getBoundingClientRect().width)}px`
+    })
+    arrondir()
+    document.fonts?.ready.then(arrondir)
+  }, [nouveaux, nbDuJour])
   return (
-    <nav class="nav-haut" aria-label="Pages">
-      {nouveaux > 0 && <button class="lien-nav" onClick={aller.nouveaux}><Sparkles size={19} strokeWidth={2} aria-hidden="true" />Nouveaux <span class="n">{nouveaux}</span></button>}
-      <button class="lien-nav" onClick={aller.mots}><List size={19} strokeWidth={2} aria-hidden="true" />Mots</button>
-      <button class="lien-nav" onClick={aller.suivi} title={TITRE_SUIVI}><ChartColumn size={19} strokeWidth={2} aria-hidden="true" />Suivi</button>
-      {nbDuJour > 0 && <button class="go jour" onClick={aller.reviser} title={TITRE_REVISER}><CalendarCheck size={19} strokeWidth={2.2} aria-hidden="true" />Réviser aujourd’hui · {nbDuJour}</button>}
+    <nav class="nav-haut" aria-label="Pages" ref={nav}>
+      <span class="liens">
+      {nouveaux > 0 && <button class="lien-nav" onClick={aller.nouveaux}><Sparkles size={20} strokeWidth={1.8} aria-hidden="true" />Nouveaux <span class="n">{nouveaux}</span></button>}
+      <button class="lien-nav" onClick={aller.mots}><List size={20} strokeWidth={1.8} aria-hidden="true" />Mots</button>
+      <button class="lien-nav" onClick={aller.suivi} title={TITRE_SUIVI}><ChartColumn size={20} strokeWidth={1.8} aria-hidden="true" />Suivi</button>
+      </span>
+      {nbDuJour > 0 && <button class="go jour" onClick={aller.reviser} title={TITRE_REVISER}><CalendarCheck size={20} strokeWidth={2} aria-hidden="true" />Réviser aujourd’hui · {nbDuJour}</button>}
     </nav>
   )
 }

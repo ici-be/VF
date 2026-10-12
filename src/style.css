@@ -5,6 +5,7 @@
   --panel-2: #eef2f8;
   --fg: #15202f;
   --muted: #5a6577;
+  --encre-douce: #3a4a63;  /* liens du menu (ordinateur) : moins austère que --fg */
   --line: #d9dfe8;
   --accent: #e2681f;       /* orange */
   --accent-fg: #ffffff;
@@ -26,14 +27,14 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --line: #2b3646;
+    --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --encre-douce: #c9d3e1; --line: #2b3646;
     --accent: #ff8a45; --accent-fg: #1a0e05; --accent-bg: #3a2414; --blue: #8db6ff; --blue-bg: #1c2b45; --blue-fg: #0d1626;
     --ok: #74d6a0; --ok-bg: #143323; --mid: #ffc46b; --mid-bg: #3a2c12; --ko: #ff8f82; --ko-bg: #3d1a17;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --line: #2b3646;
+  --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --fg: #e8edf4; --muted: #9aa6b8; --encre-douce: #c9d3e1; --line: #2b3646;
   --accent: #ff8a45; --accent-fg: #1a0e05; --accent-bg: #3a2414; --blue: #8db6ff; --blue-bg: #1c2b45; --blue-fg: #0d1626;
   --ok: #74d6a0; --ok-bg: #143323; --mid: #ffc46b; --mid-bg: #3a2c12; --ko: #ff8f82; --ko-bg: #3d1a17;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%); color-scheme: dark;
@@ -765,11 +766,16 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .entete .go.jour { padding: 8px 14px; font-size: .95rem; }
 
 /* ---------- la navigation : liens légers dans l'en-tête (ordinateur), onglets en bas (téléphone) ---------- */
-.nav-haut { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
-.lien-nav { border: 0; background: transparent; color: var(--fg); height: 44px; padding: 0 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
-.lien-nav:hover { background: var(--panel-2); }
-.lien-nav .n { background: var(--blue-bg); color: var(--blue); font-size: .8rem; border-radius: 999px; padding: 0 7px; }
-.nav-haut .go.jour { margin-left: 8px; border-radius: 999px; height: 46px; padding: 0 16px; gap: 8px; }
+.nav-haut { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  align-self: flex-start; margin-top: 8px; }   /* calé en haut, sur un pixel entier : centré, il tombait entre deux pixels (flou dans Firefox) */
+.nav-haut .liens { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
+.lien-nav { border: 0; background: transparent; color: var(--encre-douce); height: 40px; padding: 0 14px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: 7px; font-weight: 700; font-size: 15px; }
+.lien-nav svg { color: var(--muted); }
+.lien-nav:hover { background: var(--panel-2); color: var(--fg); }
+.lien-nav:hover svg { color: var(--fg); }
+.lien-nav .n { background: var(--blue-bg); color: var(--blue); font-size: .78rem; border-radius: 999px; padding: 0 7px; }
+.nav-haut .go.jour { border-radius: 999px; height: 48px; padding: 0 18px; gap: 8px; font-size: 15px; justify-content: flex-start; }
 .nav-bas, .espace-nav-bas { display: none; }
 @media (max-width: 699px) {
   .nav-haut { display: none; }
