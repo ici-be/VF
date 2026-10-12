@@ -70,6 +70,17 @@ button { cursor: pointer; }
 .haut { display: flex; flex-direction: column; gap: 4px; }
 .etat { font-size: .85rem; color: var(--muted); display: flex; gap: 8px; align-items: center; margin: 0; }
 .etat.erreur { color: var(--ko); }
+/* mise à jour des mots : un fin trait qui file en haut de l'écran ; hors ligne : une petite pastille */
+.chargement-mots { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 50; overflow: hidden; pointer-events: none; }
+.chargement-mots::before { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 0 3px 3px 0; background: var(--accent); animation: chargement-mots 1.1s ease-in-out infinite; }
+@keyframes chargement-mots { from { left: -40%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .chargement-mots::before { animation: none; left: 0; width: 100%; opacity: .6; } }
+.hors-ligne { align-self: flex-start; margin: 2px 0 0; display: inline-flex; align-items: center; gap: 6px; padding: 4px 5px 4px 10px; border-radius: 999px;
+  background: var(--accent-bg); color: var(--fg); font-size: .82rem; }
+.hors-ligne svg { color: var(--accent); }
+.hors-ligne button { border: 0; background: var(--panel); color: var(--fg); font-weight: 700; font-size: .8rem; border-radius: 999px; padding: 3px 10px; }
+.date-mots { margin: 14px 0 0; display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); }
+.date-mots svg { color: var(--ok); }
 .lien { background: none; border: 0; color: var(--blue); text-decoration: underline; padding: 0; }
 
 /* ---------- bouton principal / cartes ---------- */

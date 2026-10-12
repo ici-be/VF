@@ -16,7 +16,7 @@ import { niveauNote, nombre, note } from '../lib/texte'
 import type { Mot } from '../lib/mots'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
-import { ArrowRight, Check, Link } from 'lucide-preact'
+import { ArrowRight, Check, CloudOff, Link } from 'lucide-preact'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
@@ -119,7 +119,7 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
     .filter(Boolean).join(' · ')
 }
 
-function dateCourte(ms: number): string {
+export function dateCourte(ms: number): string {
   return new Date(ms).toLocaleString('fr-BE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
@@ -328,14 +328,14 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <NavHaut voc={voc} nbDuJour={nbDuJour} aller={{ accueil: () => {}, reviser: reviserAujourdhui, nouveaux: () => liste('nouveaux'), mots: () => liste('tous'), suivi }} />
       </header>
-      <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
-        {chargement.etat === 'chargement' && 'Mise à jour des mots…'}
-        {chargement.etat === 'ok' && `Mots à jour (${dateCourte(voc.misAJour)})`}
-        {chargement.etat === 'hors-ligne' && <>
-          {chargement.message} Copie du {dateCourte(voc.misAJour)} utilisée.
-          <button class="lien" onClick={actualiser}>Réessayer</button>
-        </>}
-      </p>
+      {/* la mise à jour des mots ne se voit que si elle traîne (fin trait en haut) ou échoue (pastille) ; la date est dans Suivi */}
+      {chargement.etat === 'chargement' && <div class="chargement-mots" role="status" aria-label="Mise à jour des mots" />}
+      {chargement.etat === 'hors-ligne' && (
+        <p class="hors-ligne" role="status" title={`${chargement.message} Copie du ${dateCourte(voc.misAJour)} utilisée.`}>
+          <CloudOff size={15} strokeWidth={2} aria-hidden="true" />Hors ligne
+          <button onClick={actualiser}>Réessayer</button>
+        </p>
+      )}
       </div>
 
       {nouvelle && (

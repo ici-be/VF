@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { TROU, type Mot, type Vocabulaire } from '../lib/mots'
 import { journal, motsARevoir, recordDeJours, RECOMPENSES, REPONSES_PAR_JOUR, serieDeJours, suivi } from '../lib/progression'
 import { apparence } from '../lib/apparence'
-import { nomChapitre } from './Accueil'
+import { dateCourte, nomChapitre } from './Accueil'
+import { CircleCheck } from 'lucide-preact'
 import { NomMatiere } from './Matieres'
 import { lienTransfert } from '../lib/transfert'
 import { svgMascotte, type Mascotte } from '../lib/mascottes'
@@ -196,6 +197,7 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
         <button class="second" onClick={copier}>Copier le lien de transfert</button>
         {lien.etat === 'copie' && <p class="astuce gauche" role="status">Lien copié. Ouvre-le sur l’autre appareil.</p>}
         {lien.etat === 'a-copier' && <textarea class="lien-transfert" readOnly rows={3} value={lien.texte} onFocus={e => (e.target as HTMLTextAreaElement).select()} aria-label="Lien de transfert, à copier" />}
+      <p class="date-mots"><CircleCheck size={15} strokeWidth={2} aria-hidden="true" />Mots du tableau : mis à jour le {dateCourte(voc.misAJour)}</p>
       </section>
     </main>
   )
