@@ -4,8 +4,8 @@ import type { Vocabulaire } from '../src/lib/mots'
 
 // un tirage au hasard reproductible
 const graine = (n: number) => () => { n = (n * 9301 + 49297) % 233280; return n / 233280 }
-// évaluer une expression du cours (× : − et parenthèses)
-const evaluer = (e: string) => Function(`return (${e.replace(/×/g, '*').replace(/:/g, '/').replace(/−/g, '-')})`)() as number
+// évaluer une expression du cours (× : − ² ³ et parenthèses)
+const evaluer = (e: string) => Function(`return (${e.replace(/×/g, '*').replace(/:/g, '/').replace(/−/g, '-').replace(/²/g, '**2').replace(/³/g, '**3')})`)() as number
 
 describe('Eeuwen', () => {
   it('le siècle, le rang à la néerlandaise (règle du cours) et les années', () => {

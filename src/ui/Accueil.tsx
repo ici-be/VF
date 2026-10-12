@@ -104,12 +104,15 @@ function CopierLien({ r }: { r: Reglages }) {
   )
 }
 
+/** Ce qu'on compte : « mot », « question », « calcul »… */
+const uniteDe = (ex: ReturnType<typeof exercice>) => ex.unite ?? (ex.surQuestions ? 'question' : 'mot')
+
 /** « NL → FR · 20 mots », sous « Commencer » */
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [ex.avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, ex.surQuestions ? 'question' : 'mot')]
+  return [ex.avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, uniteDe(ex))]
     .filter(Boolean).join(' · ')
 }
 
@@ -150,7 +153,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   const ex = exercice(r.exercice)
   const choisis = motsChoisis(voc, r)
   const dispo = aReviser(voc, r, ex).length
-  const unite = ex.surQuestions ? 'question' : 'mot'
+  const unite = uniteDe(ex)
   // la conjugaison et les nombres n'existent que dans Nederlands : leurs exercices n'apparaissent que si cette matière est choisie
   // le sens NL → FR n'a de sens que pour une matière en néerlandais
   const avecSens = r.matieres.some(n => langueMatiere(n) === 'nl')

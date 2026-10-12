@@ -31,6 +31,8 @@ export interface Exercice {
   nederlands?: boolean
   /** un exercice fabriqué par l'appli pour une matière (Eeuwen, calcul mental, natures) : affiché si elle est choisie */
   pourMatiere?: RegExp
+  /** ce qu'on compte sous « Commencer » (« 6 calculs ») : sinon « mot », ou « question » pour les questions de cours */
+  unite?: string
   /** porte sur les questions de cours (onglet « Vragen ») plutôt que sur les mots */
   surQuestions?: boolean
   /** convient aussi aux matières en français (Français, Religion) : sinon, seulement au néerlandais */
@@ -55,7 +57,7 @@ export const EXERCICES: Exercice[] = [
   { id: 'primitifs', nom: 'Temps primitifs', description: 'komen → kwam, kwamen, is gekomen (les 30 verbes les plus courants).', avecSens: false, nederlands: true, avecVitesse: false, accepte: m => estPrimitif(m.verbe) },
   { id: 'interrogatif', nom: 'Forme interrogative', description: '« Jij slaapt. » → « Slaap jij? » : mettre la phrase en question.', avecSens: false, nederlands: true, avecVitesse: false, avecTemps: true, accepte: m => !!m.verbe },
   { id: 'eeuwen', nom: 'Eeuwen', description: 'Een jaartal → de eeuw of het tijdvak, een eeuw → haar jaren (1789 → 18de eeuw, nieuwste tijd).', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /geschiedenis|histoire/i, accepte: m => m.genere === 'eeuwen' },
-  { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, parenthèses, distributivité, coder et décoder, propriétés.', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
+  { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, exposants, parenthèses, distributivité, calcul astucieux, coder et décoder, propriétés, vocabulaire.', avecSens: false, avecVitesse: false, enFrancais: true, unite: 'calcul', pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
   { id: 'natures', nom: 'Natures des mots', description: 'Dans une phrase, trouver la nature du mot souligné : nom, déterminant, adjectif, verbe, pronom…', avecSens: false, avecVitesse: false, enFrancais: true, pourMatiere: /fran[cç]ais|\bfrans\b/i, accepte: m => m.genere === 'natures' },
   { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, accepte: m => !!m.getal },
 ]

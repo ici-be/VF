@@ -1,7 +1,8 @@
 // Les exercices fabriqués par l'appli, sans fin : chacun ajoute à sa matière un chapitre de cartes
 // (une par notion, pour suivre la progression), et invente une question nouvelle à chaque carte.
 // - Eeuwen (Geschiedenis, en néerlandais) : l'année → le siècle ou le tijdvak, un siècle → ses années ;
-// - Calcul mental (Mathématiques) : priorité des opérations, parenthèses, distributivité, coder, décoder, propriétés ;
+// - Calcul mental (Mathématiques) : priorité des opérations, de gauche à droite, exposants, parenthèses, distributivité
+//   (dans les deux sens), calcul astucieux, coder, décoder, propriétés, vocabulaire des opérations ;
 // - Natures des mots (Français) : dans une phrase, la nature du mot mis en évidence.
 import donneesNatures from '../data/natures.json'
 import type { Matiere, Mot, Vocabulaire } from './mots'
@@ -162,6 +163,79 @@ function proprietes(h: Hasard): QuestionCalcul {
   const bonne = PROPRIETES[cas.p]
   return { question: 'Quelle propriété est utilisée ?', sujet: cas.e, bonne, options: melange([bonne, ...melange(PROPRIETES.filter(x => x !== bonne), h).slice(0, 3)], h), explication: `${cas.e} : c’est ${bonne}.` }
 }
+/** De gauche à droite : multiplications et divisions entre elles, additions et soustractions entre elles. */
+function gaucheDroite(h: Hasard): QuestionCalcul {
+  const a = entre(2, 9, h), b = entre(2, 9, h), c = entre(2, 9, h), x = entre(30, 90, h), y = entre(5, 25, h)
+  const formes = [
+    () => ({ e: `${a * b} : ${b} × ${c}`, r: a * c, x: `${a * b} : ${b} = ${a}, puis ${a} × ${c}`, piege: `et pas ${a * b} : ${b * c}` }),
+    () => ({ e: `${a * b * c} : ${b} : ${c}`, r: a, x: `${a * b * c} : ${b} = ${a * c}, puis ${a * c} : ${c}`, piege: '' }),
+    () => ({ e: `${x} − ${y} + ${c}`, r: x - y + c, x: `${x} − ${y} = ${x - y}, puis ${x - y} + ${c}`, piege: `et pas ${x} − ${y + c}` }),
+    () => ({ e: `${x} − ${y} − ${c}`, r: x - y - c, x: `${x} − ${y} = ${x - y}, puis ${x - y} − ${c}`, piege: '' }),
+  ]
+  const f = un(formes, h)()
+  return { question: 'Calcule (de gauche à droite)', sujet: f.e, bonne: String(f.r), explication: `${f.x} = ${f.r}${f.piege ? ` (${f.piege})` : ''}. Multiplications et divisions se font de gauche à droite, comme additions et soustractions.` }
+}
+/** Les exposants (le E de PEMDAS) : après les parenthèses, avant les multiplications. */
+function exposants(h: Hasard): QuestionCalcul {
+  const a = entre(2, 9, h), b = entre(2, 9, h), c = entre(2, 5, h), d = entre(2, 6, h)
+  const formes = [
+    () => ({ e: `${a} + ${b}²`, r: a + b * b, x: `${b}² = ${b} × ${b} = ${b * b}, puis ${a} + ${b * b}` }),
+    () => ({ e: `${c} × ${d}²`, r: c * d * d, x: `${d}² = ${d * d}, puis ${c} × ${d * d}`, piege: `et pas (${c} × ${d})² = ${(c * d) ** 2}` }),
+    () => ({ e: `(${c} + ${d})²`, r: (c + d) ** 2, x: `${c} + ${d} = ${c + d}, puis ${c + d}² = ${c + d} × ${c + d}` }),
+    () => ({ e: `${c}³ − ${a}`, r: c ** 3 - a, x: `${c}³ = ${c} × ${c} × ${c} = ${c ** 3}, puis ${c ** 3} − ${a}` }),
+    () => ({ e: `2 × ${b}² + ${a}`, r: 2 * b * b + a, x: `${b}² = ${b * b}, puis 2 × ${b * b} = ${2 * b * b}, puis ${2 * b * b} + ${a}` }),
+  ]
+  const f: { e: string; r: number; x: string; piege?: string } = un(formes, h)()
+  return { question: 'Calcule (attention aux exposants)', sujet: f.e, bonne: String(f.r), explication: `${f.x} = ${f.r}${f.piege ? ` (${f.piege})` : ''}. Les exposants passent après les parenthèses, avant les multiplications.` }
+}
+/** Calcul astucieux : changer l'ordre (commutativité) et grouper (associativité) pour faire 10, 100… */
+function astucieux(h: Hasard): QuestionCalcul {
+  const n = entre(3, 19, h)
+  const paires = [[25, 4], [4, 25], [2, 5], [5, 2], [50, 2], [20, 5]] as const
+  if (h() < .6) {
+    const [p, q] = un(paires, h)
+    return { question: 'Calcule de tête, en groupant astucieusement', sujet: `${p} × ${n} × ${q}`, bonne: String(p * q * n),
+      explication: `On change l’ordre et on groupe : (${p} × ${q}) × ${n} = ${p * q} × ${n} = ${p * q * n} (commutativité et associativité).` }
+  }
+  const a = entre(11, 89, h), b = entre(11, 89, h), c = 100 - a
+  return { question: 'Calcule de tête, en groupant astucieusement', sujet: `${a} + ${b} + ${c}`, bonne: String(100 + b),
+    explication: `On change l’ordre et on groupe : (${a} + ${c}) + ${b} = 100 + ${b} = ${100 + b} (commutativité et associativité).` }
+}
+/** La distributivité dans l'autre sens : 7 × 23 + 7 × 77 = 7 × (23 + 77) = 700. */
+function miseEnEvidence(h: Hasard): QuestionCalcul {
+  const a = entre(3, 9, h), total = un([10, 100, 100, 1000], h)
+  if (h() < .6) {
+    const b = entre(1, total - 1, h), c = total - b
+    return { question: 'Calcule de tête, avec la distributivité', sujet: `${fois(a, b)} + ${fois(a, c)}`, bonne: String(a * total),
+      explication: `${fois(a, b)} + ${fois(a, c)} = ${fois(a, `(${b} + ${c})`)} = ${fois(a, total)} = ${a * total}.` }
+  }
+  const c = entre(1, total - 1, h), b = total + c
+  return { question: 'Calcule de tête, avec la distributivité', sujet: `${fois(a, b)} − ${fois(a, c)}`, bonne: String(a * total),
+    explication: `${fois(a, b)} − ${fois(a, c)} = ${fois(a, `(${b} − ${c})`)} = ${fois(a, total)} = ${a * total}.` }
+}
+/** Le vocabulaire du cours : terme, somme, différence, facteur, produit, dividende, diviseur, quotient. */
+const PIEGES: Record<string, string[]> = {
+  'un terme': ['la somme', 'la différence', 'un facteur'], 'la somme': ['un terme', 'le produit', 'la différence'],
+  'la différence': ['un terme', 'la somme', 'le quotient'], 'un facteur': ['le produit', 'un terme', 'le diviseur'],
+  'le produit': ['un facteur', 'la somme', 'le quotient'], 'le dividende': ['le diviseur', 'le quotient', 'le produit'],
+  'le diviseur': ['le dividende', 'le quotient', 'un facteur'], 'le quotient': ['le dividende', 'le diviseur', 'le produit'],
+}
+function vocabulaire(h: Hasard): QuestionCalcul {
+  // des nombres tous différents, pour qu'on sache duquel on parle
+  const a = entre(6, 12, h), b = entre(2, 5, h), s = entre(20, 60, h), t = entre(3, 19, h)
+  const cas = un([
+    { e: `${s} + ${t} = ${s + t}`, n: s + t, bonne: 'la somme' },
+    { e: `${s} + ${t} = ${s + t}`, n: t, bonne: 'un terme' },
+    { e: `${s + t} − ${t} = ${s}`, n: s, bonne: 'la différence' },
+    { e: `${fois(a, b)} = ${a * b}`, n: a * b, bonne: 'le produit' },
+    { e: `${fois(a, b)} = ${a * b}`, n: b, bonne: 'un facteur' },
+    { e: `${a * b} : ${b} = ${a}`, n: a * b, bonne: 'le dividende' },
+    { e: `${a * b} : ${b} = ${a}`, n: b, bonne: 'le diviseur' },
+    { e: `${a * b} : ${b} = ${a}`, n: a, bonne: 'le quotient' },
+  ], h)
+  return { question: `Dans ce calcul, comment s’appelle le nombre ${cas.n} ?`, sujet: cas.e, bonne: cas.bonne,
+    options: melange([cas.bonne, ...PIEGES[cas.bonne]], h), explication: `Dans ${cas.e}, ${cas.n} est ${cas.bonne}.` }
+}
 export const CALCULS = [
   { id: 'priorite', fr: 'la priorité des opérations', faire: priorite },
   { id: 'parentheses', fr: 'les parenthèses', faire: parentheses },
@@ -169,6 +243,12 @@ export const CALCULS = [
   { id: 'coder', fr: 'coder une phrase', faire: (h: Hasard) => coder(h, false) },
   { id: 'decoder', fr: 'décoder une expression', faire: (h: Hasard) => coder(h, true) },
   { id: 'proprietes', fr: 'les propriétés des opérations', faire: proprietes },
+  // ajoutés ensuite : à la fin, pour garder la progression des cartes déjà là (leur clé est leur rang)
+  { id: 'gauche-droite', fr: 'calculer de gauche à droite', faire: gaucheDroite },
+  { id: 'exposants', fr: 'les exposants', faire: exposants },
+  { id: 'astucieux', fr: 'le calcul astucieux', faire: astucieux },
+  { id: 'mise-en-evidence', fr: 'la distributivité à l’envers', faire: miseEnEvidence },
+  { id: 'vocabulaire', fr: 'le vocabulaire des opérations', faire: vocabulaire },
 ] as const
 export const questionCalcul = (i: number, h: Hasard = Math.random) => CALCULS[i].faire(h)
 
