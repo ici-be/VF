@@ -210,6 +210,12 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .tableau .extra { color: var(--muted); font-size: .88rem; display: block; }
 .tableau .extra i { font-style: normal; font-weight: 700; color: var(--fg); }
 .ecouter { border: 0; background: none; padding: 0 4px; color: var(--blue); }
+.cellule-mot { display: flex; align-items: flex-start; gap: 4px; }
+.cellule-mot .terme { min-width: 0; }
+.cellule-mot .actions-mot { flex: none; display: inline-flex; align-items: center; white-space: nowrap; }
+.tableau .det-court { display: none; color: var(--mid); font-weight: 400; }
+/* aucun mot n'a d'article (matières en français, questions) : pas de colonne vide */
+.tableau.sans-det th:first-child, .tableau.sans-det td.det { display: none; }
 
 .vide { text-align: center; color: var(--muted); padding: 40px 16px; }
 
@@ -217,6 +223,13 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
   body { font-size: 16px; }
   .reprendre .go { width: 100%; justify-content: center; }
   .tableau td.nl { white-space: normal; }
+  /* téléphone : l'article devant le mot plutôt que dans sa colonne ; les mots longs se coupent */
+  .tableau th:first-child, .tableau td.det { display: none; }
+  .tableau .det-court { display: inline; }
+  .cellule-mot { justify-content: space-between; }
+  .tableau td.nl { width: 46%; }
+  .cellule-mot .terme { hyphens: auto; overflow-wrap: break-word; }
+  .tableau td { padding: 9px 10px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 

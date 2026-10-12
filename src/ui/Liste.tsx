@@ -210,7 +210,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       {vue === 'primitifs' ? null : mots.length === 0
         ? <p class="vide">{vue === 'revoir' && !q ? 'Rien de raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
         : (
-          <div class={`tableau ${enQuestions ? 'questions' : ''}`}>
+          <div class={`tableau ${enQuestions ? 'questions' : ''} ${mots.some(m => m.det) ? '' : 'sans-det'}`}>
             <table>
               <thead><tr><th></th>{enQuestions ? (toutFr ? <><th>Question</th><th>Réponse</th></> : <><th>Vraag</th><th>Antwoord</th></>) : toutFr ? <><th>Mot</th><th>Définition</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
@@ -220,10 +220,18 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                     <tr>
                       <td class="det">{l.det}</td>
                       <td class={`nl ${l.vraag ? 'vraag' : ''}`}>
-                        {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
-                        {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
-                        <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, langueDe(l))} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
-                        {l.getal === undefined && <BoutonSignaler classe="signaler-ligne" onClick={() => setASignaler(l)} />}
+                        {/* le terme à gauche (il passe à la ligne s'il le faut), écouter et signaler groupés à droite */}
+                        <div class="cellule-mot">
+                          <span class="terme" lang={langueDe(l)}>
+                            {l.det && <span class="det-court">{l.det} </span>}
+                            {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
+                            {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
+                          </span>
+                          <span class="actions-mot">
+                            <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, langueDe(l))} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
+                            {l.getal === undefined && <BoutonSignaler classe="signaler-ligne" onClick={() => setASignaler(l)} />}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         {l.fr}
