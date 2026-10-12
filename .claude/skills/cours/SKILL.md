@@ -177,6 +177,8 @@ Textes à trous, Défilement, Mots croisés ; pas de traduction ni de de/het). D
 - **Questions** : en français, comme un professeur les poserait (`Qu'est-ce qu'… ?`,
   `Pourquoi … ?`, `Cite trois …`), avec l'espace français avant `?` ; réponses avec les mots
   du cours ; leurres, énumérations et phrases à compléter `___` comme en néerlandais.
+- **Mathématiques** : la multiplication s'écrit toujours `×`, même si le cours écrit `·`
+  (`2 × 2 × 2`, `6 × n`) ; les exposants en exposant Unicode (`10³`, `2⁴`).
 - **Envoyer** :
 
 ```sh
