@@ -18,10 +18,12 @@ describe('voix', () => {
     expect(texteALire('46 v.Chr. en 622 n. Chr.')).toBe('46 voor Christus en 622 na Christus')
     expect(texteALire('vogels, vissen, enz. (bv. een merel)')).toBe('vogels, vissen, enzovoort')
     // un calcul, en français : opérateurs en mots, parenthèses gardées ; en néerlandais, rien ne change
+    expect(texteALire('//', 'fr')).toBe('parallèle à')
+    expect(texteALire('X ∉ AB]', 'fr')).toBe('X n’appartient pas à AB')
     expect(texteALire('28 + 12 : 4 + ((3 · 2 + 7) · 2) = 57', 'fr')).toBe('28 + 12 divisé par 4 + ((3 fois 2 + 7) fois 2) = 57')
     expect(texteALire('15 − 2 = 13', 'fr')).toBe('15 moins 2 = 13')
     expect(texteALire('trois (3)', 'fr')).toBe('trois')
-    expect(texteALire('5 ∈ ℕ', 'fr')).toBe('5 ∈ N')
+    expect(texteALire('5 ∈ ℕ', 'fr')).toBe('5 appartient à N')
     expect(texteALire('een breuk (1 : 200 000 000)', 'nl')).toBe('een breuk')
   })
 })

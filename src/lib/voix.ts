@@ -24,12 +24,15 @@ const ABREVIATIONS: [RegExp, string][] = [
 /** Le texte à lire : sans crochets ni précisions entre parenthèses, le trou d'une phrase à compléter lu comme une pause (identique à outils/voix.py). */
 /** Un calcul en français (« 7 · 18 = 126 », « 60 : 2 ») : ses parenthèses sont lues, ses opérateurs dits en mots. */
 const ENSEMBLES: Record<string, string> = { ℕ: 'N', ℤ: 'Z', ℚ: 'Q', ℝ: 'R' }
+/** Symboles de géométrie et d'ensembles, dits en mots en français (identique à SYMBOLES dans outils/voix.py). */
+const SYMBOLES: [string, string][] = [['//', ' parallèle à '], ['⊥', ' perpendiculaire à '], ['∉', ' n’appartient pas à '], ['∈', ' appartient à ']]
 const CALCUL = /\d\s*[+·×=−]\s*[\d(]|\d : \d/
 
 export function texteALire(t: string, langue: 'fr' | 'nl' = 'nl'): string {
   for (const [abr, mot] of ABREVIATIONS) t = t.replace(abr, mot)
   // les ensembles de nombres (ℕ, ℤ…) : lus comme leur lettre, la voix ne connaît pas le symbole
   t = t.normalize('NFC').replace(/[ℕℤℚℝ]/g, c => ENSEMBLES[c])
+  if (langue === 'fr') for (const [symbole, mots] of SYMBOLES) t = t.split(symbole).join(mots)
   t = langue === 'fr' && CALCUL.test(t)
     ? t.replace(/\s*[·×]\s*/g, ' fois ').replace(/(\d) : (?=[\d(])/g, '$1 divisé par ').replace(/\s*−\s*/g, ' moins ')
     : t.replace(/\([^)]*\)/g, ' ')

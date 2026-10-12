@@ -78,6 +78,8 @@ def nombre(v: str) -> str:
 
 # un calcul en français (« 7 · 18 = 126 », « 60 : 2 ») : ses parenthèses sont lues, ses opérateurs dits en mots
 ENSEMBLES = str.maketrans({'ℕ': 'N', 'ℤ': 'Z', 'ℚ': 'Q', 'ℝ': 'R'})
+# identique à SYMBOLES dans src/lib/voix.ts
+SYMBOLES = [('//', ' parallèle à '), ('⊥', ' perpendiculaire à '), ('∉', ' n’appartient pas à '), ('∈', ' appartient à ')]
 CALCUL = re.compile(r'\d\s*[+·×=−]\s*[\d(]|\d : \d')
 
 
@@ -87,6 +89,9 @@ def texte_a_lire(t: str, langue: str = 'nl') -> str:
         t = re.sub(abr, mot, t)
     t = unicodedata.normalize('NFC', t)
     t = t.translate(ENSEMBLES)   # ℕ, ℤ… : lus comme leur lettre
+    if langue == 'fr':           # symboles de géométrie et d'ensembles, dits en mots
+        for symbole, mots in SYMBOLES:
+            t = t.replace(symbole, mots)
     if langue == 'fr' and CALCUL.search(t):
         t = re.sub(r'\s*[·×]\s*', ' fois ', t)
         t = re.sub(r'(\d) : (?=[\d(])', r'\1 divisé par ', t)
