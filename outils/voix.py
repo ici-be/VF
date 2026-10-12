@@ -81,6 +81,13 @@ ENSEMBLES = str.maketrans({'ℕ': 'N', 'ℤ': 'Z', 'ℚ': 'Q', 'ℝ': 'R'})
 # identique à SYMBOLES dans src/lib/voix.ts
 SYMBOLES = [('//', ' parallèle à '), ('⊥', ' perpendiculaire à '), ('∉', ' n’appartient pas à '), ('∈', ' appartient à ')]
 CALCUL = re.compile(r'\d\s*[+·×=−]\s*[\d(]|\d : \d')
+# un exposant après un nombre (« 10³ », « 2⁴ ») : la voix l'ignore, il est dit en mots
+CHIFFRES_EXPOSANTS = str.maketrans('⁰¹²³⁴⁵⁶⁷⁸⁹', '0123456789')
+
+
+def exposant(m: re.Match) -> str:
+    e = m.group(1).translate(CHIFFRES_EXPOSANTS)
+    return {'2': ' au carré', '3': ' au cube'}.get(e, f' exposant {e}')
 
 
 def texte_a_lire(t: str, langue: str = 'nl') -> str:
@@ -92,6 +99,7 @@ def texte_a_lire(t: str, langue: str = 'nl') -> str:
     if langue == 'fr':           # symboles de géométrie et d'ensembles, dits en mots
         for symbole, mots in SYMBOLES:
             t = t.replace(symbole, mots)
+        t = re.sub(r'(?<=\d)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)', exposant, t)
     if langue == 'fr' and CALCUL.search(t):
         t = re.sub(r'\s*[·×]\s*', ' fois ', t)
         t = re.sub(r'(\d) : (?=[\d(])', r'\1 divisé par ', t)

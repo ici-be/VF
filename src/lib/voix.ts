@@ -27,12 +27,20 @@ const ENSEMBLES: Record<string, string> = { ℕ: 'N', ℤ: 'Z', ℚ: 'Q', ℝ: '
 /** Symboles de géométrie et d'ensembles, dits en mots en français (identique à SYMBOLES dans outils/voix.py). */
 const SYMBOLES: [string, string][] = [['//', ' parallèle à '], ['⊥', ' perpendiculaire à '], ['∉', ' n’appartient pas à '], ['∈', ' appartient à ']]
 const CALCUL = /\d\s*[+·×=−]\s*[\d(]|\d : \d/
+/** Un exposant après un nombre (« 10³ », « 2⁴ ») : la voix l'ignore, il est dit en mots (identique à exposant() dans outils/voix.py). */
+function exposant(_: string, e: string): string {
+  e = Array.from(e, c => String('⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c))).join('')
+  return e === '2' ? ' au carré' : e === '3' ? ' au cube' : ` exposant ${e}`
+}
 
 export function texteALire(t: string, langue: 'fr' | 'nl' = 'nl'): string {
   for (const [abr, mot] of ABREVIATIONS) t = t.replace(abr, mot)
   // les ensembles de nombres (ℕ, ℤ…) : lus comme leur lettre, la voix ne connaît pas le symbole
   t = t.normalize('NFC').replace(/[ℕℤℚℝ]/g, c => ENSEMBLES[c])
-  if (langue === 'fr') for (const [symbole, mots] of SYMBOLES) t = t.split(symbole).join(mots)
+  if (langue === 'fr') {
+    for (const [symbole, mots] of SYMBOLES) t = t.split(symbole).join(mots)
+    t = t.replace(/(?<=\d)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, exposant)
+  }
   t = langue === 'fr' && CALCUL.test(t)
     ? t.replace(/\s*[·×]\s*/g, ' fois ').replace(/(\d) : (?=[\d(])/g, '$1 divisé par ').replace(/\s*−\s*/g, ' moins ')
     : t.replace(/\([^)]*\)/g, ' ')
