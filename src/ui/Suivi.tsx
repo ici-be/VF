@@ -157,7 +157,7 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
               return (
                 <>
                   <tr class="ligne-matiere" onClick={() => setOuverte(ouvert ? null : mat.nom)}>
-                    <td><button class="lien" aria-expanded={ouvert}>{ouvert ? '▾' : '▸'} <NomMatiere nom={mat.nom} /></button></td>
+                    <td><button class="lien" aria-expanded={ouvert}><svg class="chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg> <NomMatiere nom={mat.nom} /></button></td>
                     <td><Barre b={b} /></td>
                     <Su b={b} />
                     <td class="nombre">{revoir || '–'}</td>
