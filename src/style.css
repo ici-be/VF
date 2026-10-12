@@ -788,8 +788,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .table-suivi td.nombre { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table-suivi .en-cours-nb { display: block; font-size: .75rem; color: var(--muted); }
 .table-suivi .ligne-matiere { cursor: pointer; }
-.table-suivi .ligne-matiere .lien { color: var(--fg); text-decoration: none; font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
-.table-suivi .chevron { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; margin-right: 4px; transition: transform .2s ease; }
+.table-suivi .ligne-matiere .lien { color: var(--fg); text-decoration: none; font: inherit; font-weight: 600; text-align: left; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.table-suivi .chevron { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; transition: transform .2s ease; }
 .table-suivi [aria-expanded="true"] .chevron { transform: rotate(90deg); }
 .table-suivi .ligne-matiere:hover td { background: var(--panel-2); }
 .table-suivi .ligne-chapitre td:first-child { padding-left: 26px; color: var(--muted); }

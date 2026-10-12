@@ -143,12 +143,12 @@ function coder(h: Hasard, decoder: boolean): QuestionCalcul {
   if (decoder) {
     const fausses = PHRASES_CODE.filter(x => x !== null).map(f => f(entre(2, 12, h), entre(2, 9, h)).fr)
     // les fausses traductions : l'expression lue avec un autre mot d'opération
-    const autres = [p.fr.replace('somme', 'produit').replace('différence', 'somme'), p.fr.replace('double', 'triple').replace('produit', 'quotient'), p.fr.replace('triple', 'double').replace('quotient', 'produit')]
+    const autres = [p.fr.replace(/\b(de )?la somme/, (_, de) => (de ? 'du produit' : 'le produit')).replace(/la différence entre (\d+) et/, 'la somme de $1 et de'), p.fr.replace('double', 'triple').replace('produit', 'quotient'), p.fr.replace('triple', 'double').replace('quotient', 'produit')]
       .filter(x => x !== p.fr)
     const options = [...new Set([p.fr, ...autres, ...fausses])].slice(0, 4)
-    return { question: 'Décode : comment dit-on cette expression en français ?', sujet: p.e, bonne: p.fr, options: melange(options, h), explication: `${p.e} se dit « ${p.fr} ».` }
+    return { question: 'Décode : comment dit-on cette expression en français\u00a0?', sujet: p.e, bonne: p.fr, options: melange(options, h), explication: `${p.e} se dit « ${p.fr} ».` }
   }
-  return { question: 'Code : quelle expression correspond à cette phrase ?', sujet: `« ${p.fr} »`, bonne: p.e, options: melange([...new Set([p.e, ...p.faux])], h), explication: `« ${p.fr} » se code ${p.e}.` }
+  return { question: 'Code : quelle expression correspond à cette phrase\u00a0?', sujet: `« ${p.fr} »`, bonne: p.e, options: melange([...new Set([p.e, ...p.faux])], h), explication: `« ${p.fr} » se code ${p.e}.` }
 }
 const PROPRIETES = ['la commutativité', 'l’associativité', 'l’élément neutre', 'l’élément absorbant', 'la distributivité'] as const
 function proprietes(h: Hasard): QuestionCalcul {
@@ -161,7 +161,7 @@ function proprietes(h: Hasard): QuestionCalcul {
     { e: `${a} × (${b} + ${c}) = ${fois(a, b)} + ${fois(a, c)}`, p: 4 },
   ] as const, h)
   const bonne = PROPRIETES[cas.p]
-  return { question: 'Quelle propriété est utilisée ?', sujet: cas.e, bonne, options: melange([bonne, ...melange(PROPRIETES.filter(x => x !== bonne), h).slice(0, 3)], h), explication: `${cas.e} : c’est ${bonne}.` }
+  return { question: 'Quelle propriété est utilisée\u00a0?', sujet: cas.e, bonne, options: melange([bonne, ...melange(PROPRIETES.filter(x => x !== bonne), h).slice(0, 3)], h), explication: `${cas.e} : c’est ${bonne}.` }
 }
 /** De gauche à droite : multiplications et divisions entre elles, additions et soustractions entre elles. */
 function gaucheDroite(h: Hasard): QuestionCalcul {
@@ -233,7 +233,7 @@ function vocabulaire(h: Hasard): QuestionCalcul {
     { e: `${a * b} : ${b} = ${a}`, n: b, bonne: 'le diviseur' },
     { e: `${a * b} : ${b} = ${a}`, n: a, bonne: 'le quotient' },
   ], h)
-  return { question: `Dans ce calcul, comment s’appelle le nombre ${cas.n} ?`, sujet: cas.e, bonne: cas.bonne,
+  return { question: `Dans ce calcul, comment s’appelle le nombre ${cas.n}\u00a0?`, sujet: cas.e, bonne: cas.bonne,
     options: melange([cas.bonne, ...PIEGES[cas.bonne]], h), explication: `Dans ${cas.e}, ${cas.n} est ${cas.bonne}.` }
 }
 export const CALCULS = [

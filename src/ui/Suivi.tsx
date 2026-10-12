@@ -145,7 +145,7 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
 
       <section class="bloc">
         <h2>Par matière</h2>
-        <p class="legende-suivi"><span class="pastille su" /> su (3 bonnes réponses d’affilée) <span class="pastille en-cours" /> en cours <span class="pastille jamais" /> jamais vu</p>
+        <p class="legende-suivi"><span><span class="pastille su" /> su (3 bonnes réponses d’affilée)</span> <span><span class="pastille en-cours" /> en cours</span> <span><span class="pastille jamais" /> jamais vu</span></p>
         <table class="table-suivi">
           <thead><tr><th>Matière</th><th>Où on en est</th><th>Su</th><th>À revoir</th></tr></thead>
           <tbody>
