@@ -45,6 +45,11 @@ function Barre({ b }: { b: ReturnType<typeof bilan> }) {
   )
 }
 
+/** La colonne « Su » : ce qui est su, et en dessous ce qui est en cours (pour que les premiers progrès se voient). */
+const Su = ({ b }: { b: ReturnType<typeof bilan> }) => (
+  <td class="nombre">{b.su}/{b.total}{b.enCours > 0 && <span class="en-cours-nb">{b.enCours} en cours</span>}</td>
+)
+
 const jourIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 /** Les 5 dernières semaines, du lundi au dimanche : une case par jour, plus foncée selon le nombre de réponses. */
@@ -154,7 +159,7 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
                   <tr class="ligne-matiere" onClick={() => setOuverte(ouvert ? null : mat.nom)}>
                     <td><button class="lien" aria-expanded={ouvert}>{ouvert ? '▾' : '▸'} <NomMatiere nom={mat.nom} /></button></td>
                     <td><Barre b={b} /></td>
-                    <td class="nombre">{b.su}/{b.total}</td>
+                    <Su b={b} />
                     <td class="nombre">{revoir || '–'}</td>
                   </tr>
                   {ouvert && mat.chapitres.map(ch => {
@@ -163,7 +168,7 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
                     const bc = bilan(it)
                     return (
                       <tr class="ligne-chapitre">
-                        <td>{nomChapitre(ch)}</td><td><Barre b={bc} /></td><td class="nombre">{bc.su}/{bc.total}</td><td class="nombre">{motsARevoir(it, 999).length || '–'}</td>
+                        <td>{nomChapitre(ch)}</td><td><Barre b={bc} /></td><Su b={bc} /><td class="nombre">{motsARevoir(it, 999).length || '–'}</td>
                       </tr>
                     )
                   })}
