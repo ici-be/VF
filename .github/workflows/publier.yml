@@ -28,7 +28,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install edge-tts
-      - run: python outils/voix.py
+      # si les voix ne peuvent pas être préparées (tableau ou edge-tts injoignable depuis GitHub),
+      # l'appli est quand même publiée avec les voix déjà là ; un avertissement le signale
+      - id: voix
+        run: python outils/voix.py
+        continue-on-error: true
+      - if: steps.voix.outcome == 'failure'
+        run: echo "::warning::Voix non préparées (tableau ou edge-tts injoignable) ; l'appli est publiée avec les voix déjà présentes."
       - id: commit
         name: Enregistrer les nouvelles voix
         run: |
