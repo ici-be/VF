@@ -788,6 +788,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .table-suivi td.nombre { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table-suivi .en-cours-nb { display: block; font-size: .75rem; color: var(--muted); }
 .table-suivi .ligne-matiere { cursor: pointer; }
+.table-suivi .ligne-matiere .lien { color: var(--fg); text-decoration: none; font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.table-suivi .ligne-matiere:hover td { background: var(--panel-2); }
 .table-suivi .ligne-chapitre td:first-child { padding-left: 26px; color: var(--muted); }
 .table-suivi td:nth-child(2) { width: 40%; }
 .barre-suivi { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); }
