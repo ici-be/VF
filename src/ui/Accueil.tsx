@@ -112,7 +112,9 @@ export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
   const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
-  return [ex.avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, uniteDe(ex))]
+  // le sens (NL → FR…) seulement si une matière en néerlandais est choisie : pas en maths, en français, en religion
+  const avecSens = ex.avecSens && r.matieres.some(m => langueMatiere(m) === 'nl')
+  return [avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, uniteDe(ex))]
     .filter(Boolean).join(' · ')
 }
 
