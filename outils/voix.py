@@ -81,6 +81,8 @@ ENSEMBLES = str.maketrans({'ℕ': 'N', 'ℤ': 'Z', 'ℚ': 'Q', 'ℝ': 'R'})
 # identique à SYMBOLES dans src/lib/voix.ts
 SYMBOLES = [('//', ' parallèle à '), ('⊥', ' perpendiculaire à '), ('∉', ' n’appartient pas à '), ('∈', ' appartient à ')]
 CALCUL = re.compile(r'\d\s*[+·×=−]\s*[\d(]|\d : \d')
+# mots que la voix française prononce mal, écrits comme ils se disent (identique à PRONONCIATIONS dans src/lib/voix.ts)
+PRONONCIATIONS = [(r'\bjeûner\b', 'jeuner')]
 # un exposant après un nombre (« 10³ », « 2⁴ ») : la voix l'ignore, il est dit en mots
 CHIFFRES_EXPOSANTS = str.maketrans('⁰¹²³⁴⁵⁶⁷⁸⁹', '0123456789')
 
@@ -100,6 +102,8 @@ def texte_a_lire(t: str, langue: str = 'nl') -> str:
         for symbole, mots in SYMBOLES:
             t = t.replace(symbole, mots)
         t = re.sub(r'(?<=\d)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)', exposant, t)
+        for mot, graphie in PRONONCIATIONS:
+            t = re.sub(mot, graphie, t)
     if langue == 'fr' and CALCUL.search(t):
         t = re.sub(r'\s*[·×]\s*', ' fois ', t)
         t = re.sub(r'(\d) : (?=[\d(])', r'\1 divisé par ', t)

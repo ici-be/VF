@@ -30,5 +30,7 @@ describe('voix', () => {
     expect(texteALire('1 000 000 m = 10⁶ m', 'fr')).toBe('1 000 000 m = 10 exposant 6 m')
     expect(texteALire('10¹²', 'fr')).toBe('10 exposant 12')
     expect(texteALire('per km²', 'nl')).toBe('per km²')
+    expect(texteALire('jeûner', 'fr')).toBe('jeuner')
+    expect(texteALire('le jeûne', 'fr')).toBe('le jeûne')
   })
 })

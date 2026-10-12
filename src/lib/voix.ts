@@ -27,6 +27,8 @@ const ENSEMBLES: Record<string, string> = { ℕ: 'N', ℤ: 'Z', ℚ: 'Q', ℝ: '
 /** Symboles de géométrie et d'ensembles, dits en mots en français (identique à SYMBOLES dans outils/voix.py). */
 const SYMBOLES: [string, string][] = [['//', ' parallèle à '], ['⊥', ' perpendiculaire à '], ['∉', ' n’appartient pas à '], ['∈', ' appartient à ']]
 const CALCUL = /\d\s*[+·×=−]\s*[\d(]|\d : \d/
+/** Mots que la voix française prononce mal, écrits comme ils se disent (identique à PRONONCIATIONS dans outils/voix.py). */
+const PRONONCIATIONS: [RegExp, string][] = [[/\bjeûner\b/g, 'jeuner']]
 /** Un exposant après un nombre (« 10³ », « 2⁴ ») : la voix l'ignore, il est dit en mots (identique à exposant() dans outils/voix.py). */
 function exposant(_: string, e: string): string {
   e = Array.from(e, c => String('⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c))).join('')
@@ -40,6 +42,7 @@ export function texteALire(t: string, langue: 'fr' | 'nl' = 'nl'): string {
   if (langue === 'fr') {
     for (const [symbole, mots] of SYMBOLES) t = t.split(symbole).join(mots)
     t = t.replace(/(?<=\d)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, exposant)
+    for (const [mot, graphie] of PRONONCIATIONS) t = t.replace(mot, graphie)
   }
   t = langue === 'fr' && CALCUL.test(t)
     ? t.replace(/\s*[·×]\s*/g, ' fois ').replace(/(\d) : (?=[\d(])/g, '$1 divisé par ').replace(/\s*−\s*/g, ' moins ')
