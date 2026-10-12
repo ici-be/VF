@@ -780,7 +780,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .legende-suivi { margin: 0; color: var(--muted); font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
 .pastille { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
 .pastille.su, .barre-suivi .su { background: var(--ok); }
-.pastille.en-cours, .barre-suivi .en-cours { background: var(--mid); }
+/* en cours : hachuré du vert du « su », sur un fond vert pâle */
+.pastille.en-cours, .barre-suivi .en-cours {
+  background: repeating-linear-gradient(-45deg, var(--ok) 0 2px, transparent 2px 5px), color-mix(in srgb, var(--ok) 18%, transparent);
+}
 .pastille.jamais { background: var(--panel-2); border: 1px solid var(--line); }
 .table-suivi { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .table-suivi th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 4px 6px; }
