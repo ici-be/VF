@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Mot, Vocabulaire } from '../src/lib/mots'
-import { appliquerLien, aReviser, bornesPages, chapitreSeul, cleChapitre, lienReglages, motsChoisis, questionsChoisies, reglagesDuLien, type Reglages } from '../src/lib/reglages'
+import { appliquerLien, aReviser, bornesPages, chapitreSeul, cleChapitre, lienReglages, motsChoisis, questionsChoisies, reglagesDuLien, type ExerciceId, type Reglages } from '../src/lib/reglages'
 
 const mot = (nl: string, chapitre: string, vraag = false): Mot => ({
   id: nl, matiere: 'Aard', chapitre, nl, det: '', fr: nl, definition: '', exemple: '', remarque: '',
@@ -32,6 +32,19 @@ describe('exercices de Nederlands', () => {
     const choix = r({ matieres: ['Nederlands'], chapitres: [cleChapitre('Nederlands', '1')] })
     expect(aReviser(ned, { ...choix, exercice: 'conjugaison' }).map(m => m.nl)).toEqual(['zijn'])
     expect(aReviser(ned, { ...choix, exercice: 'qcm' }).map(m => m.nl)).toEqual(['klinker'])
+  })
+})
+
+describe('exercices fabriqués', () => {
+  it('seulement si leur chapitre est coché (ou aucun)', () => {
+    const calc = (k: string): Mot => ({ ...mot(k, 'Calcul mental (entraînement)'), genere: 'calcul' })
+    const maths: Vocabulaire = { matieres: [{ nom: 'Mathématiques', chapitres: ['1. Calcul mental', 'Calcul mental (entraînement)'], mots: [mot('somme', '1. Calcul mental'), calc('0'), calc('1')] }], misAJour: 0 }
+    const avec = (chapitres: string[], exercice: ExerciceId) => aReviser(maths, { ...r({ matieres: ['Mathématiques'], chapitres: chapitres.map(c => cleChapitre('Mathématiques', c)) }), exercice }).length
+    expect(avec([], 'calcul')).toBe(2)
+    expect(avec(['Calcul mental (entraînement)'], 'calcul')).toBe(2)
+    expect(avec(['1. Calcul mental'], 'calcul')).toBe(0)
+    expect(avec(['1. Calcul mental'], 'qcm')).toBe(1)
+    expect(avec(['Calcul mental (entraînement)'], 'qcm')).toBe(0)
   })
 })
 

@@ -202,21 +202,22 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
     setTimeout(lancer, 600)
   }
 
-  // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
-  // une matière où l'exercice choisi n'a rien (Religion et ses seules questions, Français et le QCM) :
-  // on passe au premier exercice qui y trouve de quoi réviser
-  const avecMatieres = (matieres: string[]) => {
-    const r2 = { ...r, matieres }
-    if (aReviser(voc, r2).length > 0) return maj({ matieres })
-    const ex2 = EXERCICES.find(e => !e.jeu && aReviser(voc, r2, e).length > 0)
-    maj(ex2 ? { matieres, exercice: ex2.id } : { matieres })
+  // un nouveau choix de matières ou de chapitres où l'exercice choisi n'a rien (Religion et ses seules questions,
+  // Français et le QCM, le chapitre « Calcul mental (entraînement) » et le QCM, « 1. Calcul mental » et le calcul mental) :
+  // on passe au QCM s'il trouve de quoi réviser, sinon au premier exercice qui en trouve
+  const avecChoix = (p: Partial<Reglages>) => {
+    const r2 = { ...r, ...p }
+    if (aReviser(voc, r2).length > 0) return maj(p)
+    const ex2 = [exercice('qcm'), ...EXERCICES].find(e => !e.jeu && aReviser(voc, r2, e).length > 0)
+    maj(ex2 ? { ...p, exercice: ex2.id } : p)
   }
-  const choisirMatiere = (nom: string) => avecMatieres([nom])
-  const ajouterMatiere = (nom: string) => avecMatieres([...r.matieres, nom])
-  const retirerMatiere = (nom: string) => { if (r.matieres.length > 1) maj({ matieres: r.matieres.filter(m => m !== nom) }) }
+  // un clic choisit cette matière seule ; « + » l'ajoute aux autres, « − » la retire
+  const choisirMatiere = (nom: string) => avecChoix({ matieres: [nom] })
+  const ajouterMatiere = (nom: string) => avecChoix({ matieres: [...r.matieres, nom] })
+  const retirerMatiere = (nom: string) => { if (r.matieres.length > 1) avecChoix({ matieres: r.matieres.filter(m => m !== nom) }) }
   const basculerChapitre = (cle: string) =>
-    maj({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
-  const tousChapitres = (matiere: string) => maj({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
+    avecChoix({ chapitres: r.chapitres.includes(cle) ? r.chapitres.filter(c => c !== cle) : [...r.chapitres, cle] })
+  const tousChapitres = (matiere: string) => avecChoix({ chapitres: r.chapitres.filter(c => !c.startsWith(matiere + SEP)) })
   // un seul chapitre choisi : on peut n'en garder que quelques pages (la prochaine interro)
   const seul = chapitreSeul(voc, r)
   const bornes = seul && bornesPages(voc, seul.matiere, seul.chapitre)
