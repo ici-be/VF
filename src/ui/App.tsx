@@ -6,6 +6,7 @@ import { surveillerEnvois } from '../lib/signalements'
 import { estUnTransfert, importerTransfert } from '../lib/transfert'
 import { aReviserAujourdhui } from '../lib/revision'
 import { Suivi } from './Suivi'
+import { NavBas, type Page } from './Navigation'
 import { aReviser, chargerReglages, enregistrerReglages, reglagesDuLien, type Reglages } from '../lib/reglages'
 import { construireSerie, type Carte } from '../lib/seance'
 import { Accueil } from './Accueil'
@@ -194,6 +195,17 @@ export function App() {
       )
   }
   })()
-  return <>{annonce && <div class="annonce-app" role="status"><span>{annonce}</span><button class="icone" onClick={() => setAnnonce(null)} aria-label="Fermer">✕</button></div>}{vue}</>
+  // la barre d'onglets du téléphone : sur l'accueil, la liste des mots et le suivi (pas pendant un exercice)
+  const page: Page | null = ecran.nom === 'accueil' ? 'accueil' : ecran.nom === 'suivi' ? 'suivi'
+    : ecran.nom === 'liste' ? (ecran.vue === 'nouveaux' ? 'nouveaux' : 'mots') : null
+  const aller = {
+    accueil: () => setEcran({ nom: 'accueil' }), reviser: reviserAujourdhui, suivi: () => setEcran({ nom: 'suivi' }),
+    nouveaux: () => setEcran({ nom: 'liste', vue: 'nouveaux' }), mots: () => setEcran({ nom: 'liste', vue: 'tous' }),
+  }
+  return <>
+    {annonce && <div class="annonce-app" role="status"><span>{annonce}</span><button class="icone" onClick={() => setAnnonce(null)} aria-label="Fermer">✕</button></div>}
+    {vue}
+    {page && <NavBas voc={voc} aller={aller} nbDuJour={nbDuJour} page={page} />}
+  </>
 }
 

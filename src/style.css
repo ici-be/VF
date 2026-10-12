@@ -764,6 +764,29 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .bandeau-recompense b { color: var(--mid); }
 .entete .go.jour { padding: 8px 14px; font-size: .95rem; }
 
+/* ---------- la navigation : liens légers dans l'en-tête (ordinateur), onglets en bas (téléphone) ---------- */
+.nav-haut { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.lien-nav { border: 0; background: transparent; color: var(--fg); height: 44px; padding: 0 12px; border-radius: 10px; display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
+.lien-nav:hover { background: var(--panel-2); }
+.lien-nav .n { background: var(--blue-bg); color: var(--blue); font-size: .8rem; border-radius: 999px; padding: 0 7px; }
+.nav-haut .go.jour { margin-left: 8px; border-radius: 999px; height: 46px; padding: 0 16px; gap: 8px; }
+.nav-bas, .espace-nav-bas { display: none; }
+@media (max-width: 699px) {
+  .nav-haut { display: none; }
+  .espace-nav-bas { display: block; height: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .nav-bas { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    background: var(--panel); border-top: 1px solid var(--line); padding: 4px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .nav-bas button { position: relative; border: 0; background: transparent; color: var(--muted); min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font: 700 .72rem var(--body); }
+  .nav-bas button[aria-current="page"] { color: var(--fg); }
+  .nav-bas button[aria-current="page"]::before { content: ''; position: absolute; top: -4px; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+  .nav-bas button.reviser:not(:disabled) { color: var(--accent); }
+  .nav-bas button:disabled { opacity: .45; }
+  .nav-bas .ic { position: relative; display: grid; }
+  .nav-bas .badge { position: absolute; top: -6px; left: 14px; min-width: 10px; text-align: center; background: var(--accent); color: var(--accent-fg); font-size: .66rem; line-height: 1.35; border-radius: 999px; padding: 0 5px; border: 2px solid var(--panel); }
+  .nav-bas .badge.bleu { background: var(--blue); color: var(--blue-fg); }
+}
+@media print { .nav-bas, .espace-nav-bas { display: none !important; } }
+
 /* ---------- la page de suivi ---------- */
 .suivi .bloc { display: flex; flex-direction: column; gap: 10px; }
 .regularite { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }

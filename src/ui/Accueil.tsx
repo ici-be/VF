@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { contenu, derniersAjouts, type Vocabulaire } from '../lib/mots'
+import { contenu, type Vocabulaire } from '../lib/mots'
+import { NavHaut } from './Navigation'
 import {
-  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, questionsChoisies, SEP,
+  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, SEP,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence, langueMatiere } from '../lib/apparence'
-import { motsARevoir, noteSur20, recordDeJours, RECOMPENSES } from '../lib/progression'
+import { noteSur20, recordDeJours, RECOMPENSES } from '../lib/progression'
 import { lire, ecrire } from '../lib/stockage'
 import { confettis } from '../lib/confettis'
 import { SURPRISES, interrompre, surprendre } from '../lib/surprises'
@@ -180,10 +181,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       if (svg && surprise) { interrompre(svg); surprendre(svg, surprise) }
     }, 1200)
   }, [])
-  const nbARevoir = motsARevoir([...choisis, ...questionsChoisies(voc, r)]).length
-  // le dernier envoi /cours reste signalé deux semaines sur l'accueil
-  const nouveaux = derniersAjouts(voc)
-  const nouveauxRecents = nouveaux.mots.length > 0 && Date.now() - new Date(nouveaux.date + 'T00:00').getTime() < 14 * 86_400_000
 
   // la mascotte d'une matière qu'on vient de choisir reçoit le flambeau : petit saut dans son médaillon
   const avant = useRef(r.matieres)
@@ -329,12 +326,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <h1>Woord<span class="nl">jes</span></h1>
           <MotExemple mots={choisis} />
         </div>
-        {nbDuJour > 0 && <button class="go jour" onClick={reviserAujourdhui} title="Une séance courte, toutes matières : ce qui est à revoir aujourd’hui et les erreurs récentes">Réviser aujourd’hui ({nbDuJour})</button>}
-        {nbARevoir > 0 && <button class="second revoir" onClick={() => liste('revoir')}>À revoir ({nbARevoir})</button>}
-        {nouveauxRecents && <button class="second" onClick={() => liste('nouveaux')}>Nouveaux ({nouveaux.mots.length})</button>}
-        {questionsChoisies(voc, r).length > 0 && <button class="second" onClick={() => liste('interro')} title="Imprimer les questions de cours, avec la place pour répondre et les réponses à part">Interro</button>}
-        <button class="second" onClick={() => liste('tous')}>Liste des mots</button>
-        <button class="second" onClick={suivi} title="Régularité, récompenses, ce qui est su, erreurs qui reviennent, changer d’appareil">Suivi</button>
+        <NavHaut voc={voc} nbDuJour={nbDuJour} aller={{ accueil: () => {}, reviser: reviserAujourdhui, nouveaux: () => liste('nouveaux'), mots: () => liste('tous'), suivi }} />
       </header>
       <p class={`etat ${chargement.etat === 'hors-ligne' ? 'erreur' : ''}`} role="status">
         {chargement.etat === 'chargement' && 'Mise à jour des mots…'}
