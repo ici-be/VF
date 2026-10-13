@@ -544,7 +544,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 @media (max-width: 999px) {
   .page.accueil .reprendre { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 20;
     box-shadow: 0 -12px 0 2px var(--bg), var(--shadow), 0 6px 14px -6px rgb(0 0 0 / 18%); }
-  /* pour qu'il prenne moins de place : pas de description de l'exercice (elle reste sous les tuiles) ; l'alerte « Rien à réviser » reste */
+  /* pour qu'il prenne moins de place : pas de description de l'exercice ; l'alerte « Rien à réviser » reste */
   .reprendre .description-exercice:not(.alerte) { display: none; }
 }
 /* la mascotte du bloc « Commencer », un peu plus grande que celles du menu, et de l'air sous le bloc */
