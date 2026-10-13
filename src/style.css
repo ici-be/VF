@@ -821,6 +821,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   background: var(--mid-bg); color: var(--fg); border: 1.5px solid var(--mid); }
 .bandeau-recompense b { color: var(--mid); }
 .entete .go.jour { padding: 8px 14px; font-size: .95rem; }
+/* le son, tout à droite de l'en-tête de l'accueil (comme dans la barre d'un exercice) */
+.entete .son-accueil { flex: none; width: 48px; height: 48px; padding: 0; border-radius: 999px; border-width: 1px; color: var(--encre-douce); }
+.entete .son-accueil[aria-pressed="false"] { color: var(--muted); }
+@media (max-width: 560px) { .entete .son-accueil { width: 42px; height: 42px; } }
 
 /* ---------- la navigation : liens légers dans l'en-tête (ordinateur), onglets en bas (téléphone) ---------- */
 .nav-haut { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { contenu, type Vocabulaire } from '../lib/mots'
 import { NavHaut } from './Navigation'
 import {
-  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, SEP,
+  EXERCICES, aReviser, bornesPages, chapitreSeul, cleChapitre, exercice, lienReglages, motsChoisis, SEP, tailleSerie,
   type ExerciceId, type Ordre, type Reglages, type Sens,
 } from '../lib/reglages'
 import type { Chargement } from './App'
@@ -15,7 +15,7 @@ import type { Vue } from './Liste'
 import { nombre } from '../lib/texte'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
-import { ArrowRight, Check, CloudOff, Link } from 'lucide-preact'
+import { ArrowRight, Check, CloudOff, Link, Volume2, VolumeX } from 'lucide-preact'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
@@ -112,7 +112,7 @@ const uniteDe = (ex: ReturnType<typeof exercice>) => ex.unite ?? (ex.surQuestion
 export function resume(voc: Vocabulaire, r: Reglages): string {
   const ex = exercice(r.exercice)
   const dispo = aReviser(voc, r, ex).length
-  const n = r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
+  const n = tailleSerie(ex, r, dispo)
   // le sens (NL → FR…) seulement si une matière en néerlandais est choisie : pas en maths, en français, en religion
   const avecSens = ex.avecSens && r.matieres.some(m => langueMatiere(m) === 'nl')
   return [avecSens ? nomSens(r.sens, ex.id) : '', nombre(n, uniteDe(ex))]
@@ -266,7 +266,8 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <div class="reglage">
             <span class="lbl">Combien</span>
             <div class="segment" role="group" aria-label={`Combien de ${unite}s ?`}>
-              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? nombre(n, unite) : `Tous les ${unite}s`}>{n ? nombre(n, unite) : 'Tous'}</button>)}
+              {/* un exercice fabriqué invente ses questions : pas de « Tous » (20 par défaut) */}
+              {NOMBRES.filter(n => n > 0 || !ex.pourMatiere).map(n => <button aria-pressed={r.nombre === n || (!r.nombre && !!ex.pourMatiere && n === 20)} onClick={() => maj({ nombre: n })} title={n ? nombre(n, unite) : `Tous les ${unite}s`}>{n ? nombre(n, unite) : 'Tous'}</button>)}
             </div>
           </div>
           <div class="reglage">
@@ -328,6 +329,11 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <MotExemple mots={choisis} />
         </div>
         <NavHaut voc={voc} nbDuJour={nbDuJour} aller={{ accueil: () => {}, reviser: reviserAujourdhui, nouveaux: () => liste('nouveaux'), mots: () => liste('tous'), suivi }} />
+        {/* le son des exercices, à couper ou remettre avant de commencer (le même bouton qu'en exercice) */}
+        <button class="icone son-accueil" onClick={() => maj({ voix: !r.voix })} aria-pressed={r.voix}
+          title={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'} aria-label={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'}>
+          {r.voix ? <Volume2 size={20} strokeWidth={2.2} /> : <VolumeX size={20} strokeWidth={2.2} />}
+        </button>
       </header>
       {/* la mise à jour des mots ne se voit que si elle traîne (fin trait en haut) ou échoue (pastille) ; la date est dans Suivi */}
       {chargement.etat === 'chargement' && <div class="chargement-mots" role="status" aria-label="Mise à jour des mots" />}

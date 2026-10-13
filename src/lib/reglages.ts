@@ -74,6 +74,11 @@ for (const e of EXERCICES) {
 
 export const exercice = (id: ExerciceId) => EXERCICES.find(e => e.id === id) ?? EXERCICES[0]
 
+/** Le nombre de cartes de la série, quand l'exercice a `dispo` mots à réviser. Un exercice fabriqué (calcul mental…)
+ *  invente ses questions : autant qu'on en demande (pas de « Tous » : 20 par défaut). */
+export const tailleSerie = (ex: Exercice, r: Pick<Reglages, 'nombre'>, dispo: number) =>
+  !dispo ? 0 : ex.pourMatiere ? r.nombre || 20 : r.nombre > 0 ? Math.min(r.nombre, dispo) : dispo
+
 export interface Reglages {
   matieres: string[]
   /** `${matière}␟${chapitre}` de toutes les matières, même non choisies (mémoire) ; aucun pour une matière = tous ses chapitres */

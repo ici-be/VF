@@ -5,7 +5,7 @@ import { ArrowLeft, Volume2, VolumeX } from 'lucide-preact'
 import { BoutonSignaler, FenetreSignalement } from './Signaler'
 import { langueDe } from '../lib/apparence'
 import { IconeExercice } from './icones'
-import { question, reponse, type Carte } from '../lib/seance'
+import { cleCarte, question, reponse, type Carte } from '../lib/seance'
 import type { Resultat } from '../lib/correction'
 import { noter } from '../lib/progression'
 import { precharger, taire } from '../lib/voix'
@@ -96,7 +96,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
   // les cartes qui restaient dans la série ne comptent pas
   const arreter = () => {
     const carte = file[i]
-    if (carte && ex.id !== 'defilement' && !carte.reprise && !resultats.has(carte.mot.id)) noter(carte.mot.id, annonce.current ?? 'faux')
+    if (carte && ex.id !== 'defilement' && !carte.reprise && !resultats.has(cleCarte(carte))) noter(carte.mot.id, annonce.current ?? 'faux')
     quitter()
   }
   // l'exercice de la carte (la révision du jour en mélange plusieurs), sinon celui des réglages
@@ -142,7 +142,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
     if (r && !revisite()) {
       if (!annonce.current) compter(r)
       // la première réponse compte pour le score et la progression
-      if (!carte.reprise && !res.has(carte.mot.id)) { res.set(carte.mot.id, r); noter(carte.mot.id, r) }
+      if (!carte.reprise && !res.has(cleCarte(carte))) { res.set(cleCarte(carte), r); noter(carte.mot.id, r) }
       // un mot raté revient une fois en fin de série
       if (r === 'faux' && !carte.reprise) nouvelleFile = [...file, { ...carte, reprise: true }]
     }
@@ -157,7 +157,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
       juste: valeurs.filter(v => v === 'juste').length,
       presque: valeurs.filter(v => v === 'presque').length,
       faux: valeurs.filter(v => v === 'faux').length,
-      aRevoir: serie.filter(c => res.get(c.mot.id) && res.get(c.mot.id) !== 'juste').map(c => c.mot),
+      aRevoir: serie.filter(c => res.get(cleCarte(c)) && res.get(cleCarte(c)) !== 'juste').map(c => c.mot),
       notee: r !== null,
       meilleurCombo: meilleurCombo.current,
     })
@@ -208,7 +208,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'natures' && <Natures key={i} {...props} />}
       </main>
       {aSignaler && carte && (
-        <FenetreSignalement mot={carte.mot} exercice={ex.nom} resultat={resultats.get(carte.mot.id) ?? annonce.current ?? undefined} fermer={() => setASignaler(false)} />
+        <FenetreSignalement mot={carte.mot} exercice={ex.nom} resultat={resultats.get(cleCarte(carte)) ?? annonce.current ?? undefined} fermer={() => setASignaler(false)} />
       )}
       {pause && (
         // un bandeau, pas un voile : la page reste lisible (le temps de lire une définition…)
@@ -230,7 +230,7 @@ function vocalesConjugaison(inf: string, temps: Reglages['temps']) {
 }
 
 /**
- * Le son de l'appli, à droite de la pause : un clic le coupe ou le remet (comme la case « Lire les mots à voix haute »).
+ * Le son de l'appli, à droite de la pause : un clic le coupe ou le remet (comme le bouton du son de l'accueil).
  * Un exercice sans voix (Eeuwen, Calcul mental…) le dit discrètement ; la dictée et l'oral gardent toujours la voix.
  */
 function BoutonSon({ ex, reglages, setReglages }: { ex: ReturnType<typeof exercice>; reglages: Reglages; setReglages: (r: Reglages) => void }) {

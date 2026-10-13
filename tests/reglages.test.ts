@@ -98,3 +98,18 @@ describe('permalien', () => {
     expect(apres.pages).toEqual({ [aard]: [1, 3], [bio]: [5, 12] })
   })
 })
+
+import { cleCarte, construireSerie } from '../src/lib/seance'
+describe('série d’un exercice fabriqué', () => {
+  const calc = (k: string): Mot => ({ ...mot(k, 'Calcul mental (entraînement)'), id: `Maths|Calcul|${k}`, genere: 'calcul' })
+  const notions = Array.from({ length: 11 }, (_, i) => calc(String(i)))
+  const serie = (nombre: number) => construireSerie(notions, r({ exercice: 'calcul', nombre, ordre: 'hasard' }))
+  it('autant de questions que demandé : les notions reviennent', () => {
+    expect(serie(20)).toHaveLength(20)
+    expect(serie(10)).toHaveLength(10)
+    expect(serie(0)).toHaveLength(20)                               // pas de « Tous » : 20
+    const s = serie(30)
+    expect(new Set(s.map(cleCarte)).size).toBe(30)                // chaque carte compte à part dans le score
+    expect(new Set(s.map(c => c.mot.id)).size).toBe(11)           // toutes les notions y passent
+  })
+})

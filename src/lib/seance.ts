@@ -1,6 +1,6 @@
 // Une série d'exercices : quels mots, dans quel ordre, dans quel sens.
 import type { Mot } from './mots'
-import { exercice, type ExerciceId, type Reglages } from './reglages'
+import { exercice, tailleSerie, type ExerciceId, type Reglages } from './reglages'
 import { fragilite } from './progression'
 import { simplifier } from './correction'
 import { langueDe } from './apparence'
@@ -12,7 +12,12 @@ export interface Carte {
   reprise?: boolean
   /** l'exercice de cette carte, s'il n'est pas celui des réglages (révision du jour) */
   exercice?: ExerciceId
+  /** exercice fabriqué : la même notion revient (un nouveau calcul à chaque fois) ; 1, 2… à partir de son 2e passage */
+  tirage?: number
 }
+
+/** Ce qui distingue une carte dans la série (le score) : le mot, et son passage pour une notion qui revient. */
+export const cleCarte = (c: Carte) => (c.tirage ? `${c.mot.id}#${c.tirage}` : c.mot.id)
 
 export function melanger<T>(t: T[], hasard = Math.random): T[] {
   const r = [...t]
@@ -32,11 +37,21 @@ export function construireSerie(mots: Mot[], r: Reglages, hasard = Math.random):
     const f = new Map(choisis.map(m => [m.id, fragilite(m.id)]))
     choisis = melanger(choisis, hasard).sort((a, b) => f.get(a.id)! - f.get(b.id)!)
   }
-  if (r.nombre > 0) choisis = choisis.slice(0, r.nombre)
+  let tirages = choisis.map(mot => ({ mot, tirage: 0 }))
+  if (ex.pourMatiere && choisis.length) {
+    // exercice fabriqué : une question nouvelle à chaque carte, ses notions reviennent jusqu'au nombre demandé
+    const n = tailleSerie(ex, r, choisis.length)
+    while (tirages.length < n) {
+      const tour = Math.floor(tirages.length / choisis.length)
+      tirages.push(...melanger(choisis, hasard).map(mot => ({ mot, tirage: tour })))
+    }
+    tirages = melanger(tirages.slice(0, n), hasard)
+  } else if (r.nombre > 0) tirages = tirages.slice(0, r.nombre)
   // l'ordre « fragiles » sert à choisir les mots ; on les mélange ensuite pour la série
-  if (r.ordre === 'fragiles') choisis = melanger(choisis, hasard)
-  return choisis.map(mot => ({
+  if (r.ordre === 'fragiles' && !ex.pourMatiere) tirages = melanger(tirages, hasard)
+  return tirages.map(({ mot, tirage }) => ({
     mot,
+    ...(tirage > 0 && { tirage }),
     // une matière en français : toujours le mot, puis sa définition (pas de sens NL ↔ FR)
     sens: langueDe(mot) === 'fr' ? 'nl-fr' : r.sens === 'mix' ? (hasard() < 0.5 ? 'fr-nl' : 'nl-fr') : r.sens,
   }))
