@@ -791,6 +791,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 
 /* toucher la mascotte du bloc « Commencer » : une surprise */
 .reprendre .acteur { cursor: pointer; }
+/* au doigt (téléphone) : ni surbrillance bleue au toucher, ni sélection, ni menu de l'image sur appui long */
+.acteur, .medaillon, svg.mascotte { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .scene-mini .acteur { pointer-events: auto; }
 
 /* exercices fabriqués : le mot dont on cherche la nature, l'explication après la réponse */
