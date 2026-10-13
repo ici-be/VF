@@ -46,6 +46,8 @@ body { background: var(--bg); color: var(--fg); font: 17px/1.5 var(--body); -web
 #app { min-height: 100%; display: flex; flex-direction: column; }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
+/* au doigt (téléphone) : un appui un peu long sur un bouton (matière, exercice…) ne le sélectionne pas en bleu */
+button { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 [hidden] { display: none !important; }
 
