@@ -33,3 +33,33 @@ describe('mots à revoir', () => {
     expect(motsARevoir(mots, 30, t0 + 31 * JOUR)).toHaveLength(0)
   })
 })
+
+import { appliquerRates } from '../src/lib/progression'
+describe('erreurs des interros en classe', () => {
+  beforeEach(() => {
+    _reinitialiser()
+    const m = new Map<string, string>()
+    globalThis.localStorage = { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) } as Storage
+  })
+  const rate = (nl: string, date: string): Mot => ({ ...mot(nl), rate: { interro: 'Toets 5', reponse: '', date } })
+  const jour = (d: string) => new Date(d + 'T12:00').getTime()
+  it('comptent comme une réponse fausse le jour de l’interro, une seule fois', () => {
+    const mots = [rate('eeuw', '2026-10-05'), mot('jaar')]
+    expect(appliquerRates(mots)).toBe(1)
+    expect(suivi('eeuw')).toMatchObject({ boite: 0, rates: 1, dernierRate: jour('2026-10-05') })
+    expect(appliquerRates(mots)).toBe(0)
+    expect(suivi('eeuw')!.rates).toBe(1)
+    expect(motsARevoir(mots, 30, jour('2026-10-11')).map(x => x.mot.nl)).toEqual(['eeuw'])
+  })
+  it('ce que l’élève a réussi depuis l’interro garde la main', () => {
+    for (let i = 0; i < 4; i++) noter('eeuw', 'juste', jour('2026-10-06') + i)
+    appliquerRates([rate('eeuw', '2026-10-05')])
+    expect(suivi('eeuw')).toMatchObject({ boite: 4, rates: 1 })
+    expect(motsARevoir([mot('eeuw')], 30, jour('2026-10-11'))).toHaveLength(0)
+  })
+  it('un mot su avant l’interro, raté à l’interro, redevient à revoir', () => {
+    for (let i = 0; i < 4; i++) noter('eeuw', 'juste', jour('2026-10-01') + i)
+    appliquerRates([rate('eeuw', '2026-10-05')])
+    expect(suivi('eeuw')!.boite).toBe(0)
+  })
+})
