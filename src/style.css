@@ -397,7 +397,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau th:first-child, .tableau td.det { width: 6mm; color: #555; padding-right: 0; }
   .tableau th:nth-child(2), .tableau td.nl { width: 24%; white-space: normal; }
   .tableau th:nth-child(3) { width: 25%; }
-  .tableau td > .extra { display: none; }           /* sous la traduction : seulement à l'écran */
+  .tableau td > .extra, .def-avec-dessin .extra { display: none; }   /* sous la traduction : seulement à l'écran */
+  .tableau .def-avec-dessin { flex-direction: column; align-items: flex-start; gap: 1mm; }   /* le dessin sous la définition, pas à côté */
   .tableau .details { display: table-cell; }
   .tableau .details .extra { display: block; color: #333; font-size: 8pt; }   /* une ligne par type d'info */
   .tableau .extra i { color: #000; font-weight: 700; }
