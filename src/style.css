@@ -539,6 +539,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .page.accueil .reprendre { padding: 6px 18px 6px 8px; }
 }
 @media (max-width: 999px) { .reprendre .resume { padding-right: 74px; } }
+/* téléphone et tablette : au défilement, l'en-tête s'en va et le bloc « Commencer » reste collé en haut, la page passe dessous
+   (on voit la mascotte changer avec la matière, et « Commencer » reste à portée) ; l'ombre vers le haut cache les coins arrondis */
+@media (max-width: 999px) {
+  .page.accueil .reprendre { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 20;
+    box-shadow: 0 -12px 0 2px var(--bg), var(--shadow), 0 6px 14px -6px rgb(0 0 0 / 18%); }
+}
 /* la mascotte du bloc « Commencer », un peu plus grande que celles du menu, et de l'air sous le bloc */
 .page.accueil .reprendre { margin-bottom: 5px; }
 .reprendre .scene-mascottes { width: 200px; height: 132px; }
