@@ -225,14 +225,8 @@ export const questionsChoisies = (voc: Vocabulaire, r: Reglages) => motsChoisis(
 
 /** Ce que l'exercice peut réviser avec ce choix de matières et de chapitres : des mots ou des questions. */
 export const aReviser = (voc: Vocabulaire, r: Reglages, ex = exercice(r.exercice)) =>
-  ex.nederlands
-    // les verbes de Conjugaison, les nombres de Getallen : même si d'autres chapitres sont cochés
+  ex.nederlands || ex.pourMatiere
+    // les exercices « Spécial » (conjugaison, nombres, Eeuwen, calcul mental, natures) : dès que leur matière est choisie,
+    // quels que soient les chapitres et les pages cochés
     ? voc.matieres.filter(m => r.matieres.includes(m.nom)).flatMap(m => m.mots).filter(ex.accepte)
-    : ex.pourMatiere
-    // les exercices fabriqués : seulement si leur chapitre est coché (ou aucun), sans le filtre des pages ;
-    // sinon « 1. Calcul mental » coché annoncerait les 11 calculs de « Calcul mental (entraînement) »
-    ? voc.matieres.filter(m => r.matieres.includes(m.nom)).flatMap(m => {
-        const coches = r.chapitres.filter(c => c.startsWith(m.nom + SEP))
-        return coches.length ? m.mots.filter(x => coches.includes(cleChapitre(m.nom, x.chapitre))) : m.mots
-      }).filter(ex.accepte)
     : motsChoisis(voc, r, !!ex.surQuestions).filter(ex.accepte)

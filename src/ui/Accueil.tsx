@@ -222,7 +222,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   }
 
   // un nouveau choix de matières ou de chapitres où l'exercice choisi n'a rien (Religion et ses seules questions,
-  // Français et le QCM, le chapitre « Calcul mental (entraînement) » et le QCM, « 1. Calcul mental » et le calcul mental) :
+  // Français et le QCM) :
   // on passe au QCM s'il trouve de quoi réviser, sinon au premier exercice qui en trouve
   const avecChoix = (p: Partial<Reglages>) => {
     const r2 = { ...r, ...p }

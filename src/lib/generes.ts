@@ -301,18 +301,19 @@ const CHAPITRES = [
 /** La notion d'une carte fabriquée (l'indice du tijdvak ou du calcul, la nature). */
 export const cleDe = (m: Mot) => m.id.split('|').pop()!
 
-/** Ajoute à chaque matière concernée son chapitre d'exercices fabriqués (une seule fois). */
+/** Ajoute à chaque matière concernée les cartes de son exercice fabriqué (une seule fois). Leur chapitre n'est pas
+ *  dans la liste des chapitres : il ne sert qu'à cet exercice, proposé dès que la matière est choisie. */
 export function avecExercicesGeneres(voc: Vocabulaire): Vocabulaire {
   let matieres: Matiere[] = voc.matieres
   for (const c of CHAPITRES) {
     const i = matieres.findIndex(m => c.matiere.test(m.nom))
-    if (i < 0 || matieres[i].chapitres.includes(c.chapitre)) continue
+    if (i < 0 || matieres[i].mots.some(m => m.genere === c.genere)) continue
     const nom = matieres[i].nom
     const mots: Mot[] = c.cartes.map(k => ({
       id: `${nom}|${c.chapitre}|${k.cle}`, matiere: nom, chapitre: c.chapitre, nl: k.nl, det: '', fr: k.fr,
       definition: '', exemple: '', remarque: '', genere: c.genere,
     }))
-    matieres = matieres.map((m, j) => (j === i ? { ...m, chapitres: [...m.chapitres, c.chapitre], mots: [...m.mots, ...mots] } : m))
+    matieres = matieres.map((m, j) => (j === i ? { ...m, mots: [...m.mots, ...mots] } : m))
   }
   return matieres === voc.matieres ? voc : { ...voc, matieres }
 }

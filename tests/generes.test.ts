@@ -48,10 +48,11 @@ describe('Natures des mots', () => {
       expect(q.bonne).toBe(NATURES[n].nom)
     }
   })
-  it('les chapitres s’ajoutent une seule fois, à la bonne matière', () => {
+  it('les cartes s’ajoutent une seule fois, à la bonne matière, sans chapitre à cocher', () => {
     const voc: Vocabulaire = { misAJour: 0, matieres: [{ nom: 'HW Geschiedenis', chapitres: ['1'], mots: [] }, { nom: 'Français', chapitres: [], mots: [] }] }
     const v = avecExercicesGeneres(avecExercicesGeneres(voc))
-    expect(v.matieres[0].chapitres).toEqual(['1', 'Eeuwen en tijdvakken'])
+    expect(v.matieres[0].chapitres).toEqual(['1'])
+    expect(v.matieres[0].mots).toHaveLength(TIJDVAKKEN.length)
     expect(v.matieres[0].mots.every(m => m.genere === 'eeuwen')).toBe(true)
     expect(v.matieres[1].mots).toHaveLength(8)
   })

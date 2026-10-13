@@ -36,15 +36,15 @@ describe('exercices de Nederlands', () => {
 })
 
 describe('exercices fabriqués', () => {
-  it('seulement si leur chapitre est coché (ou aucun)', () => {
+  it('dès que leur matière est choisie, quels que soient les chapitres cochés', () => {
     const calc = (k: string): Mot => ({ ...mot(k, 'Calcul mental (entraînement)'), genere: 'calcul' })
-    const maths: Vocabulaire = { matieres: [{ nom: 'Mathématiques', chapitres: ['1. Calcul mental', 'Calcul mental (entraînement)'], mots: [mot('somme', '1. Calcul mental'), calc('0'), calc('1')] }], misAJour: 0 }
+    const maths: Vocabulaire = { matieres: [{ nom: 'Mathématiques', chapitres: ['1. Calcul mental', '2. Diviseurs'], mots: [mot('somme', '1. Calcul mental'), mot('diviseur', '2. Diviseurs'), calc('0'), calc('1')] }], misAJour: 0 }
     const avec = (chapitres: string[], exercice: ExerciceId) => aReviser(maths, { ...r({ matieres: ['Mathématiques'], chapitres: chapitres.map(c => cleChapitre('Mathématiques', c)) }), exercice }).length
     expect(avec([], 'calcul')).toBe(2)
-    expect(avec(['Calcul mental (entraînement)'], 'calcul')).toBe(2)
-    expect(avec(['1. Calcul mental'], 'calcul')).toBe(0)
+    expect(avec(['1. Calcul mental'], 'calcul')).toBe(2)
+    expect(avec(['2. Diviseurs'], 'calcul')).toBe(2)
     expect(avec(['1. Calcul mental'], 'qcm')).toBe(1)
-    expect(avec(['Calcul mental (entraînement)'], 'qcm')).toBe(0)
+    expect(avec([], 'qcm')).toBe(2)
   })
 })
 
