@@ -24,6 +24,16 @@ import { Logo, MotExemple } from './Marque'
 export { nomChapitre } from './Matieres'
 import { nomChapitre, NomsMatieres } from './Matieres'
 
+// les exercices les plus utiles d'abord ; les jeux, de/het et l'oral à part ; le reste (propre à une matière) dans « Spécial »
+const REVISER: ExerciceId[] = ['defilement', 'qcm', 'ecrit', 'definitions', 'questions', 'trous', 'dictee']
+const AUTRES: ExerciceId[] = ['motscroises', 'dehet', 'oral']
+type Onglet = 'reviser' | 'special' | 'autres'
+const ONGLETS: { id: Onglet; nom: string; court: string; ids: ExerciceId[] }[] = [
+  { id: 'reviser', nom: 'Réviser', court: 'Réviser', ids: REVISER },
+  { id: 'special', nom: 'Spécial', court: 'Spécial', ids: [] },
+  { id: 'autres', nom: 'Jeux et autres', court: 'Autres', ids: AUTRES },
+]
+
 export const SENS: { id: Sens; nom: string }[] = [
   { id: 'nl-fr', nom: 'NL → FR' },
   { id: 'fr-nl', nom: 'FR → NL' },
@@ -165,6 +175,16 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
   // un exercice fabriqué pour une matière (Eeuwen, calcul, natures) : seulement si elle est choisie
   const pourLesMatieres = (e: typeof ex) => !e.pourMatiere || r.matieres.some(n => e.pourMatiere!.test(n))
   useEffect(() => { if ((ex.nederlands && !avecNederlands) || !pourLesMatieres(ex)) maj({ exercice: 'qcm' }) }, [ex.nederlands, avecNederlands, ex.id, r.matieres.join('|')])
+  // les exercices en trois onglets : Réviser, Spécial (ceux d'une matière, s'il y en a), Jeux et autres
+  const proposes = EXERCICES.filter(e => (!e.nederlands || avecNederlands) && pourLesMatieres(e))
+  const onglets = ONGLETS
+    .map(o => ({ ...o, exercices: o.id === 'special' ? proposes.filter(e => !REVISER.includes(e.id) && !AUTRES.includes(e.id)) : o.ids.map(exercice).filter(e => proposes.includes(e)) }))
+    .filter(o => o.exercices.length > 0)
+  // « Spécial Nederlands » si une seule matière choisie a des exercices à elle
+  const avecSpeciaux = voc.matieres.filter(m => r.matieres.includes(m.nom)
+    && proposes.some(e => (e.nederlands && m.mots.some(x => x.verbe || x.getal !== undefined)) || e.pourMatiere?.test(m.nom)))
+  const [ongletChoisi, setOnglet] = useState<Onglet | null>(null)
+  const ongletActif = onglets.find(o => o.id === ongletChoisi) ?? onglets.find(o => o.exercices.includes(ex)) ?? onglets[0]
   // les mots et les questions de cours ratés (à l'appli ou à une interro en classe)
   // une récompense gagnée (série de jours) : annoncée une fois, avec des confettis et la surprise jouée
   const [nouvelle, setNouvelle] = useState<typeof RECOMPENSES[number] | null>(null)
@@ -399,8 +419,18 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <div class="col-exercice">
       <section class="bloc">
         <h2>Exercice</h2>
-        <div class="tuiles">
-          {EXERCICES.filter(e => (!e.nederlands || avecNederlands) && pourLesMatieres(e)).map(e => {
+        <div class="onglets" role="tablist" aria-label="Familles d'exercices">
+          {onglets.map(o => (
+            <button role="tab" class="onglet" aria-selected={o === ongletActif} onClick={() => setOnglet(o.id)}>
+              {o.id === 'special'
+                ? <><span class="long">Spécial{avecSpeciaux.length === 1 && ` ${apparence(avecSpeciaux[0].nom).titre}`}</span><span class="court">Spécial</span></>
+                : <><span class="long">{o.nom}</span><span class="court">{o.court}</span></>}
+              {o !== ongletActif && o.exercices.includes(ex) && <span class="point" title="L'exercice choisi est ici" />}
+            </button>
+          ))}
+        </div>
+        <div class="tuiles" role="tabpanel">
+          {ongletActif.exercices.map(e => {
             const n = aReviser(voc, r, e).length
             return (
               <button class="tuile" aria-pressed={r.exercice === e.id} onClick={() => maj({ exercice: e.id })} disabled={n === 0}

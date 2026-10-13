@@ -467,6 +467,14 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .col-exercice .segment button { padding: 6px 11px; }
 }
 
+/* onglets des exercices : Réviser, Spécial (matière), Jeux et autres */
+.onglets { display: flex; gap: 4px; background: var(--panel-2); padding: 4px; border-radius: 11px; margin-bottom: 10px; }
+.onglet { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; border-radius: 8px; padding: 7px 10px; font-weight: 700; font-size: .95rem; color: var(--muted); white-space: nowrap; }
+.onglet[aria-selected="true"] { background: var(--panel); color: var(--fg); box-shadow: 0 1px 2px rgb(20 30 50 / 12%); }
+.onglet .point { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.onglet .court { display: none; }
+@media (max-width: 560px) { .onglet .long { display: none; } .onglet .court { display: inline; } }
+
 /* ---------- icônes des exercices ---------- */
 .icone-ex { flex: none; color: var(--blue); }
 .tuile { flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left; }
