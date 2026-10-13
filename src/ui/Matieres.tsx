@@ -20,14 +20,22 @@ export function NomsCote({ noms }: { noms: string[] }) {
   return <>{noms.map((n, i) => <>{i > 0 && ' · '}<NomMatiere nom={n} /></>)}</>
 }
 
-/** Les matières choisies, chacune avec ses chapitres s'ils sont restreints (dans l'ordre du tableau). */
-export function NomsMatieres({ voc, r }: { voc: Vocabulaire; r: Reglages }) {
+/** Les matières choisies, chacune avec ses chapitres s'ils sont restreints (dans l'ordre du tableau).
+ *  `aLaLigne` (bloc « Commencer ») : jusqu'à 3 chapitres, un par ligne ; au-delà, séparés par des virgules. */
+export function NomsMatieres({ voc, r, aLaLigne }: { voc: Vocabulaire; r: Reglages; aLaLigne?: boolean }) {
   const p = pagesChoisies(voc, r)
   return (
     <>
       {r.matieres.map(m => {
         const ordre = voc.matieres.find(x => x.nom === m)?.chapitres ?? []
         const ch = ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
+        if (aLaLigne && ch.length > 0 && ch.length <= 3) return (
+          <span class="nom-matiere">
+            <NomMatiere nom={m} />
+            {ch.map(c => <span class="chapitre-ligne">{c}</span>)}
+            {p && <span class="chapitre-ligne">p. {p.de}–{p.a}</span>}
+          </span>
+        )
         return (
           <span class="nom-matiere">
             <NomMatiere nom={m} />{(ch.length > 0 || p) && <span class="chapitres-choisis">{[ch.join(', '), p && `p. ${p.de}–${p.a}`].filter(Boolean).join(' · ')}</span>}

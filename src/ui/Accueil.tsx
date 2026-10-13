@@ -350,7 +350,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         <div class="resume">
           <p class="titre"><IconeExercice id={ex.id} taille={22} />{ex.nom}{ex.beta && <span class="beta">bêta</span>}<CopierLien r={r} /></p>
           {/* plusieurs matières : une par ligne, sans la description ; le sens et le nombre sont dans le bouton */}
-          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} /></p>
+          <p class={`detail ${r.matieres.length > 1 ? 'plusieurs' : ''}`}><NomsMatieres voc={voc} r={r} aLaLigne /></p>
           {/* rien à réviser : l'explication prend la place de la description, sans décaler la page */}
           {dispo === 0
             ? <p class="description-exercice alerte" role="status">Rien à réviser avec ce choix : il faut {{ dehet: 'des noms avec de/het', definitions: 'des mots avec une définition', trous: 'des mots avec un exemple', conjugaison: 'le chapitre Conjugaison de Nederlands', primitifs: 'le chapitre Conjugaison de Nederlands', interrogatif: 'le chapitre Conjugaison de Nederlands', getallen: 'la matière Nederlands', questions: 'des questions de cours (onglet « Vragen » du tableau)' }[ex.id as string] ?? 'des mots'}.</p>

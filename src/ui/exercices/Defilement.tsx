@@ -75,7 +75,7 @@ export function Defilement({ carte, reglages, setReglages, pause, suivant }: Pro
           ? <button class="second" onClick={() => setEtape('reponse')}>Voir la réponse</button>
           : <button class="second" onClick={() => suivant(null)}>Mot suivant ⏭</button>}
       </div>
-      <p class="astuce"><kbd>Espace</kbd> pause · <kbd>→</kbd> suivant · <kbd>−</kbd> <kbd>+</kbd> vitesse</p>
+      <p class="astuce touches"><kbd>Espace</kbd> pause · <kbd>→</kbd> suivant · <kbd>−</kbd> <kbd>+</kbd> vitesse</p>
     </>
   )
 }

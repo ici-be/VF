@@ -64,7 +64,7 @@ export function Choix({ options, bonne, mot, pause, lire, suivant, annoncer, lon
       </div>
       {choisi !== null && <Infos mot={mot} />}
       {choisi !== null && !juste && <button class="go" autoFocus onClick={() => suivant('faux')}>Suivant ⏎</button>}
-      {choisi === null && <p class="astuce">Touches <kbd>1</kbd> à <kbd>{options.length}</kbd></p>}
+      {choisi === null && <p class="astuce touches">Touches <kbd>1</kbd> à <kbd>{options.length}</kbd></p>}
     </>
   )
 }

@@ -45,7 +45,7 @@ export function DeHet({ carte, reglages, pause, suivant, annoncer }: PropsExerci
         ))}
       </div>
       {choisi && !juste && <><Infos mot={mot} /><button class="go" autoFocus onClick={() => suivant('faux')}>Suivant ⏎</button></>}
-      {!choisi && <p class="astuce">Touches <kbd>D</kbd> ou <kbd>H</kbd></p>}
+      {!choisi && <p class="astuce touches">Touches <kbd>D</kbd> ou <kbd>H</kbd></p>}
     </>
   )
 }

@@ -159,6 +159,8 @@ button { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; us
 .choix { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
 .choix button { border: 2px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 14px 16px; text-align: left; font-size: 1.08rem; display: flex; gap: 12px; align-items: center; min-height: 60px; }
 .choix button .k { flex: none; width: 28px; height: 28px; border-radius: 6px; background: var(--panel-2); display: grid; place-items: center; font-size: .85rem; font-weight: 700; color: var(--muted); }
+/* écran tactile sans souris : pas d'indications de touches du clavier (chiffres des QCM, « Touches 1 à 4 »…) */
+@media (hover: none) and (pointer: coarse) { .choix button .k, .astuce.touches, kbd { display: none; } }
 .choix button.bon { border-color: var(--ok); background: var(--ok-bg); }
 .choix button.mauvais { border-color: var(--ko); background: var(--ko-bg); }
 .choix.dehet { grid-template-columns: 1fr 1fr; max-width: 420px; }
@@ -635,6 +637,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* le nom d'une matière, partout : en gras dans la couleur de sa carte (src/ui/Matieres.tsx) */
 .nom-matiere-coul { font-weight: 800; color: var(--bord, var(--fg)); }
 .nom-matiere .chapitres-choisis { color: var(--muted); margin-left: .45em; }
+.nom-matiere .chapitre-ligne { display: block; color: var(--muted); }
 .etat .nom-matiere + .nom-matiere::before { content: " · "; }
 .reprendre .detail.plusieurs .nom-matiere { display: block; }
 /* le bouton : « Commencer », dessous en petit le sens et le nombre de mots, et une flèche dans un rond */
