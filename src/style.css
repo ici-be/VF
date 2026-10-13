@@ -324,17 +324,8 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .combo.palier { animation: palier .7s ease-out; }
 @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 @keyframes palier { 0% { transform: scale(.6) rotate(-8deg); } 40% { transform: scale(1.8) rotate(6deg); } 100% { transform: scale(1) rotate(0); } }
-.note-serie { margin: 0; font: 800 clamp(2.4rem, 9vw, 3.4rem)/1 var(--display); font-variant-numeric: tabular-nums; }
-.note-serie.bien, .note.bien { color: var(--ok); }
-.note-serie.moyen, .note.moyen { color: var(--mid); }
-.note-serie.faible, .note.faible { color: var(--ko); }
 .score .c b { color: var(--accent); }
 canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 50; }
-.note { font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.matiere-choix .noms .note { font-size: .8rem; }
-.matiere-choix .noms .note.bien { color: var(--ok); }
-.matiere-choix .noms .note.moyen { color: var(--mid); }
-.matiere-choix .noms .note.faible { color: var(--ko); }
 
 /* ---------- mots croisés ---------- */
 .page.jeu { gap: 16px; padding-top: 16px; }
@@ -618,9 +609,17 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .reglages-bloc .case input { width: 16px; height: 16px; }
 .reglages-bloc input[type="range"] { height: 18px; }
 .reglages-bloc .valeur { font-size: .86rem; }
-@media (min-width: 1000px) {
-  .col-choix .reglages-bloc .reglages { grid-template-columns: 1fr; }
-  .col-exercice .segment button { padding: 6px 11px; }
+/* un réglage par ligne : son nom à gauche, les choix à droite */
+.reglages-bloc .reglages { grid-template-columns: 1fr; gap: 8px; }
+.reglages-bloc .reglage { flex-direction: row; align-items: center; gap: 10px; }
+.reglages-bloc .reglage .lbl, .reglages-bloc .reglage > label:not(.case) { flex: none; width: 6.2rem; }
+.reglages-bloc .reglage input[type="range"] { flex: 1; max-width: 320px; }
+@media (min-width: 1000px) { .col-exercice .segment button { padding: 6px 11px; } }
+/* téléphone : le nom au-dessus des choix, pour qu'ils tiennent sur une ligne */
+@media (max-width: 560px) {
+  .reglages-bloc .reglages { gap: 10px; }
+  .reglages-bloc .reglage { flex-direction: column; align-items: stretch; gap: 4px; }
+  .reglages-bloc .reglage input[type="range"] { max-width: none; }
 }
 
 .indice-titre { display: none; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .8rem; }
@@ -630,18 +629,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .astuce-matiere { display: none; }
   .col-choix .matiere-choix { padding-block: 5px; }
   .col-choix .medaillon { width: 2.7rem; height: 2.7rem; }
-  .col-choix .reglages-bloc .reglage { flex-direction: row; align-items: center; gap: 10px; }
-  .col-choix .reglages-bloc .reglage .lbl, .col-choix .reglages-bloc .reglage > label:not(.case) { flex: none; width: 6.8rem; white-space: nowrap; }
-  .col-choix .reglages-bloc .segment { flex-wrap: wrap; }
-  .col-choix .reglages-bloc .reglage:has(.case) { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .col-choix .reglages-bloc .reglages { gap: 8px; }
 }
-@media (min-width: 1000px) {
-  .col-choix .reglages-bloc .segment button { padding: 3px 7px; font-size: .8rem; }
-  .col-choix .reglages-bloc .reglage .lbl, .col-choix .reglages-bloc .reglage > label:not(.case) { width: 6.2rem; }
-}
-/* « Mots » à droite : les deux choix côte à côte */
-.mots-bloc .reglages { grid-template-columns: repeat(auto-fit, minmax(200px, max-content)); gap: 10px 32px; }
 
 /* la description de l'exercice choisi, dans le bloc « Commencer » */
 .reprendre .description-exercice { margin: 4px 0 0; font-size: .9rem; color: var(--muted); max-width: 60ch; }

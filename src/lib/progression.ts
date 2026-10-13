@@ -103,16 +103,6 @@ export function fragilite(id: string, maintenant = Date.now()): number {
 /** Ce qui est su d'un mot : 0 (jamais réussi) … 1 (su : 3 bonnes réponses sans erreur depuis). */
 export const maitrise = (id: string) => Math.min(3, suivi(id)?.boite ?? 0) / 3
 
-/**
- * Note sur 20 d'un ensemble de mots (un chapitre, une matière) : la part de ce qui est su, au demi-point.
- * Seuls les mots déjà proposés comptent : ceux qu'on n'a jamais vus ne font pas baisser la note.
- */
-export function noteSur20(mots: Mot[]): number | null {
-  const vus = mots.filter(m => suivi(m.id))
-  if (!vus.length) return null
-  return Math.round((vus.reduce((t, m) => t + maitrise(m.id), 0) / vus.length) * 40) / 2
-}
-
 export const RECEMMENT = 30 * JOUR
 /** Un mot réussi assez de fois depuis son dernier échec (boîte 3) n'est plus « à revoir ». */
 const SU = 3

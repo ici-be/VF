@@ -91,8 +91,6 @@ export interface Reglages {
   repondre: Repondre
   /** conjugaison : le temps, ou « mix » pour les mélanger */
   temps: Temps | 'mix'
-  /** afficher les notes sur 20 (matières, chapitres, fin de série) */
-  notes: boolean
   /** pages du cours retenues dans un chapitre (`${matière}␟${chapitre}` → [de, à]) ; absent = tout le chapitre */
   pages: Record<string, [number, number]>
 }
@@ -102,7 +100,7 @@ export const cleChapitre = (matiere: string, chapitre: string) => matiere + SEP 
 
 const DEFAUT: Reglages = {
   matieres: [], chapitres: [], exercice: 'qcm', sens: 'nl-fr', nombre: 20,
-  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', notes: false, pages: {},
+  delai: 4, voix: true, exigerArticle: false, ordre: 'fragiles', repondre: 'choix', temps: 'present', pages: {},
 }
 
 // Le permalien : les réglages de l'accueil dans l'adresse (#r=…), en JSON encodé en base64url.

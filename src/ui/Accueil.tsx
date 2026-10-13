@@ -7,13 +7,12 @@ import {
 } from '../lib/reglages'
 import type { Chargement } from './App'
 import { apparence, langueMatiere } from '../lib/apparence'
-import { noteSur20, recordDeJours, RECOMPENSES } from '../lib/progression'
+import { recordDeJours, RECOMPENSES } from '../lib/progression'
 import { lire, ecrire } from '../lib/stockage'
 import { confettis } from '../lib/confettis'
 import { SURPRISES, interrompre, surprendre } from '../lib/surprises'
 import type { Vue } from './Liste'
-import { niveauNote, nombre, note } from '../lib/texte'
-import type { Mot } from '../lib/mots'
+import { nombre } from '../lib/texte'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
 import { ArrowRight, Check, CloudOff, Link } from 'lucide-preact'
@@ -48,15 +47,6 @@ const ORDRES: { id: Ordre; nom: string; aide: string }[] = [
   { id: 'hasard', nom: 'Au hasard', aide: 'Des mots tirés au hasard' },
   { id: 'tableau', nom: 'Dans l’ordre', aide: 'Dans l’ordre du tableau' },
 ]
-
-/** La note de maîtrise d'un groupe de mots, s'il a déjà été travaillé. */
-function Note({ mots, r }: { mots: Mot[]; r: Reglages }) {
-  // les notes ne s'affichent que si on l'a demandé dans les réglages
-  const n = r.notes ? noteSur20(mots) : null
-  return n === null ? null : (
-    <span class={`note ${niveauNote(n)}`} title="Ce que tu sais déjà : un mot compte comme su après 3 bonnes réponses sans erreur">{note(n)}</span>
-  )
-}
 
 /** Les pages du chapitre choisi sur lesquelles porte l'exercice : « Pages [5] à [12] ». */
 function Pages({ cle, bornes, r, maj, n, unite }: {
@@ -258,7 +248,6 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   return (
                     <button class="puce" aria-pressed={coches.includes(cle)} onClick={() => basculerChapitre(cle)}>
                       {nomChapitre(c)} <span class="n">{contenu(m).filter(x => x.chapitre === c).length}</span>
-                      <Note mots={contenu(m).filter(x => x.chapitre === c)} r={r} />
                     </button>
                   )
                 })}
@@ -273,6 +262,19 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
       <section class="bloc reglages-bloc">
         <h2>Réglages</h2>
         <div class="reglages">
+          {/* combien de mots, et lesquels (avec les chapitres, c'est le choix des mots à réviser) */}
+          <div class="reglage">
+            <span class="lbl">Combien</span>
+            <div class="segment" role="group" aria-label={`Combien de ${unite}s ?`}>
+              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? nombre(n, unite) : `Tous les ${unite}s`}>{n ? nombre(n, unite) : 'Tous'}</button>)}
+            </div>
+          </div>
+          <div class="reglage">
+            <span class="lbl">Lesquels</span>
+            <div class="segment" role="group" aria-label={`Quels ${unite}s ?`}>
+              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
+            </div>
+          </div>
           {ex.avecSens && avecSens && (
             <div class="reglage">
               <span class="lbl">Sens</span>
@@ -306,36 +308,15 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                 onInput={e => maj({ delai: Number((e.target as HTMLInputElement).value) })} />
             </div>
           )}
-          <div class="reglage">
-            <label class="case"><input id="voix" type="checkbox" checked={r.voix} onChange={e => maj({ voix: (e.target as HTMLInputElement).checked })} /> Lire les mots à voix haute</label>
-            <label class="case"><input id="notes" type="checkbox" checked={r.notes} onChange={e => maj({ notes: (e.target as HTMLInputElement).checked })} /> Afficher les notes sur 20</label>
-            {(r.exercice === 'ecrit' || r.exercice === 'dictee' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
+          {/* la voix se coupe avec le bouton du son, en haut à droite pendant l'exercice */}
+          {(r.exercice === 'ecrit' || r.exercice === 'dictee' || (r.exercice === 'definitions' && r.repondre === 'ecrit')) && (
+            <div class="reglage">
               <label class="case"><input id="article" type="checkbox" checked={r.exigerArticle} onChange={e => maj({ exigerArticle: (e.target as HTMLInputElement).checked })} /> Exiger l’article (de / het)</label>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
   )
-
-  // « Mots » : combien de mots, et lesquels (avec les chapitres, c'est le choix des mots à réviser)
-  const blocMots = (
-      <section class="bloc reglages-bloc mots-bloc">
-        <h2>{ex.surQuestions ? 'Questions' : 'Mots'}</h2>
-        <div class="reglages">
-          <div class="reglage">
-            <div class="segment" role="group" aria-label="Combien de mots ?">
-              {NOMBRES.map(n => <button aria-pressed={r.nombre === n} onClick={() => maj({ nombre: n })} title={n ? nombre(n, unite) : `Tous les ${unite}s`}>{n ? nombre(n, unite) : 'Tous'}</button>)}
-            </div>
-          </div>
-          <div class="reglage">
-            <div class="segment" role="group" aria-label="Quels mots ?">
-              {ORDRES.map(o => <button aria-pressed={r.ordre === o.id} onClick={() => maj({ ordre: o.id })} title={o.aide}>{o.nom}</button>)}
-            </div>
-          </div>
-        </div>
-      </section>
-  )
-
 
   return (
     <main class="page accueil">
@@ -402,7 +383,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   {a.mascotte
                     ? <span class="medaillon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgBuste(a.mascotte) }} />
                     : <span class="ico" aria-hidden="true">{a.icone}</span>}
-                  <span class="noms"><b>{a.titre}</b><span>{a.fr}{a.fr && ' '}<Note mots={contenu(m)} r={r} /></span></span>
+                  <span class="noms"><b>{a.titre}</b><span>{a.fr}</span></span>
                   <span class="n">{contenu(m).filter(x => !x.genere).length}</span>
                 </button>
                 {!choisie
@@ -414,7 +395,7 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
         </div>
         <p class="astuce gauche astuce-matiere">Un clic choisit la matière. <b>+</b> pour réviser plusieurs matières ensemble.</p>
       </section>
-      {!large && <>{blocChapitres}{blocMots}</>}
+      {!large && blocChapitres}
         </div>
         <div class="col-exercice">
       <section class="bloc">
@@ -442,7 +423,9 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           })}
         </div>
       </section>
-      {large ? <>{blocChapitres}{blocMots}{blocReglages}</> : blocReglages}
+      {/* les réglages en bas, sous l'exercice (et les chapitres sur grand écran) */}
+      {large && blocChapitres}
+      {blocReglages}
         </div>
       </div>
     </main>
