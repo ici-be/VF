@@ -401,6 +401,10 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau .def-avec-dessin { flex-direction: column; align-items: flex-start; gap: 1mm; }   /* le dessin sous la définition, pas à côté */
   .tableau .details { display: table-cell; }
   .tableau .details .extra { display: block; color: #333; font-size: 8pt; }   /* une ligne par type d'info */
+  /* cours en français : la définition est le mot traduit, exemple et remarque restent dessous (une seule colonne) */
+  .tableau.tout-fr .details { display: none; }
+  .tableau.tout-fr th:nth-child(3) { width: auto; }
+  .tableau.tout-fr td .extra { display: block; color: #333; font-size: 8pt; }
   .tableau .extra i { color: #000; font-weight: 700; }
   .tableau td.rate, .tableau th:last-child:not(.details) { width: 13mm; color: #000; }
   .tableau td.rate .extra { display: block; font-size: 7pt; }

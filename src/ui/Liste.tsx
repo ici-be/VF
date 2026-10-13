@@ -96,7 +96,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
   const serieARevoir = ex.surQuestions ? [] : construireSerie(motsRates, { ...reglages, nombre: 0, ordre: 'hasard' })
   const serieQuestions = construireSerie(questionsRatees, { ...reglages, exercice: 'questions', nombre: 0, ordre: 'hasard' })
   const serieNouveaux = construireSerie(nouveaux.mots, { ...reglages, nombre: 0, ordre: 'hasard' })
-  const colonnes = vue === 'revoir' ? 4 : 3
+  // colonnes imprimées (le titre d'un chapitre les couvre toutes, sans en créer une de trop qui prendrait de la place) :
+  // l'article s'il y en a, le mot, la traduction, les détails (sauf cours en français : sous la définition), « Raté »
+  const avecDet = mots.some(m => m.det)
+  const colonnes = (avecDet ? 1 : 0) + 2 + (toutFr ? 0 : 1) + (vue === 'revoir' ? 1 : 0)
 
   // titre de la page imprimée : « Biologie / Biologie — 1. De ecosystemen »
   const pages = pagesChoisies(voc, reglages)
@@ -132,7 +135,7 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
     <main class={`page liste ${feuille ? 'mode-feuille' : ''}`}>
       {/* en-tête de la page imprimée (caché à l'écran) */}
       <header class="impression">
-        <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : 'Vocabulaire néerlandais'}</h1>
+        <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : toutFr ? 'Vocabulaire' : 'Vocabulaire néerlandais'}</h1>
         {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
         <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : enQuestions ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
       </header>
@@ -211,12 +214,12 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       {vue === 'primitifs' ? null : mots.length === 0
         ? <p class="vide">{vue === 'revoir' && !q ? 'Rien de raté récemment dans ce choix. Bravo ! 🎉' : vue === 'questions' ? 'Aucune question ne correspond.' : 'Aucun mot ne correspond.'}</p>
         : (
-          <div class={`tableau ${enQuestions ? 'questions' : ''} ${mots.some(m => m.det) ? '' : 'sans-det'}`}>
+          <div class={`tableau ${enQuestions ? 'questions' : ''} ${toutFr ? 'tout-fr' : ''} ${avecDet ? '' : 'sans-det'}`}>
             <table>
               <thead><tr><th></th>{enQuestions ? (toutFr ? <><th>Question</th><th>Réponse</th></> : <><th>Vraag</th><th>Antwoord</th></>) : toutFr ? <><th>Mot</th><th>Définition</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
               <tbody>
                 {lignes.map(l => 'groupe' in l
-                  ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes + 1}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
+                  ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
                   : (
                     <tr>
                       <td class="det">{l.det}</td>
