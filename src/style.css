@@ -759,7 +759,11 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .tag-interro { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--mid-bg); color: var(--fg); font-size: .75rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }
 .astuce .tag-interro { margin-left: 0; }
 @media (max-width: 560px) { .tableau .tag-interro { white-space: normal; } .tableau td.rate .interro-rate { overflow-wrap: anywhere; } }
+.icone-interro { display: none; }
 @media print {
+  .tableau .tag-interro { display: none; }
+  .icone-interro { display: inline-block; width: 2.6mm; height: 2.6mm; margin-left: 1.2mm; vertical-align: -.3mm; color: #666; }
+  .legende-interro .icone-interro { margin-left: 0; }
   .tag-interro { background: none; border: .5pt solid #000; font-size: 7pt; }
   .feuille-interro .blanc { display: inline-block; width: 45mm; border-bottom: .6pt solid #000; margin: 0 1mm; }
 }

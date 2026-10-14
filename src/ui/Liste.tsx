@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+import { ClipboardCheck } from 'lucide-preact'
 import { langueDe } from '../lib/apparence'
 import { derniersAjouts, type Mot, type Vocabulaire } from '../lib/mots'
 import { exercice, motsChoisis, pagesChoisies, questionsChoisies, type Reglages } from '../lib/reglages'
@@ -148,7 +149,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
       <header class="impression">
         <h1>{vue === 'revoir' ? 'À revoir' : vue === 'primitifs' ? `Temps primitifs – les ${NB_PRIMITIFS} verbes les plus courants` : vue === 'nouveaux' ? `Nouveaux mots – ajoutés le ${dateNouveaux}` : vue === 'questions' ? 'Questions de cours' : toutFr ? 'Vocabulaire' : 'Vocabulaire néerlandais'}</h1>
         {vue !== 'nouveaux' && titreMatieres.map(t => <p class="sujet"><b>{t.nom}</b> · {t.chapitres}</p>)}
-        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : enQuestions ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}</p>
+        <p class="meta">{nombre(mots.length, vue === 'primitifs' ? 'verbe' : enQuestions ? 'question' : 'mot')}{q ? ` contenant « ${cherche.trim()} »` : ''} · {aujourdhui}
+          {enQuestions && mots.some(m => m.vraag?.interro) && <span class="legende-interro"> · <ClipboardCheck class="icone-interro" size={11} strokeWidth={1.8} aria-hidden="true" /> déjà posée en interro</span>}</p>
       </header>
       <div class="haut">
         <header class="entete">
@@ -243,7 +245,9 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                           <span class="terme" lang={langueDe(l)}>
                             {l.det && <span class="det-court">{l.det} </span>}
                             {l.vraag ? (TROU.test(l.nl) ? <PhraseATrou phrase={l.nl} matiere={l.matiere} /> : <Glose texte={l.nl} matiere={l.matiere} />) : l.nl}
+                            {/* à l'écran le nom de l'interro ; à l'impression, une petite icône discrète à la place */}
                             {l.vraag?.interro && <span class="tag-interro">{l.vraag.interro}</span>}
+                            {l.vraag?.interro && <ClipboardCheck class="icone-interro" size={11} strokeWidth={1.8} aria-hidden="true" />}
                           </span>
                           <span class="actions-mot">
                             <button class="ecouter" onClick={() => parler(l.det ? `${l.det} ${l.nl}` : l.nl, langueDe(l))} aria-label={`Écouter ${l.nl}`} title="Écouter">🔊</button>
