@@ -91,6 +91,14 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
     if (trier === 'chapitre' && g !== groupe) { lignes.push({ groupe: g, matiere: m.matiere, chapitre: m.chapitre }); groupe = g }
     lignes.push(m)
   }
+  // les lignes du tableau par blocs : chaque titre de chapitre avec la ligne qui le suit, puis le reste du chapitre
+  const blocs: (typeof lignes)[] = [[]]
+  for (let i = 0; i < lignes.length; i++) {
+    const l = lignes[i]
+    if ('groupe' in l) blocs.push(lignes[i + 1] && !('groupe' in lignes[i + 1]) ? [l, lignes[++i]] : [l], [])
+    else blocs[blocs.length - 1].push(l)
+  }
+  const blocsPleins = blocs.filter(b => b.length)
 
   const ex = exercice(reglages.exercice)
   const serieARevoir = ex.surQuestions ? [] : construireSerie(motsRates, { ...reglages, nombre: 0, ordre: 'hasard' })
@@ -105,7 +113,10 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
   const pages = pagesChoisies(voc, reglages)
   const titreMatieres = reglages.matieres.map(n => {
     const a = apparence(n)
-    const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => nomChapitre(c.split(SEP)[1]))
+    // dans l'ordre du tableau, pas dans celui où ils ont été cochés
+    const ordre = voc.matieres.find(m => m.nom === n)?.chapitres ?? []
+    const ch = reglages.chapitres.filter(c => c.startsWith(n + SEP)).map(c => c.split(SEP)[1])
+      .sort((x, y) => ordre.indexOf(x) - ordre.indexOf(y)).map(nomChapitre)
     const chapitres = (ch.length ? ch.join(', ') : 'tous les chapitres') + (pages ? `, p. ${pages.de}–${pages.a}` : '')
     return { nom: a.fr && a.fr !== a.titre ? `${a.titre} / ${a.fr}` : a.titre, chapitres }
   })
@@ -217,8 +228,11 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
           <div class={`tableau ${enQuestions ? 'questions' : ''} ${toutFr ? 'tout-fr' : ''} ${avecDet ? '' : 'sans-det'}`}>
             <table>
               <thead><tr><th></th>{enQuestions ? (toutFr ? <><th>Question</th><th>Réponse</th></> : <><th>Vraag</th><th>Antwoord</th></>) : toutFr ? <><th>Mot</th><th>Définition</th></> : <><th>Nederlands</th><th>Français</th></>}<th class="details">{enQuestions ? '' : 'Définition · exemple · remarque'}</th>{vue === 'revoir' && <th>Raté</th>}</tr></thead>
-              <tbody>
-                {lignes.map(l => 'groupe' in l
+              {/* à l'impression, un titre de chapitre ne reste jamais seul en bas de page : il est dans le même
+                  groupe que la ligne qui le suit (insécables ensemble) */}
+              {blocsPleins.map(b => (
+                <tbody class={'groupe' in b[0] ? 'debut-chapitre' : undefined}>
+                  {b.map(l => 'groupe' in l
                   ? <tr class={`chap ${lignes.filter(x => 'groupe' in x).length === 1 ? 'seul' : ''}`}><td colSpan={colonnes}><NomMatiere nom={l.matiere} /> · {nomChapitre(l.chapitre)}</td></tr>
                   : (
                     <tr>
@@ -254,7 +268,8 @@ export function Liste({ voc, reglages, vueInitiale, retour, lancer, lancerQuesti
                       })()}
                     </tr>
                   ))}
-              </tbody>
+                </tbody>
+              ))}
             </table>
           </div>
         )}

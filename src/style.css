@@ -384,6 +384,7 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .tableau tr { break-inside: avoid; }
   .tableau tr.chap td { background: none; color: #000; font-size: 9.5pt; padding-top: 2.5mm; border-bottom: 1pt solid #000; }
   .tableau tr.chap { break-after: avoid; }
+  .tableau tbody.debut-chapitre { break-inside: avoid; }   /* le titre d'un chapitre et sa première ligne, ensemble */
   .tableau tr.chap.seul { display: none; }          /* un seul chapitre : déjà dans le titre */
   .tableau th:first-child, .tableau td.det { width: 6mm; color: #555; padding-right: 0; }
   .tableau th:nth-child(2), .tableau td.nl { width: 24%; white-space: normal; }
