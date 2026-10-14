@@ -136,10 +136,32 @@ vérifie dans le cours, propose les corrections, les applique après accord
 
 ## Partager des réglages
 
-L'icône 🔗 discrète à côté du nom de l'exercice, sur l'accueil, copie un **permalien** :
-l'adresse de l'appli avec les réglages en cours (matières, chapitres, pages, exercice, sens,
-nombre de mots, réponse, voix…). Qui l'ouvre arrive sur l'accueil avec ces réglages, qui
-restent ensuite les siens (l'adresse est nettoyée aussitôt).
+L'icône 🔗 discrète à côté du nom de l'exercice, sur l'accueil, copie un **lien court**
+(`https://ici.be/VF/z/G8T9`) vers les réglages en cours (matières, chapitres, pages, exercice,
+sens, nombre de mots, réponse, voix…). Qui l'ouvre arrive sur l'accueil avec ces réglages, qui
+restent ensuite les siens. Le script du tableau garde le lien long (`#r=…`) un peu plus d'un mois
+sous ce code ; sans réseau (ou script pas encore redéployé), c'est le lien long qui est copié.
+Le lien de transfert de Suivi est raccourci de la même façon.
+
+## Utilisateurs
+
+Le bouton rond à côté du son, sur l'accueil, montre l'initiale de l'utilisateur (une silhouette
+s'il n'y en a pas). Un utilisateur, c'est un prénom, sans mot de passe : ses exercices le suivent
+sur chaque appareil où ce prénom a été choisi en dernier. Le lien `https://ici.be/VF/u/Olivia`
+choisit Olivia sur l'appareil qui l'ouvre et mène à l'accueil.
+- Premier prénom choisi sur un appareil : ce qui y a déjà été fait lui est attribué.
+- Changer de prénom (dans la fenêtre du bouton) : l'appareil prend l'historique du nouveau prénom,
+  ou repart de zéro si le prénom est nouveau ; celui de l'ancien reste gardé à son nom.
+- La progression part vers le script du tableau (au lancement, 20 s après des réponses, quand
+  l'appli passe en arrière-plan ou revient), qui la réunit avec celle des autres appareils : pour
+  chaque mot, la plus récente l'emporte.
+
+Liens courts et utilisateurs sont rangés dans un **classeur privé à part**, « Woordjes — liens
+courts et utilisateurs », créé par le script dans le Drive au premier usage (onglets Liens et
+Utilisateurs) : le tableau des mots est public et l'appli le télécharge en entier, les prénoms et les
+progressions n'y vont pas. GitHub Pages ne connaissant que des fichiers, `public/404.html` (et
+`index.html`, pour l'appli installée) change `…/z/G8T9` en `…/#z=G8T9` et `…/u/Olivia` en
+`…/#u=Olivia`, que l'appli traite.
 
 ## Installer
 
@@ -155,7 +177,7 @@ Adresse : **https://ici-be.github.io/VF/**
   (ou, dans Chrome, menu ⋮ → *Caster, enregistrer et partager* → *Installer la page en tant qu'application*).
 - **Android** : ouvrir l'adresse dans Chrome, menu ⋮ → *Ajouter à l'écran d'accueil* → *Installer*.
 
-La progression et les réglages sont enregistrés sur chaque appareil séparément.
+La progression et les réglages sont enregistrés sur chaque appareil séparément ; avec un utilisateur, la progression le suit d'un appareil à l'autre.
 
 ## Développer
 

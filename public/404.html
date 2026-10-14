@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Woordjes</title>
+<!-- GitHub Pages ne sert que des fichiers : les liens courts …/VF/z/G8T9 (réglages partagés, transfert) et
+     …/VF/u/Olivia (utilisateur) arrivent ici, et repartent vers l'accueil de l'appli avec #z=G8T9 ou #u=Olivia.
+     Toute autre adresse inconnue mène à l'accueil. -->
+<script>
+  (function () {
+    var m = location.pathname.match(/^(.*?\/)(z|u)\/([^\/]+)\/?$/)
+    if (m) location.replace(m[1] + '#' + m[2] + '=' + m[3])
+    else location.replace(location.pathname.replace(/^(\/[^\/]*\/?).*$/, '$1'))
+  })()
+</script>
+</head>
+<body style="font-family: system-ui, sans-serif; background: #f6f8fb; color: #1d2433">
+<p>Ouverture de <a href="/VF/">Woordjes</a>…</p>
+</body>
+</html>

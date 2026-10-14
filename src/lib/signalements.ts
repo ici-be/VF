@@ -53,7 +53,7 @@ const CLE = 'signalements-a-envoyer'
 const id = () => (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`)
 
 /** Un identifiant au hasard pour cet appareil (rien de personnel) : le script limite les envois par appareil. */
-function appareil(): string {
+export function appareil(): string {
   let a = lire<string>('appareil', '')
   if (!a) { a = id(); ecrire('appareil', a) }
   return a

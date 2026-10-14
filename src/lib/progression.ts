@@ -19,6 +19,10 @@ export const INTERVALLES = [0, 1, 2, 4, 8, 16]
 const JOUR = 86_400_000
 
 let cache: Record<string, Suivi> | null = null
+// prévenu à chaque réponse (et erreur d'interro) : la progression de l'utilisateur part vers le tableau (utilisateur.ts)
+const ecouteurs: (() => void)[] = []
+export const surChangement = (f: () => void) => { ecouteurs.push(f) }
+const changee = () => ecouteurs.forEach(f => f())
 const tout = () => (cache ??= lire<Record<string, Suivi>>('progression', {}))
 
 export function suivi(id: string): Suivi | undefined {
@@ -41,6 +45,7 @@ export function noter(id: string, resultat: Resultat, maintenant = Date.now()): 
   tout()[id] = s
   ecrire('progression', tout())
   compterDansLeJournal(maintenant)
+  changee()
   return s
 }
 
@@ -151,6 +156,7 @@ export function appliquerRates(mots: Mot[]): number {
   if (n) {
     ecrire('progression', tout())
     ecrire('rates-interro', [...faits])
+    changee()
   }
   return n
 }
@@ -179,4 +185,13 @@ export function fusionner(s: Sauvegarde): number {
   ecrire('journal', journal())
   ecrire('rates-interro', [...new Set([...lire<string[]>('rates-interro', []), ...(s.ratesInterro ?? [])])])
   return n
+}
+
+/** Remplace toute la progression de l'appareil (un autre utilisateur : la sienne, ou rien pour un prénom nouveau). */
+export function remplacer(s: Sauvegarde): void {
+  cache = { ...(s.progression ?? {}) }
+  cacheJournal = { ...(s.journal ?? {}) }
+  ecrire('progression', cache)
+  ecrire('journal', cacheJournal)
+  ecrire('rates-interro', s.ratesInterro ?? [])
 }

@@ -6,6 +6,8 @@ import { dateCourte, nomChapitre } from './Accueil'
 import { CircleCheck } from 'lucide-preact'
 import { NomMatiere } from './Matieres'
 import { lienTransfert } from '../lib/transfert'
+import { copierBientot, raccourcir } from '../lib/liens'
+import { lienUtilisateur, nomUtilisateur } from '../lib/utilisateur'
 import { svgMascotte, type Mascotte } from '../lib/mascottes'
 import { SURPRISES, interrompre, surprendre } from '../lib/surprises'
 import { nombre } from '../lib/texte'
@@ -110,14 +112,11 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
   const mascotte = (voc.matieres.map(m => apparence(m.nom).mascotte).find(Boolean) ?? 'renard') as Mascotte
   useEffect(() => { scrollTo(0, 0) }, [])
 
+  // avec un utilisateur, son lien (ici.be/VF/u/Olivia) ; sinon le lien de transfert, raccourci (ici.be/VF/z/G8T9)
+  const nom = nomUtilisateur()
   const copier = async () => {
-    const texte = await lienTransfert()
-    try {
-      await navigator.clipboard.writeText(texte)
-      setLien({ etat: 'copie', texte })
-    } catch {
-      setLien({ etat: 'a-copier', texte })
-    }
+    const texte = nom ? Promise.resolve(lienUtilisateur(nom)) : lienTransfert().then(raccourcir)
+    setLien({ etat: (await copierBientot(texte)) ? 'copie' : 'a-copier', texte: await texte })
   }
 
   return (
@@ -193,8 +192,10 @@ export function Suivi({ voc, retour, reviser, nbDuJour }: Props) {
 
       <section class="bloc">
         <h2>Changer d’appareil</h2>
-        <p class="astuce gauche">Pour retrouver cette progression sur un autre appareil (téléphone, ordinateur) : copie le lien, envoie-le-toi (message, mail) et ouvre-le sur l’autre appareil. Les deux progressions sont réunies : pour chaque mot, la plus récente l’emporte.</p>
-        <button class="second" onClick={copier}>Copier le lien de transfert</button>
+        {nom
+          ? <p class="astuce gauche">Les exercices de <b>{nom}</b> le suivent sur chaque appareil où ce prénom a été choisi en dernier. Pour les retrouver sur un autre appareil (téléphone, ordinateur) : copie ton lien, envoie-le-toi (message, mail) et ouvre-le là-bas. Pour changer d’utilisateur : le bouton de l’initiale, en haut de l’accueil.</p>
+          : <p class="astuce gauche">Pour retrouver cette progression sur un autre appareil (téléphone, ordinateur) : copie le lien, envoie-le-toi (message, mail) et ouvre-le sur l’autre appareil. Les deux progressions sont réunies : pour chaque mot, la plus récente l’emporte. Mieux : choisis un prénom (bouton en haut de l’accueil), tes exercices te suivront partout.</p>}
+        <button class="second" onClick={copier}>{nom ? `Copier le lien de ${nom}` : 'Copier le lien de transfert'}</button>
         {lien.etat === 'copie' && <p class="astuce gauche" role="status">Lien copié. Ouvre-le sur l’autre appareil.</p>}
         {lien.etat === 'a-copier' && <textarea class="lien-transfert" readOnly rows={3} value={lien.texte} onFocus={e => (e.target as HTMLTextAreaElement).select()} aria-label="Lien de transfert, à copier" />}
       <p class="date-mots"><CircleCheck size={15} strokeWidth={2} aria-hidden="true" />Mots du tableau : mis à jour le {dateCourte(voc.misAJour)}</p>

@@ -38,6 +38,12 @@
  * Signalements : le bouton drapeau de l'appli envoie l'action « signaler », la seule possible
  * sans clé (une ligne dans l'onglet « Signalements », créé au premier). La commande /signalements
  * corrige ensuite le tableau avec « modifier » (ou « supprimer ») et marque les lignes avec « traiter » (avec clé).
+ *
+ * Liens courts et utilisateurs (sans clé eux aussi, limités) : « raccourcir » et « lien » pour les liens
+ * ici.be/VF/z/G8T9, « profil » pour la progression d'un utilisateur (ici.be/VF/u/Olivia). Ils sont rangés
+ * dans un classeur à part, privé, créé au premier usage (« Woordjes — liens courts et utilisateurs ») :
+ * ce tableau-ci est public et l'appli le télécharge en entier. Ces actions demandent une autorisation
+ * de plus : après avoir collé ce code, exécuter une fois installer (▶) et accepter, puis redéployer.
  */
 
 // mêmes noms de colonnes que l'appli (src/lib/mots.ts) ; de « matiere » à « nombre » pour l'onglet « Vragen »
@@ -86,6 +92,7 @@ function installer() {
   const props = PropertiesService.getScriptProperties()
   if (!props.getProperty('CLE')) props.setProperty('CLE', Utilities.getUuid().replace(/-/g, ''))
   Logger.log('Clé secrète : ' + props.getProperty('CLE'))
+  Logger.log('Liens courts et utilisateurs : ' + classeurPrive().getUrl())
 }
 
 function doGet(e) {
@@ -95,15 +102,20 @@ function doGet(e) {
   })
 }
 
+const SANS_CLE = ['signaler', 'raccourcir', 'lien', 'profil']
+
 function doPost(e) {
   return repondre(() => {
     const req = JSON.parse(e.postData.contents)
-    // la seule action sans clé : un signalement envoyé par l'appli (voir signaler)
-    if (req.action !== 'signaler') verifierCle(req.cle)
+    // les actions sans clé, ouvertes à l'appli (voir signaler, raccourcir, lien, profil) : limitées
+    if (!SANS_CLE.includes(req.action)) verifierCle(req.cle)
     const verrou = LockService.getScriptLock()
     verrou.waitLock(30000)
     try {
       if (req.action === 'signaler') return signaler(req)
+      if (req.action === 'raccourcir') return raccourcir(req)
+      if (req.action === 'lien') return lien(req)
+      if (req.action === 'profil') return profil(req)
       if (req.action === 'modifier') return modifier(req.modifications || [], !!req.essai)
       if (req.action === 'traiter') return traiter(req.ids || [], String(req.note || ''))
       if (req.action === 'supprimer') return supprimer(req.onglet, req.suppressions || [], !!req.vides, !!req.essai)
@@ -129,14 +141,8 @@ function signaler(req) {
   const texte = v => String(v == null ? '' : v).replace(/[\t\r\n]+/g, ' ').trim().slice(0, LONGUEUR_MAX)
   const id = texte(req.id).slice(0, 64), appareil = texte(req.appareil).slice(0, 64)
   if (!id || !appareil || !texte(req.element)) throw new Error('signalement incomplet')
-  const cache = CacheService.getScriptCache()
-  const compter = (cle, max) => {
-    const n = Number(cache.get(cle) || 0) + 1
-    if (n > max) throw new Error('trop de signalements, réessayer dans une minute')
-    cache.put(cle, String(n), 60)
-  }
-  compter('sig-tous', 60)
-  compter('sig-' + appareil, 10)
+  compter('sig-tous', 60, 'signalements')
+  compter('sig-' + appareil, 10, 'signalements')
   const classeur = SpreadsheetApp.getActive()
   let feuille = classeur.getSheetByName(ONGLET_SIGNALEMENTS)
   if (!feuille) {
@@ -154,6 +160,157 @@ function signaler(req) {
   // en texte : Sheets ne transforme ni la date ni les nombres
   feuille.getRange(feuille.getLastRow() + 1, 1, 1, ligne.length).setNumberFormat('@').setValues([ligne])
   return { ok: true }
+}
+
+/** Au plus « max » appels par minute pour cette clé (un appareil, ou tous). */
+function compter(cle, max, quoi) {
+  const cache = CacheService.getScriptCache()
+  const n = Number(cache.get(cle) || 0) + 1
+  if (n > max) throw new Error('trop de ' + quoi + ', réessayer dans une minute')
+  cache.put(cle, String(n), 60)
+}
+
+// ---------- liens courts et utilisateurs (classeur privé à part) ----------
+
+/** Le classeur privé des liens courts et des utilisateurs, créé au premier usage (dans le Drive du propriétaire). */
+function classeurPrive() {
+  const props = PropertiesService.getScriptProperties()
+  const id = props.getProperty('CLASSEUR_PRIVE')
+  if (id) return SpreadsheetApp.openById(id)
+  const c = SpreadsheetApp.create('Woordjes — liens courts et utilisateurs')
+  props.setProperty('CLASSEUR_PRIVE', c.getId())
+  return c
+}
+
+/** Un onglet du classeur privé, créé avec ses titres s'il manque. */
+function ongletPrive(nom, titres) {
+  const c = classeurPrive()
+  let f = c.getSheetByName(nom)
+  if (!f) {
+    f = c.insertSheet(nom)
+    f.getRange(1, 1, 1, titres.length).setValues([titres]).setFontWeight('bold')
+    f.setFrozenRows(1)
+    // la feuille vide du classeur neuf ne sert à rien
+    const vide = c.getSheets().find(x => x.getName() !== nom && x.getLastRow() === 0)
+    if (vide) c.deleteSheet(vide)
+  }
+  return f
+}
+
+// un long texte (progression, lien de transfert) est coupé en morceaux : une case en tient 50 000 caractères au plus
+const MORCEAU = 45000
+/** Écrit le texte à partir de la colonne « col » de la ligne (en texte, morceau par morceau ; les cases de trop sont vidées). */
+function ecrireMorceaux(feuille, ligne, col, texte) {
+  const morceaux = []
+  for (let i = 0; i < texte.length; i += MORCEAU) morceaux.push(texte.slice(i, i + MORCEAU))
+  const avant = Math.max(0, feuille.getLastColumn() - col + 1)
+  while (morceaux.length < avant) morceaux.push('')
+  if (morceaux.length) feuille.getRange(ligne, col, 1, morceaux.length).setNumberFormat('@').setValues([morceaux])
+}
+const lireMorceaux = (valeurs, col) => valeurs.slice(col - 1).map(String).join('')
+
+// liens courts : 4 caractères sans ceux qu'on confond (0/O, 1/I/L), gardés un peu plus d'un mois
+const ONGLET_LIENS = 'Liens', TITRES_LIENS = ['Code', 'Créé', 'Lien']
+const ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ'
+const DUREE_LIENS = 35 * 86400000
+const LIEN_MAX = 400000
+
+/** Enregistre un lien de l'appli (« #r=… » réglages, « #transfert=… ») et renvoie son code court. */
+function raccourcir(req) {
+  const appareil = String(req.appareil || '').slice(0, 64)
+  const texte = String(req.lien || '')
+  if (!appareil || !/^#(r|transfert)=[\w.=-]+$/.test(texte) || texte.length > LIEN_MAX) throw new Error('lien refusé')
+  compter('rac-tous', 120, 'liens')
+  compter('rac-' + appareil, 20, 'liens')
+  const f = ongletPrive(ONGLET_LIENS, TITRES_LIENS)
+  const maintenant = Date.now()
+  const n = f.getLastRow() - 1
+  const lignes = n > 0 ? f.getRange(2, 1, n, Math.max(3, f.getLastColumn())).getValues() : []
+  // le même lien déjà raccourci : même code, rajeuni
+  const deja = lignes.findIndex(l => lireMorceaux(l, 3) === texte)
+  if (deja >= 0) {
+    f.getRange(deja + 2, 2).setValue(maintenant)
+    return { ok: true, code: String(lignes[deja][0]) }
+  }
+  // les liens de plus d'un mois sont oubliés (du bas vers le haut : les numéros de ligne ne bougent pas)
+  for (let i = lignes.length - 1; i >= 0; i--) if (maintenant - Number(lignes[i][1]) > DUREE_LIENS) f.deleteRow(i + 2)
+  const pris = new Set(lignes.map(l => String(l[0])))
+  let code
+  do {
+    code = ''
+    for (let i = 0; i < 4; i++) code += ALPHABET[Math.floor(Math.random() * ALPHABET.length)]
+  } while (pris.has(code))
+  const ligne = f.getLastRow() + 1
+  f.getRange(ligne, 1, 1, 2).setNumberFormat('@').setValues([[code, '']])
+  f.getRange(ligne, 2).setNumberFormat('0').setValue(maintenant)
+  ecrireMorceaux(f, ligne, 3, texte)
+  return { ok: true, code }
+}
+
+/** Le lien derrière un code court (inconnu ou trop vieux : erreur « lien expiré »). */
+function lien(req) {
+  const appareil = String(req.appareil || '').slice(0, 64)
+  const code = String(req.code || '').toUpperCase()
+  if (!appareil || !/^[A-Z0-9]{4}$/.test(code)) throw new Error('lien expiré')
+  compter('lien-' + appareil, 60, 'liens')
+  const f = classeurPrive().getSheetByName(ONGLET_LIENS)
+  const n = f ? f.getLastRow() - 1 : 0
+  const l = n > 0 ? f.getRange(2, 1, n, Math.max(3, f.getLastColumn())).getValues().find(x => String(x[0]) === code) : null
+  if (!l || Date.now() - Number(l[1]) > DUREE_LIENS) throw new Error('lien expiré')
+  return { ok: true, lien: lireMorceaux(l, 3) }
+}
+
+// utilisateurs : un prénom (sans mot de passe) et sa progression, compressée (gzip, base64), réunie à chaque envoi
+const ONGLET_UTILISATEURS = 'Utilisateurs', TITRES_UTILISATEURS = ['Clé', 'Prénom', 'Mis à jour', 'Mots', 'Progression']
+const PROGRESSION_MAX = 4000000
+const cleUtilisateur = nom => nom.normalize('NFC').toLowerCase()
+
+/**
+ * La progression d'un utilisateur. Avec « donnees » (celle d'un appareil), elle est d'abord réunie avec celle
+ * déjà gardée, comme le fait l'appli (src/lib/progression.ts, fusionner) : pour chaque mot, le suivi le plus
+ * récent l'emporte ; pour chaque jour, le plus grand nombre de réponses. Renvoie la progression réunie (vide
+ * pour un prénom inconnu) : l'appareil la reprend.
+ */
+function profil(req) {
+  const appareil = String(req.appareil || '').slice(0, 64)
+  const nom = String(req.nom || '').replace(/\s+/g, ' ').trim()
+  const donnees = String(req.donnees || '')
+  if (!appareil || !nom || nom.length > 30 || donnees.length > PROGRESSION_MAX) throw new Error('utilisateur refusé')
+  compter('profil-tous', 300, 'envois')
+  compter('profil-' + appareil, 30, 'envois')
+  const f = ongletPrive(ONGLET_UTILISATEURS, TITRES_UTILISATEURS)
+  const cle = cleUtilisateur(nom)
+  const n = f.getLastRow() - 1
+  const cles = n > 0 ? f.getRange(2, 1, n, 1).getValues().map(l => String(l[0])) : []
+  const i = cles.indexOf(cle)
+  const ligne = i >= 0 ? f.getRange(i + 2, 1, 1, Math.max(5, f.getLastColumn())).getValues()[0] : null
+  let s = ligne ? decompresser(lireMorceaux(ligne, 5)) : null
+  if (donnees) {
+    s = reunir(s || { progression: {}, journal: {}, ratesInterro: [] }, decompresser(donnees))
+    const ou = i >= 0 ? i + 2 : f.getLastRow() + 1
+    f.getRange(ou, 1, 1, 4).setNumberFormat('@')
+      .setValues([[cle, ligne ? String(ligne[1]) : nom, aujourdhui() + ' ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'HH:mm'), String(Object.keys(s.progression).length)]])
+    ecrireMorceaux(f, ou, 5, compresser(s))
+  }
+  return { ok: true, nom: ligne ? String(ligne[1]) : nom, existe: !!ligne, donnees: s ? compresser(s) : '' }
+}
+
+function reunir(s, autre) {
+  for (const id in autre.progression || {}) {
+    const ici = s.progression[id], la = autre.progression[id]
+    if (!ici || la.dernier > ici.dernier) s.progression[id] = la
+  }
+  for (const j in autre.journal || {}) s.journal[j] = Math.max(s.journal[j] || 0, autre.journal[j])
+  s.ratesInterro = [...new Set([...(s.ratesInterro || []), ...(autre.ratesInterro || [])])]
+  return s
+}
+
+const compresser = s => Utilities.base64EncodeWebSafe(Utilities.gzip(Utilities.newBlob(JSON.stringify(s), 'application/json')).getBytes())
+function decompresser(texte) {
+  if (!texte) return null
+  const s = JSON.parse(Utilities.ungzip(Utilities.newBlob(Utilities.base64DecodeWebSafe(texte), 'application/x-gzip')).getDataAsString('UTF-8'))
+  if (!s || typeof s.progression !== 'object') throw new Error('progression illisible')
+  return { progression: s.progression || {}, journal: s.journal || {}, ratesInterro: s.ratesInterro || [] }
 }
 
 /** Marque des signalements comme traités (colonne « Traité » : date et note). */

@@ -13,6 +13,8 @@ import { confettis } from '../lib/confettis'
 import { SURPRISES, interrompre, surprendre } from '../lib/surprises'
 import type { Vue } from './Liste'
 import { nombre } from '../lib/texte'
+import { copierBientot, raccourcir } from '../lib/liens'
+import { BoutonUtilisateur } from './Utilisateur'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
 import { ArrowRight, Check, CloudOff, Link, Volume2, VolumeX } from 'lucide-preact'
@@ -89,13 +91,12 @@ function Pages({ cle, bornes, r, maj, n, unite }: {
 function CopierLien({ r }: { r: Reglages }) {
   const [copie, setCopie] = useState(false)
   const copier = async () => {
-    try {
-      await navigator.clipboard.writeText(lienReglages(r))
+    // le lien court (ici.be/VF/z/G8T9), ou le long si le script du tableau n'est pas joignable
+    const lien = raccourcir(lienReglages(r))
+    if (await copierBientot(lien)) {
       setCopie(true)
       setTimeout(() => setCopie(false), 2000)
-    } catch {
-      prompt('Copier le lien :', lienReglages(r))
-    }
+    } else prompt('Copier le lien :', await lien)
   }
   return (
     <button class={`copier-lien ${copie ? 'copie' : ''}`} onClick={copier} title={copie ? 'Lien copié' : 'Copier le lien vers ces réglages (matière, chapitres, pages, exercice…)'} aria-label="Copier le lien vers ces réglages">
@@ -329,11 +330,15 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
           <MotExemple mots={choisis} />
         </div>
         <NavHaut voc={voc} nbDuJour={nbDuJour} aller={{ accueil: () => {}, reviser: reviserAujourdhui, nouveaux: () => liste('nouveaux'), mots: () => liste('tous'), suivi }} />
-        {/* le son des exercices, à couper ou remettre avant de commencer (le même bouton qu'en exercice) */}
-        <button class="icone son-accueil" onClick={() => maj({ voix: !r.voix })} aria-pressed={r.voix}
-          title={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'} aria-label={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'}>
-          {r.voix ? <Volume2 size={20} strokeWidth={2.2} /> : <VolumeX size={20} strokeWidth={2.2} />}
-        </button>
+        <div class="ronds-entete">
+          {/* l'utilisateur (son initiale) : ses exercices le suivent d'un appareil à l'autre */}
+          <BoutonUtilisateur />
+          {/* le son des exercices, à couper ou remettre avant de commencer (le même bouton qu'en exercice) */}
+          <button class="icone son-accueil" onClick={() => maj({ voix: !r.voix })} aria-pressed={r.voix}
+            title={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'} aria-label={r.voix ? 'Couper le son des exercices' : 'Remettre le son des exercices'}>
+            {r.voix ? <Volume2 size={20} strokeWidth={2.2} /> : <VolumeX size={20} strokeWidth={2.2} />}
+          </button>
+        </div>
       </header>
       {/* la mise à jour des mots ne se voit que si elle traîne (fin trait en haut) ou échoue (pastille) ; la date est dans Suivi */}
       {chargement.etat === 'chargement' && <div class="chargement-mots" role="status" aria-label="Mise à jour des mots" />}

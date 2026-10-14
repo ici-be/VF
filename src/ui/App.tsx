@@ -4,6 +4,8 @@ import { appliquerRates } from '../lib/progression'
 import { glossaire } from '../lib/glossaire'
 import { surveillerEnvois } from '../lib/signalements'
 import { estUnTransfert, importerTransfert } from '../lib/transfert'
+import { deplier, estUnRaccourci } from '../lib/liens'
+import { choisirUtilisateur, demarrerSynchro, estUnUtilisateur, nomDuLien } from '../lib/utilisateur'
 import { aReviserAujourdhui } from '../lib/revision'
 import { Suivi } from './Suivi'
 import { NavBas, type Page } from './Navigation'
@@ -81,6 +83,45 @@ export function App() {
     importer()
     addEventListener('hashchange', importer)
     return () => removeEventListener('hashchange', importer)
+  }, [])
+
+  // l'utilisateur (prénom) : sa progression part vers le tableau et revient des autres appareils ;
+  // ce qui arrive d'ailleurs est aussitôt montré
+  useEffect(() => { demarrerSynchro(() => setReglagesBruts(r => ({ ...r }))) }, [])
+  // les liens courts : …/z/G8T9 (devenu #z=G8T9) cache un permalien ou un lien de transfert, ouvert comme s'il
+  // avait été collé ; …/u/Olivia (devenu #u=Olivia) choisit l'utilisateur de cet appareil
+  useEffect(() => {
+    const ouvrir = async () => {
+      const hash = location.hash
+      if (estUnRaccourci(hash)) {
+        try {
+          // seule la fin de l'adresse change : les écoutes de « hashchange » (permalien, transfert) s'en chargent
+          location.replace(location.pathname + location.search + await deplier(hash))
+        } catch (e) {
+          history.replaceState(null, '', location.pathname + location.search)
+          setAnnonce((e as Error).message)
+        }
+      } else if (estUnUtilisateur(hash)) {
+        history.replaceState(null, '', location.pathname + location.search)
+        const nom = nomDuLien(hash)
+        if (!nom) return
+        try {
+          const c = await choisirUtilisateur(nom)
+          setAnnonce({
+            meme: null,
+            premier: `Bonjour ${c.nom} ! Les exercices faits ici sont maintenant enregistrés à ton nom, sur tous tes appareils.`,
+            repris: `Bonjour ${c.nom} ! Ton historique est repris sur cet appareil.`,
+            nouveau: `Bonjour ${c.nom} ! Les exercices faits ici seront enregistrés à ton nom.`,
+          }[c.etat])
+          setEcran({ nom: 'accueil' })
+        } catch (e) {
+          setAnnonce((e as Error).message)
+        }
+      }
+    }
+    ouvrir()
+    addEventListener('hashchange', ouvrir)
+    return () => removeEventListener('hashchange', ouvrir)
   }, [])
 
   // le geste « retour » du téléphone (ou le bouton ← du navigateur) ramène à l'accueil au lieu
