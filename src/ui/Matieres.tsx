@@ -21,24 +21,42 @@ export function NomsCote({ noms }: { noms: string[] }) {
 }
 
 /** Les matières choisies, chacune avec ses chapitres s'ils sont restreints (dans l'ordre du tableau).
- *  `aLaLigne` (bloc « Commencer ») : jusqu'à 3 chapitres, un par ligne ; au-delà, séparés par des virgules. */
+ *  `aLaLigne` (bloc « Commencer ») : une hauteur à peu près stable, quel que soit le choix.
+ *  Une matière : jusqu'à 3 chapitres, un par ligne ; au-delà, leur nombre (« 7 chapitres »).
+ *  2 ou 3 matières : une par ligne, avec son chapitre s'il est seul, sinon leur nombre.
+ *  Plus de 3 : « 6 matières », et leurs noms sur une ligne (coupée si trop longue). */
 export function NomsMatieres({ voc, r, aLaLigne }: { voc: Vocabulaire; r: Reglages; aLaLigne?: boolean }) {
   const p = pagesChoisies(voc, r)
+  const chapitres = (m: string) => {
+    const ordre = voc.matieres.find(x => x.nom === m)?.chapitres ?? []
+    return ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
+  }
+  if (aLaLigne && r.matieres.length > 3) return (
+    <span class="nom-matiere" title={r.matieres.map(m => apparence(m).titre).join(', ')}>
+      <b>{r.matieres.length} matières</b>
+      <span class="chapitre-ligne">{r.matieres.map((m, i) => <>{i > 0 && ' · '}<NomMatiere nom={m} /></>)}</span>
+    </span>
+  )
   return (
     <>
       {r.matieres.map(m => {
-        const ordre = voc.matieres.find(x => x.nom === m)?.chapitres ?? []
-        const ch = ordre.filter(c => r.chapitres.includes(cleChapitre(m, c))).map(nomChapitre)
-        if (aLaLigne && ch.length > 0 && ch.length <= 3) return (
+        const ch = chapitres(m)
+        const pages = p && `p. ${p.de}–${p.a}`
+        if (aLaLigne && r.matieres.length === 1 && ch.length > 0 && ch.length <= 3) return (
           <span class="nom-matiere">
             <NomMatiere nom={m} />
             {ch.map(c => <span class="chapitre-ligne">{c}</span>)}
-            {p && <span class="chapitre-ligne">p. {p.de}–{p.a}</span>}
+            {pages && <span class="chapitre-ligne">{pages}</span>}
           </span>
         )
+        // leur nombre (« 2 chap. » sur téléphone, où les mascottes prennent de la place)
+        const compte = aLaLigne && (r.matieres.length > 1 ? ch.length > 1 : ch.length > 3)
+        const texte = compte
+          ? <><span class="long">{ch.length} chapitres</span><span class="court">{ch.length} chap.</span></>
+          : [ch.join(', '), pages].filter(Boolean).join(' · ')
         return (
-          <span class="nom-matiere">
-            <NomMatiere nom={m} />{(ch.length > 0 || p) && <span class="chapitres-choisis">{[ch.join(', '), p && `p. ${p.de}–${p.a}`].filter(Boolean).join(' · ')}</span>}
+          <span class="nom-matiere" title={aLaLigne && ch.length > 1 ? ch.join(', ') : undefined}>
+            <NomMatiere nom={m} />{texte && <span class="chapitres-choisis">{texte}</span>}
           </span>
         )
       })}

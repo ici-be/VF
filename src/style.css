@@ -545,7 +545,12 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
   .reprendre .scene-mini { display: none; }
   .page.accueil .reprendre { padding: 6px 18px 6px 8px; }
 }
-@media (max-width: 999px) { .reprendre .resume { padding-right: 74px; } }
+@media (max-width: 999px) {
+  .reprendre .resume { padding-right: 74px; }
+  /* plusieurs mascottes côte à côte : les lignes (coupées par « … ») s'arrêtent avant elles */
+  .reprendre:has(.scene-mini .acteur:nth-child(2)) .resume { padding-right: 96px; }
+  .reprendre:has(.scene-mini .acteur:nth-child(3)) .resume { padding-right: 138px; }
+}
 /* téléphone et tablette : au défilement, l'en-tête s'en va et le bloc « Commencer » reste collé en haut, la page passe dessous
    (on voit la mascotte changer avec la matière, et « Commencer » reste à portée) ; l'ombre vers le haut cache les coins arrondis */
 @media (max-width: 999px) {
@@ -642,6 +647,17 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .nom-matiere .chapitre-ligne { display: block; color: var(--muted); }
 .etat .nom-matiere + .nom-matiere::before { content: " · "; }
 .reprendre .detail.plusieurs .nom-matiere { display: block; }
+/* bloc « Commencer » : chaque ligne tient sur une ligne (coupée par « … »), pour une hauteur stable */
+.reprendre .detail .nom-matiere, .reprendre .detail .chapitre-ligne { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* matière et chapitres sur une ligne : seuls les chapitres sont coupés, jamais le nom */
+.reprendre .detail .nom-matiere:has(> .chapitres-choisis) { display: flex; align-items: baseline; }
+.reprendre .detail .nom-matiere > .nom-matiere-coul { flex: none; }
+.reprendre .detail .chapitres-choisis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.reprendre .detail .chapitres-choisis .court { display: none; }
+@media (max-width: 999px) {
+  .reprendre .detail .chapitres-choisis .long { display: none; }
+  .reprendre .detail .chapitres-choisis .court { display: inline; }
+}
 /* le bouton : « Commencer », dessous en petit le sens et le nombre de mots, et une flèche dans un rond */
 .reprendre .go.lancer {
   gap: 16px; padding: 9px 10px 9px 22px; border-radius: 16px; text-align: left;
