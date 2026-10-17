@@ -248,8 +248,9 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
   .tableau th:first-child, .tableau td.det { display: none; }
   .tableau .det-court { display: inline; }
   .cellule-mot { justify-content: space-between; }
-  .tableau td.nl { width: 46%; }
-  .cellule-mot .terme { hyphens: auto; overflow-wrap: break-word; }
+  .tableau td.nl { width: 56%; }
+  /* « anywhere » et non « break-word » : seul lui laisse la colonne rétrécir (un tableau se cale sur le mot le plus long) */
+  .cellule-mot .terme { hyphens: auto; overflow-wrap: anywhere; }
   .tableau td { padding: 9px 10px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
