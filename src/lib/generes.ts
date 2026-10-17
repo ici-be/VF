@@ -3,9 +3,11 @@
 // - Eeuwen (Geschiedenis, en néerlandais) : l'année → le siècle ou le tijdvak, un siècle → ses années ;
 // - Calcul mental (Mathématiques) : priorité des opérations, de gauche à droite, exposants, parenthèses, distributivité
 //   (dans les deux sens), calcul astucieux, coder, décoder, propriétés, vocabulaire des opérations ;
-// - Natures des mots (Français) : dans une phrase, la nature du mot mis en évidence.
+// - Natures des mots (Français) : dans une phrase, la nature du mot mis en évidence ;
+// - Voornaamwoorden (Nederlands) : la phrase à compléter par le bon voornaamwoord (src/lib/voornaamwoorden.ts).
 import donneesNatures from '../data/natures.json'
 import type { Matiere, Mot, Vocabulaire } from './mots'
+import { VOORNAAMWOORDEN } from './voornaamwoorden'
 
 type Hasard = () => number
 const entre = (a: number, b: number, h: Hasard) => a + Math.floor(h() * (b - a + 1))
@@ -297,6 +299,8 @@ const CHAPITRES = [
     cartes: CALCULS.map((c, i) => ({ cle: String(i), nl: c.fr, fr: c.fr })) },
   { matiere: /fran[cç]ais|\bfrans\b/i, chapitre: 'Natures des mots (entraînement)', genere: 'natures' as const,
     cartes: (Object.keys(NATURES) as Nature[]).map(n => ({ cle: n, nl: NATURES[n].nom, fr: NATURES[n].nom })) },
+  { matiere: /^nederlands$/i, chapitre: 'Voornaamwoorden (oefening)', genere: 'voornaamwoorden' as const,
+    cartes: VOORNAAMWOORDEN.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
 ]
 /** La notion d'une carte fabriquée (l'indice du tijdvak ou du calcul, la nature). */
 export const cleDe = (m: Mot) => m.id.split('|').pop()!

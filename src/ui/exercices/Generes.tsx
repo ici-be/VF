@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'preact/hooks'
-import type { Correction, Resultat } from '../../lib/correction'
+import { corriger, type Correction, type Resultat } from '../../lib/correction'
 import { cleDe, questionCalcul, questionEeuwen, questionNature, type Nature } from '../../lib/generes'
+import { questionVoornaamwoord } from '../../lib/voornaamwoorden'
 import type { PropsExercice } from '../Seance'
 import { Langue } from './commun'
 import { Choix, Saisie } from './Reponses'
@@ -65,6 +66,38 @@ export function Natures({ carte, pause, suivant, annoncer }: PropsExercice) {
       <Choix options={q.options} bonne={q.bonne} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant}
         annoncer={r => { setRepondu(r); annoncer(r) }} />
       {repondu && <div class="info explication"><b>Le test</b><span>{q.explication}</span></div>}
+    </>
+  )
+}
+
+/** Voornaamwoorden : la phrase à compléter (l'indice entre parenthèses), en choisissant ou en écrivant le mot. */
+export function Voornaamwoorden({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
+  const q = useMemo(() => questionVoornaamwoord(Number(cleDe(carte.mot))), [])
+  const [repondu, setRepondu] = useState<Resultat | null>(null)
+  // en début de phrase, avec une majuscule
+  const vorm = (s: string) => (q.avant ? s : s[0].toUpperCase() + s.slice(1))
+  const attendu = q.bonnes.map(vorm).join(' / ')
+  const uitleg = <div class="info explication"><b>Uitleg</b><span>{q.uitleg}</span></div>
+  const annoncer2 = (r: Resultat) => { setRepondu(r); annoncer(r) }
+  return (
+    <>
+      <div class="carte">
+        <Langue l="nl" />
+        {q.boven && <p class="astuce boven">{q.boven}</p>}
+        <p class="phrase">
+          {q.avant}
+          <span class={repondu ? `trou-corrige ${repondu}` : 'trou-vnw'}>{repondu ? vorm(q.bonnes[0]) : '…'}</span>
+          {q.apres}
+        </p>
+        <p class="astuce">Vul in met het juiste voornaamwoord.</p>
+      </div>
+      {reglages.repondre === 'choix'
+        ? <>
+            <Choix options={q.options.map(vorm)} bonne={vorm(q.bonnes[0])} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant} annoncer={annoncer2} />
+            {repondu && uitleg}
+          </>
+        : <Saisie langue="nl" attendu={attendu} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant} annoncer={annoncer2}
+            corriger={t => corriger(t, q.bonnes.join(' / '), 'nl')} placeholder="Het voornaamwoord" apres={() => uitleg} />}
     </>
   )
 }

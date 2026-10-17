@@ -33,8 +33,8 @@ export interface Mot {
   getal?: number
   /** question de cours : nl = la question, fr = la réponse (en néerlandais aussi) */
   vraag?: Vraag
-  /** une carte d'un exercice fabriqué par l'appli (Eeuwen, calcul mental, natures de mots) : son exercice */
-  genere?: 'eeuwen' | 'calcul' | 'natures'
+  /** une carte d'un exercice fabriqué par l'appli (Eeuwen, calcul mental, natures de mots, voornaamwoorden) : son exercice */
+  genere?: 'eeuwen' | 'calcul' | 'natures' | 'voornaamwoorden'
   /** raté à une interro en classe (colonnes « Interro » et « Raté ») : l'appli le met « à revoir » */
   rate?: RateInterro
 }

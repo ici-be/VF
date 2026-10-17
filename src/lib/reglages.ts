@@ -8,7 +8,7 @@ import { estPrimitif, type Temps } from './conjugaison'
 
 export type Sens = 'fr-nl' | 'nl-fr' | 'mix'
 export type Ordre = 'hasard' | 'fragiles' | 'tableau'
-export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions' | 'getallen' | 'eeuwen' | 'calcul' | 'natures'
+export type ExerciceId = 'defilement' | 'oral' | 'ecrit' | 'qcm' | 'dictee' | 'dehet' | 'definitions' | 'trous' | 'conjugaison' | 'primitifs' | 'interrogatif' | 'motscroises' | 'questions' | 'getallen' | 'eeuwen' | 'calcul' | 'natures' | 'voornaamwoorden'
 export type Repondre = 'choix' | 'ecrit'
 
 export interface Exercice {
@@ -61,6 +61,7 @@ export const EXERCICES: Exercice[] = [
   { id: 'eeuwen', nom: 'Eeuwen', description: 'Een jaartal → de eeuw of het tijdvak, een eeuw → haar jaren (1789 → 18de eeuw, nieuwste tijd).', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, pourMatiere: /geschiedenis|histoire/i, accepte: m => m.genere === 'eeuwen' },
   { id: 'calcul', nom: 'Calcul mental', description: 'Des calculs toujours nouveaux : priorité des opérations, exposants, parenthèses, distributivité, calcul astucieux, coder et décoder, propriétés, vocabulaire.', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, unite: 'calcul', pourMatiere: /math/i, accepte: m => m.genere === 'calcul' },
   { id: 'natures', nom: 'Natures des mots', description: 'Dans une phrase, trouver la nature du mot souligné : nom, déterminant, adjectif, verbe, pronom…', avecSens: false, avecVitesse: false, son: 'muet', enFrancais: true, pourMatiere: /fran[cç]ais|\bfrans\b/i, accepte: m => m.genere === 'natures' },
+  { id: 'voornaamwoorden', nom: 'Voornaam\u00adwoorden', description: 'Des phrases toujours nouvelles à compléter avec le bon voornaamwoord : hij of hem, zijn of haar, ons of onze, hen of hun, « sa mère » → zijn of haar moeder.', avecSens: false, avecVitesse: false, avecRepondre: true, son: 'muet', unite: 'phrase', pourMatiere: /^nederlands$/i, accepte: m => m.genere === 'voornaamwoorden' },
   { id: 'getallen', nom: 'Nombres', description: 'Écrire un nombre en lettres (2 345 → tweeduizend driehonderdvijfenveertig), ou l’inverse, jusqu’à deux millions.', avecSens: true, nederlands: true, avecVitesse: false, son: 'muet', accepte: m => !!m.getal },
 ]
 

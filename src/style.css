@@ -265,6 +265,9 @@ kbd { font: .8rem ui-monospace, monospace; border: 1px solid var(--line); border
 .trou-corrige.juste { background: var(--ok-bg); color: var(--ok); }
 .trou-corrige.presque { background: var(--mid-bg); color: var(--mid); }
 .trou-corrige.faux { background: var(--ko-bg); color: var(--ko); }
+/* Voornaamwoorden : le trou de la phrase, rempli par la bonne réponse une fois répondu */
+.trou-vnw { display: inline-block; min-width: 3em; border-bottom: 2.5px solid var(--blue); background: var(--blue-bg); border-radius: 6px 6px 0 0; color: var(--muted); }
+.astuce.boven { font-style: italic; margin-bottom: .4em; }
 .tape { color: var(--ko); margin-right: 6px; font-weight: 400; text-decoration-thickness: 2px; }
 
 /* ---------- matières ---------- */
@@ -453,7 +456,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .description-exercice { margin: 0; font-size: .92rem; color: var(--muted); }
 .description-exercice b { color: var(--fg); }
 @media (min-width: 1000px) { .col-exercice .tuiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .tuiles { grid-template-columns: 1fr 1fr; } }
+/* minmax(0, …) : un nom long (Voornaamwoorden) se coupe au lieu d'élargir la page */
+@media (max-width: 560px) { .tuiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1000px) {
   .col-exercice { gap: 16px; }
   .col-exercice .reglages { gap: 12px 20px; }
