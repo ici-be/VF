@@ -1,7 +1,7 @@
 import dessins from '../data/dessins.json'
 import type { Mot } from '../lib/mots'
 
-// Les dessins des définitions (géométrie) : outils/dessins.py les écrit dans src/data/dessins.json,
+// Les dessins des définitions (géométrie, religion, histoire, géographie) : outils/dessins.py les écrit dans src/data/dessins.json,
 // par matière puis par mot, tels qu'ils sont dans le tableau.
 const DESSINS = dessins as Record<string, Record<string, string>>
 
