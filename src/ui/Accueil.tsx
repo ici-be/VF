@@ -17,13 +17,14 @@ import { copierBientot, raccourcir } from '../lib/liens'
 import { BoutonUtilisateur } from './Utilisateur'
 import { TEMPS } from '../lib/conjugaison'
 import { IconeExercice } from './icones'
-import { ArrowRight, Check, CloudOff, Link, Volume2, VolumeX } from 'lucide-preact'
+import { ArrowRight, Check, CloudOff, Link, Play, Volume2, VolumeX } from 'lucide-preact'
 import { Scene } from './Scene'
 import { sauter, svgBuste } from '../lib/mascottes'
 import { Logo, MotExemple } from './Marque'
 
 export { nomChapitre } from './Matieres'
 import { nomChapitre, NomsMatieres } from './Matieres'
+import { leconsDe } from '../lib/lecons'
 
 // les exercices les plus utiles d'abord ; les jeux, de/het et l'oral à part ; le reste (propre à une matière) dans « Spécial »
 const REVISER: ExerciceId[] = ['defilement', 'qcm', 'ecrit', 'definitions', 'questions', 'trous', 'dictee']
@@ -253,6 +254,13 @@ export function Accueil({ voc, chargement, actualiser, reglages: r, setReglages,
                   )
                 })}
               </div>
+              {leconsDe(m.nom).length > 0 && (
+                <div class="lecons">
+                  {leconsDe(m.nom).map(l => (
+                    <a class="lecon" href={l.url}><Play size={16} aria-hidden="true" /> Leçon animée <span class="n">{nomChapitre(l.chapitre)} · p. {l.pages}</span></a>
+                  ))}
+                </div>
+              )}
               {seul?.matiere === m.nom && bornes && <Pages cle={seul.cle} bornes={bornes} r={r} maj={maj} n={dispo} unite={unite} />}
             </div>
           )

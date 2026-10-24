@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wat bevindt er zich onder onze voeten?</title>
+<link rel="stylesheet" href="../lib/engine.css">
+<link rel="expect" href="#bar" blocking="render"><!-- hold the first frame until the player exists, so the page transition can run -->
+</head>
+<body>
+<script src="../lib/engine.js"></script>
+<script src="../lib/natuur.js"></script>
+<script src="audio/nl/timings.js"></script>
+<script>
+'use strict';
+// Chemie, natuurlijke grondstoffen · hoofdstuk 1 (handboek p. 46–57): bodem, ondergrond en natuurlijke hulpbronnen.
+const CHAPTER = { number: 1, title: 'Wat bevindt er zich onder onze voeten?', minutes: 8, language: 'nl' };
+
+/* ---------- chapter drawing helpers ---------- */
+const text = (p, str, x, y, t0, { size = 30, fill = COL.chalk, anchor = 'start', weight = 500 } = {}) => { const e = T(p, str, { x, y, size, fill, anchor, weight, o: 0 }); show(e, t0); return e; };
+const lines = (p, arr, x, y, dy, t0, opt, gap = .25) => arr.map((s, i) => text(p, s, x, y + i * dy, t0 + i * gap, opt));
+const popIn = (e, t0, d = .4) => tw(e, { s: 1, o: 1 }, t0, d, back);
+const flash = (p, x, y, w, h, t0, color = COL.chalk) => {   // an outline that lights up a region for a moment
+  const r = mk('rect', { x, y, width: w, height: h, rx: 6, fill: 'none', stroke: color, 'stroke-width': 5 }, p);
+  put(r, { o: 0 }); tw(r, { o: 1 }, t0, .25); tw(r, { o: 0 }, t0 + .9, .6); return r;
+};
+const SHADES = ['#cdb99a', '#b8a47f', '#d9ccb0', '#a89677'];
+
+/* ---------- beats: [id, title, run(m, D), { ask }?] ---------- */
+const BEATS = [
+
+/* ===== titel ===== */
+  ['intro', 'Wat zit er onder onze voeten?', (m, D) => {
+    const g = G(scene, { o: 0, y: 24 });
+    T(g, 'Deel chemie · Natuurlijke grondstoffen', { x: 800, y: 230, size: 28, fill: COL.dim, anchor: 'middle' });
+    T(g, 'Hoofdstuk 1', { x: 800, y: 300, size: 34, fill: COL.task, anchor: 'middle', weight: 700 });
+    tw(g, { o: 1, y: 0 }, .2, 1.1, out);
+    const t = G(scene, { o: 0, y: 20 });
+    T(t, 'Wat bevindt er zich', { x: 800, y: 420, size: 84, weight: 600, anchor: 'middle' });
+    T(t, 'onder onze voeten?', { x: 800, y: 520, size: 84, weight: 600, anchor: 'middle' });
+    tw(t, { o: 1, y: 0 }, m('t'), .9, out);
+    // the ground, in the colours the chapter uses for it
+    const ground = G(scene);
+    [[760, 50, NAT.aarde], [810, 50, '#9a8466'], [860, 40, '#2c6ea6'], [895, 25, '#3a2b23']].forEach(([y, hh, c], i) => {
+      const r = mk('rect', { x: 0, y: y + hh, width: 1600, height: 0, fill: c }, ground);
+      r.setAttribute('y', y + hh);
+      tw(r, { a_y: y, a_height: hh + 1 }, .5 + i * .35, .8, out);
+    });
+    const r = text(scene, 'Bodem, ondergrond en natuurlijke hulpbronnen', 800, 660, m('sub'), { size: 34, fill: COL.dim, anchor: 'middle' });
+    tw(g, { o: 0, y: -24 }, D - .9, .8); tw(t, { o: 0, y: -24 }, D - .9, .8); hide(r, D - .9, .8); hide(ground, D - .9, .8);
+  }],
+
+/* ===== 1. de bodem ===== */
+  ['bodem', 'De bodem is een mengsel', (m, D) => {
+    const p = panel(0);
+    const bx = 110, by = 190, W = 660, H = 580;
+    const mx = bx + W / 2, my = by + H / 2;
+    const box = G(p, { o: 0, s: .55, x: mx * .45, y: my * .45 });
+    mk('rect', { x: bx, y: by, width: W, height: H, rx: 22, fill: '#5a4333', stroke: NAT.aardeD, 'stroke-width': 4 }, box);
+    show(box, .2);
+    prog(q => { const s = .55 + .45 * q; put(box, { s, x: mx * (1 - s), y: my * (1 - s) }); }, m('b'), 1.8, out);
+    text(p, 'Een stukje bodem, sterk uitvergroot', bx + W / 2, by - 30, m('b'), { size: 30, fill: COL.dim, anchor: 'middle' });
+    const placed = [], rect = { x: bx + 18, y: by + 18, w: W - 36, h: H - 36 };
+    const wg = [], bg = [];
+    const worms = nscatter(rect, 2, 44, 44, 15, placed), beetles = nscatter(rect, 2, 24, 24, 16, placed);
+    const stones = nscatter(rect, 34, 16, 34, 11, placed), bits = nscatter(rect, 24, 11, 17, 12, placed);
+    const wet = nscatter(rect, 40, 7, 11, 13, placed, 2), air = nscatter(rect, 28, 7, 13, 14, placed, 3);
+    const part = (list, t0, gap, make) => list.map((c, i) => { const g = G(box, { x: c.x, y: c.y, s: 0 }); make(g, c, i); tw(g, { s: 1 }, t0 + i * gap, .35, back); return g; });
+    const wave = (gs, t0, gap, until, k) => gs.forEach((g, i) => { for (let t = t0 + 2 + i * gap; t < until; t += gs.length * gap + 1) pulse(g, t, k); });
+    const gStones = part(stones, m('c1'), .05, (g, c, i) => mk('path', { d: nblob(c.r, c.r * .8, 50 + i, .25, 8), fill: SHADES[i % 4], stroke: NAT.steenD, 'stroke-width': 2 }, g));
+    const gBits = part(bits, m('c2', 2.2), .08, (g, c, i) => {
+      const dead = i % 3 === 0;
+      mk('path', { d: `M${-c.r} 0Q0 ${-c.r * .8} ${c.r} 0Q0 ${c.r * .8} ${-c.r} 0Z`, fill: dead ? '#6b4a2a' : (i % 2 ? NAT.bioD : NAT.bio), stroke: dead ? '#3d2a16' : '#2f6b33', 'stroke-width': 2, transform: `rotate(${i * 47})` }, g);
+    });
+    worms.forEach((c, i) => {
+      const w = path(p, 'M-34 8C-22 -22 -6 22 6 -4S28 -14 36 6', { stroke: '#e9a0a0', 'stroke-width': 10 }, { x: c.x, y: c.y, d: 0 });
+      box.appendChild(w); draw(w, m('c2') + i * .6, 1.2); wg.push(w);
+    });
+    beetles.forEach((c, i) => {
+      const g = G(box, { x: c.x, y: c.y, s: 0, r: i ? 30 : -25 });
+      mk('path', { d: 'M-16 -8L-26 -18M-16 4L-28 6M-14 14L-24 24M16 -8L26 -18M16 4L28 6M14 14L24 24', stroke: '#1a1512', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, g);
+      mk('ellipse', { cx: 0, cy: 4, rx: 16, ry: 20, fill: '#2b2623', stroke: '#6b6562', 'stroke-width': 2 }, g);
+      mk('circle', { cx: 0, cy: -20, r: 8, fill: '#2b2623' }, g);
+      tw(g, { s: 1 }, m('c2') + 1.2 + i * .5, .4, back); g._x = c.x; g._y = c.y; bg.push(g);
+    });
+    const gWet = part(wet, m('c3'), .06, (g, c) => { mk('ellipse', { rx: c.r, ry: c.r * .72, fill: NAT.water, stroke: NAT.waterD, 'stroke-width': 1.5 }, g); mk('circle', { cx: -c.r * .3, cy: -c.r * .25, r: c.r * .2, fill: '#e8f5ff' }, g); });
+    const gAir = part(air, m('c4'), .07, (g, c) => mk('circle', { r: c.r, fill: NAT.lucht, 'fill-opacity': .8, stroke: '#fff', 'stroke-width': 2 }, g));
+    wave(gStones, m('c1'), .28, m('c2') - 1, 1.3); wave(gBits, m('c2'), .4, m('c3') - 1, 1.4);
+    wave(gWet, m('c3'), .12, m('c4') - .5, 1.5); wave(gAir, m('c4'), .2, D - 1, 1.4);
+    clockRun(t => {
+      wg.forEach((w, i) => put(w, { r: Math.sin(t * 2.2 + i * 2) * 6 }));
+      bg.forEach((g, i) => put(g, { x: g._x + Math.sin(t * 1.3 + i * 2) * 7, y: g._y + Math.cos(t * 1.1 + i) * 5 }));
+    }, D);
+    const rows = [
+      ['Gesteentefragmenten', ['heel kleine stukjes steen en zand:', 'de basis van de bodem'], 'c1', NAT.steen],
+      ['Organisch materiaal', ['levende organismen en hun resten', '→ de bodem wordt vruchtbaar'], 'c2', NAT.bio],
+      ['Water', ['tussen de deeltjes zitten waterdruppels:', 'planten gebruiken het om te groeien'], 'c3', NAT.water],
+      ['Lucht', ['ook tussen de deeltjes:', 'nodig voor wortels en kleine organismen'], 'c4', NAT.lucht],
+    ];
+    rows.forEach(([name, sub, mark, c], i) => {
+      const y = 262 + i * 150, g = G(p, { x: -24, y, o: 0 });
+      const dot = mk('circle', { cx: 880, cy: -12, r: 20, fill: c, stroke: '#fff', 'stroke-width': 2 }, g);
+      T(g, name, { x: 925, y: 0, size: 40, weight: 700, fill: c });
+      sub.forEach((s, j) => T(g, s, { x: 925, y: 42 + j * 34, size: 27, fill: COL.dim }));
+      tw(g, { o: 1, x: 0 }, m(mark), .6, out);
+      pulse(dot, m(mark) + .3, 1.5);
+    });
+  }],
+
+/* ===== soorten bodem ===== */
+  ['bodem2', 'Zand, klei en humus', (m, D) => {
+    const p = panel(0);
+    const TY = 250, TH = 310, TWD = 330;
+    const cols = [
+      { cx: 300, key: 'zand', title: 'Veel zand', res: 'Het water loopt snel door.', c: NAT.steen },
+      { cx: 800, key: 'klei', title: 'Veel klei', res: 'Houdt het water goed vast.', c: '#d98a5c' },
+      { cx: 1300, key: 'hum', title: 'Veel organisch materiaal', res: 'Heel vruchtbaar.', c: NAT.bio },
+    ];
+    cols.forEach(({ cx, key, title, res, c }, ci) => {
+      const g = G(p, { o: 0 });
+      const tx = cx - TWD / 2;
+      const inner = { x: tx + 8, y: TY + 8, w: TWD - 16, h: TH - 16 };
+      mk('rect', { x: tx, y: TY, width: TWD, height: TH, fill: key === 'zand' ? '#4a3a2b' : key === 'klei' ? '#7a4a30' : '#3b2a1e' }, g);
+      if (key === 'zand') nscatter(inner, 34, 13, 20, 21, [], 14).forEach((q, i) => mk('path', { d: nblob(q.r, q.r * .85, 60 + i, .2, 7), fill: SHADES[i % 4], transform: `translate(${q.x},${q.y})` }, g));
+      if (key === 'klei') nscatter(inner, 190, 6, 9, 22, [], 1).forEach((q, i) => mk('circle', { cx: q.x, cy: q.y, r: q.r, fill: ['#b9704a', '#a35f3c', '#c98258'][i % 3] }, g));
+      if (key === 'hum') {
+        const pl = [];
+        nscatter(inner, 40, 6, 12, 23, pl, 3).forEach((q, i) => mk('circle', { cx: q.x, cy: q.y, r: q.r, fill: ['#2a1d14', '#4a3524', '#5a4330'][i % 3] }, g));
+        nscatter(inner, 14, 9, 13, 24, pl, 3).forEach((q, i) => mk('path', { d: `M${-q.r} 0Q0 ${-q.r * .8} ${q.r} 0Q0 ${q.r * .8} ${-q.r} 0Z`, fill: i % 3 ? NAT.bioD : '#6b4a2a', transform: `translate(${q.x},${q.y}) rotate(${i * 53})` }, g));
+        mk('path', { d: 'M-34 8C-22 -22 -6 22 6 -4S28 -14 36 6', stroke: '#e9a0a0', 'stroke-width': 9, fill: 'none', 'stroke-linecap': 'round', transform: `translate(${cx - 70},${TY + 215})` }, g);
+      }
+      mk('path', { d: `M${tx} ${TY}V${TY + TH}M${tx + TWD} ${TY}V${TY + TH}`, stroke: COL.chalk, 'stroke-width': 5, fill: 'none' }, g);
+      mk('path', { d: `M${tx} ${TY + TH}H${tx + TWD}`, stroke: COL.dim, 'stroke-width': 4, 'stroke-dasharray': '10 8', fill: 'none' }, g);
+      show(g, .3 + ci * .2);
+      text(p, title, cx, 612, m(key), { size: 34, weight: 700, fill: c, anchor: 'middle' });
+      text(p, res, cx, 654, m(key, 2.2), { size: 28, fill: COL.chalk, anchor: 'middle' });
+    });
+    // water poured on each: drops falling through sand, stopped by clay, a plant growing in humus
+    const dropsAt = (cx, t0, fall, stopY) => [-90, 0, 80].forEach((dx, i) => {
+      const d = ndrop(p, 40, { x: cx + dx, y: 228, o: 0 });
+      const ts = t0 + .2 + i * .55;
+      tw(d, { o: 1 }, ts, .15);
+      prog(q => put(d, { x: cx + dx + (fall ? Math.sin(q * 14 + i) * 11 : 0), y: 228 + (stopY - 228) * q }), ts, fall ? 1.1 : .55, lin);
+      hide(d, ts + (fall ? .95 : .5), .15);
+    });
+    dropsAt(300, m('zand'), true, 580);
+    dropsAt(800, m('klei'), false, TY + 6);
+    const pud = mk('ellipse', { cx: 800, cy: TY + 2, rx: 0, ry: 8, fill: NAT.water, stroke: NAT.waterD, 'stroke-width': 2 }, p);
+    tw(pud, { a_rx: 170, a_ry: 16 }, m('klei') + .8, 1.8, out);
+    const sx = 1300, stem = path(p, `M${sx} ${TY} C${sx - 8} ${TY - 40} ${sx + 8} ${TY - 80} ${sx} ${TY - 118}`, { stroke: NAT.bioD, 'stroke-width': 7 }, { d: 0 });
+    draw(stem, m('hum') + .5, 1.6);
+    [[-1, 55], [1, 85]].forEach(([dir, up], i) => {
+      const l = G(p, { x: sx, y: TY - up, s: 0, r: dir * 20 });
+      mk('path', { d: `M0 0C${dir * 40} -30 ${dir * 70} -10 ${dir * 70} 6C${dir * 40} 16 ${dir * 10} 12 0 0Z`, fill: NAT.bio, stroke: NAT.bioD, 'stroke-width': 3 }, l);
+      tw(l, { s: 1 }, m('hum') + 1.5 + i * .4, .5, back);
+    });
+    const fl = G(p, { x: sx, y: TY - 124, s: 0 });
+    [0, 72, 144, 216, 288].forEach(a => mk('ellipse', { cx: 0, cy: -16, rx: 8, ry: 14, fill: '#f08fb5', transform: `rotate(${a})` }, fl));
+    mk('circle', { r: 8, fill: NAT.zon }, fl);
+    tw(fl, { s: 1 }, m('hum') + 2.4, .5, back);
+  }],
+  ['q1', 'Even controleren', () => {}, { ask: done => quiz(BAND, [{
+    id: 'c-bodem', prompt: ['Welke bodem houdt het water goed vast?'],
+    build: choice([['Een bodem met veel zand'], ['Een bodem met veel klei'], ['Een bodem met veel lucht']], 1,
+      'Klei houdt het water goed vast. Zand laat het snel doorlopen.',
+      ['Zand laat het water snel doorlopen: het blijft dus niet vast.', null, 'Lucht zit tussen de deeltjes, maar dat zegt niets over het vasthouden van water.']),
+  }], done) }],
+
+/* ===== 2. de ondergrond ===== */
+  ['ondergrond', 'Bodem en ondergrond', (m, D) => {
+    const p = panel(0);
+    const bx = 420, bw = 780, by = 250;
+    const L = [   // y, height, colour
+      ['bodem', by, 90, NAT.aarde], ['gest', by + 90, 190, '#8d7b62'], ['water', by + 280, 130, '#2c6ea6'], ['foss', by + 410, 140, '#3a2b23'],
+    ];
+    const blk = G(p, { o: 0 });
+    L.forEach(([k, y, hh, c]) => mk('rect', { x: bx, y, width: bw, height: hh, fill: c }, blk));
+    const r0 = nrng(5);
+    for (let i = 0; i < 26; i++) mk('circle', { cx: bx + 14 + r0() * (bw - 28), cy: by + 12 + r0() * 66, r: 2 + r0() * 4, fill: NAT.aardeD }, blk);
+    for (let i = -1; i < 3; i++) mk('path', { d: `M${bx} ${by + 150 + i * 52}Q${bx + bw * .3} ${by + 135 + i * 52} ${bx + bw * .55} ${by + 152 + i * 52}T${bx + bw} ${by + 148 + i * 52}`, stroke: '#a8957a', 'stroke-width': 3, fill: 'none', opacity: .8 }, blk);
+    nscatter({ x: bx + 10, y: by + 100, w: bw - 20, h: 170 }, 16, 6, 13, 6, [], 22).forEach((q, i) => mk('path', { d: nblob(q.r, q.r * .8, i, .2, 7), fill: '#b8a789', opacity: .8, transform: `translate(${q.x},${q.y})` }, blk));
+    for (let i = 0; i < 6; i++) mk('path', { d: `M${bx + 8} ${by + 300 + i * 20}Q${bx + bw / 2} ${by + 288 + i * 20} ${bx + bw - 8} ${by + 300 + i * 20}`, stroke: '#6ab7f0', 'stroke-width': 2, fill: 'none', opacity: .35 }, blk);
+    // fossils: an ammonite and a fern leaf
+    path(blk, 'M0 0C0 -8 8 -10 12 -6C18 0 14 12 4 14C-10 16 -18 4 -14 -8C-8 -22 12 -26 22 -16C34 -4 30 18 12 26C-14 36 -38 18 -34 -6', { stroke: NAT.fossiel, 'stroke-width': 5 }, { x: bx + 66, y: by + 482 });
+    path(blk, 'M0 0C20 -10 50 -14 80 -6M14 -7L20 -24M30 -10L36 -28M46 -11L52 -29M62 -9L68 -26M14 -7L22 8M30 -10L38 6M46 -11L54 5M62 -9L70 7', { stroke: '#7da05d', 'stroke-width': 4 }, { x: bx + bw - 130, y: by + 492 });
+    tw(blk, { o: 1 }, .3, .8);
+    // above the surface
+    const sky = G(p, { o: 0 });
+    ngrass(sky, bx, bx + bw, by, 8);
+    ntree(sky, 150, { x: bx + 140, y: by });
+    [[bx + 560, 36], [bx + 660, 28]].forEach(([x, r], i) => { mk('path', { d: nblob(r * 1.2, r, 90 + i, .15, 8), fill: NAT.steen, stroke: NAT.steenD, 'stroke-width': 3, transform: `translate(${x},${by - r * .6})` }, sky); });
+    show(sky, .5);
+    // bubbles rise through the water layer
+    const bub = [0, 1, 2, 3].map(i => { const b = mk('circle', { r: 6 + i, fill: 'none', stroke: '#cfe9ff', 'stroke-width': 2.5 }, p); put(b, { o: 0 }); return b; });
+    clockRun(t => bub.forEach((b, i) => { const k = (t * .22 + i * .27) % 1; put(b, { x: bx + 140 + i * 190 + Math.sin(t * 2 + i) * 8, y: by + 400 - k * 110, o: t > m('w') ? Math.sin(k * Math.PI) * .8 : 0 }); }), D);
+    // the surface line
+    const surf = path(p, `M${bx - 40} ${by}H${bx + bw + 40}`, { stroke: COL.chalk, 'stroke-width': 3, 'stroke-dasharray': '14 10' }, { o: 0 });
+    show(surf, m('bod') + .2);
+    text(p, 'aardoppervlak', bx + bw + 60, by + 8, m('bod') + .2, { size: 26, fill: COL.dim });
+    // the topsoil
+    flash(p, bx, by, bw, 90, m('bod') + .3, NAT.bio);
+    const b1 = nbracket(p, bx - 26, by, by + 90, -1, NAT.bio); draw(b1, m('bod') + .4, .6);
+    text(p, 'De bodem', bx - 50, by + 50, m('bod') + .5, { size: 38, weight: 700, fill: NAT.bio, anchor: 'end' });
+    text(p, 'de bovenste laag', bx - 50, by + 84, m('bod') + .8, { size: 26, fill: COL.dim, anchor: 'end' });
+    // everything below the surface
+    const b2 = nbracket(p, bx + bw + 26, by, by + 550, 1, COL.task); draw(b2, m('ond') + .3, 1.4);
+    text(p, 'De ondergrond', bx + bw + 52, by + 250, m('ond') + .5, { size: 40, weight: 700, fill: COL.task });
+    lines(p, ['alles onder het', 'aardoppervlak'], bx + bw + 52, by + 292, 34, m('ond') + 1, { size: 27, fill: COL.dim });
+    const scan = path(p, `M${bx} 0H${bx + bw}`, { stroke: COL.task, 'stroke-width': 5 }, { o: 0 });
+    put(scan, { y: by });
+    tw(scan, { o: 1 }, m('ond') + 1.4, .3);
+    tw(scan, { y: by + 548 }, m('ond') + 1.4, 3.6, io);
+    hide(scan, m('ond') + 5.2, .4);
+    // the three materials
+    const pill = (str, y, color, mark, hh) => {
+      const g = npill(p, str, { x: bx + bw / 2, y, size: 34, color, o: 0 });
+      put(g, { s: .7 }); popIn(g, m(mark), .45);
+      flash(p, bx, y - hh / 2 - 0, bw, hh, m(mark) + .2, color);
+    };
+    pill('Gesteenten', by + 185, '#d8c8a8', 'g', 190);
+    pill('Water', by + 345, NAT.water, 'w', 130);
+    pill('Fossiel organisch materiaal', by + 480, NAT.fossiel, 'f', 140);
+  }],
+
+/* ===== 2.1 gesteenten ===== */
+  ['steen1', 'Stollingsgesteenten', (m, D) => {
+    const p = panel(0);
+    text(p, 'Gesteenten', 800, 300, .3, { size: 64, weight: 700, anchor: 'middle' });
+    const ovr = ['basalt', 'zandsteen', 'marmer', 'graniet', 'kalksteen', 'leisteen'].map((k, i) => {
+      const r = nrock(p, k, 74, { x: 285 + i * 206, y: 520, s: 0 });
+      tw(r, { s: 1 }, 3 + i * .4, .5, back); tw(r, { s: 0 }, m('a') - .9, .4); return r;
+    });
+    hide(p.firstChild, m('a') - .9, .4);
+    rockChips(p, 0, m('a', -.3));
+    const cx = 540, cy = 480;
+    const blob = path(p, nblob(270, 165, 5, .1, 10), { fill: NAT.magma, stroke: '#ffd2a0', 'stroke-width': 7 }, { x: cx, y: cy, o: 0 });
+    show(blob, m('a') + .3, .8);
+    const bub = [0, 1, 2, 3, 4].map(i => { const b = mk('circle', { r: 11 + i * 3, fill: '#ffb27a', stroke: '#ffd9b0', 'stroke-width': 2 }, p); put(b, { o: 0 }); return b; });
+    const tAf = m('af');
+    clockRun(t => bub.forEach((b, i) => {
+      const hot = t > m('a') + .6 && t < tAf + .6;
+      const k = ((t * .45 + i * .21) % 1);
+      put(b, { x: cx - 170 + i * 85, y: cy + 90 - k * 170, o: hot ? Math.sin(k * Math.PI) * .9 : 0 });
+    }), D);
+    const heat = pillAt(p, 'gesmolten gesteente', cx, cy - 215, NAT.magma, m('a') + .6);
+    const hard = pillAt(p, 'hard gesteente', cx, cy - 215, '#aab0b8', tAf + 2.6);
+    hide(heat, tAf + 2.2, .4);
+    tw(blob, { c_fill: '#8d9096', c_stroke: '#5f6368' }, tAf + .2, 3, soft);
+    ['M-120 -60L-60 -10L-70 50', 'M20 -90L60 -20L130 10', 'M-30 60L40 90'].forEach((d, i) => {
+      const c = path(p, d, { stroke: '#3a3d42', 'stroke-width': 5 }, { x: cx, y: cy, d: 0 }); draw(c, tAf + 2.8 + i * .2, .6);
+    });
+    // the thermometer cools
+    const tx = 130;
+    const tube = mk('rect', { x: tx - 12, y: 270, width: 24, height: 470, rx: 12, fill: COL.board, stroke: COL.chalk, 'stroke-width': 4 }, p);
+    put(tube, { o: 0 }); show(tube, m('a'));
+    const lvl = mk('rect', { x: tx - 6, y: 285, width: 12, height: 455, rx: 6, fill: NAT.magma }, p);
+    const bulb = mk('circle', { cx: tx, cy: 745, r: 30, fill: NAT.magma, stroke: COL.chalk, 'stroke-width': 4 }, p);
+    put(lvl, { o: 0 }); put(bulb, { o: 0 }); show(lvl, m('a')); show(bulb, m('a'));
+    tw(lvl, { a_y: 640, a_height: 100, c_fill: NAT.waterD }, tAf, 3.4, soft);
+    tw(bulb, { c_fill: NAT.waterD }, tAf + 2.2, 1.2, soft);
+    text(p, 'heet', tx + 36, 300, m('a'), { size: 26, fill: NAT.magma });
+    text(p, 'koud', tx + 36, 700, tAf + 2.5, { size: 26, fill: NAT.waterD });
+    text(p, 'afkoelen', cx + 200, 700, tAf, { size: 32, fill: COL.task, weight: 600 });
+    rockInfo(p, m, 'Stollingsgesteenten', NAT.magma, ['Gesmolten gesteente', '(magma of lava)', 'koelt af en wordt hard.'], ['basalt', 'graniet'], m('a'));
+  }],
+
+/* ===== 2.2 afzetting ===== */
+  ['steen2', 'Afzettingsgesteenten', (m, D) => {
+    const p = panel(0);
+    rockChips(p, 1, m('a', .3));
+    const x0 = 200, x1 = 780, floor = 760;
+    const defs = [['#d8c28f', 'zand'], ['#b9704a', 'klei'], ['#e8e2d0', 'schelpjes'], ['#d8c28f', 'zand'], ['#a06040', 'klei']];
+    const bands = mk('g', {}, p), hB = 70;
+    defs.forEach(([c, name], i) => {
+      const g = G(bands, { y: -180, o: 0 }), y = floor - (i + 1) * hB;
+      mk('rect', { x: x0 + 12, y, width: x1 - x0 - 24, height: hB, fill: c }, g);
+      if (name === 'schelpjes') [0, 1, 2, 3, 4, 5].forEach(k => mk('path', { d: 'M-14 6A14 14 0 0 1 14 6Z M-8 6L-8 -3M0 6V-6M8 6V-3', fill: '#fff', stroke: '#b8ad92', 'stroke-width': 2, transform: `translate(${x0 + 80 + k * 80},${y + 36})` }, g));
+      else nscatter({ x: x0 + 20, y: y + 6, w: x1 - x0 - 40, h: hB - 12 }, 14, 3, 5, 30 + i, [], 6).forEach(q => mk('circle', { cx: q.x, cy: q.y, r: q.r, fill: 'rgba(0,0,0,.18)' }, g));
+      const ts = m('lg') + i * .45;
+      tw(g, { y: 0, o: 1 }, ts, .55, out);
+      const lab = text(p, name, x1 + 28, y + hB / 2 + 10, ts + .2, { size: 28, fill: COL.dim });
+      tw(lab, { o: 0 }, m('dr') + .2, .5);
+    });
+    mk('path', { d: `M${x0} ${floor - 440}V${floor}H${x1}V${floor - 440}`, stroke: COL.chalk, 'stroke-width': 8, fill: 'none', 'stroke-linejoin': 'round' }, p);
+    const plate = mk('rect', { x: x0 + 8, y: 0, width: x1 - x0 - 16, height: 26, rx: 6, fill: '#7a8591', stroke: '#c4ccd4', 'stroke-width': 3 }, p);
+    put(plate, { o: 0, y: 250 }); tw(plate, { o: 1 }, m('dr') - .6, .5);
+    const arr = [0, 1, 2].map(i => {
+      const a = path(p, `M${x0 + 110 + i * 180} 150V225M${x0 + 90 + i * 180} 205L${x0 + 110 + i * 180} 228L${x0 + 130 + i * 180} 205`, { stroke: COL.task, 'stroke-width': 8 }, { o: 0 });
+      show(a, m('dr') - .4, .4); return a;
+    });
+    const druk = text(p, 'druk', x1 + 28, 215, m('dr') - .2, { size: 34, fill: COL.task, weight: 700 });
+    // the pile is pressed down by 18 %
+    const K = .8, topY = floor - 5 * hB, plateRest = floor - 5 * hB * K - 26;
+    prog(q => {
+      const k = 1 - (1 - K) * q;
+      bands.setAttribute('transform', `translate(0,${floor * (1 - k)}) scale(1,${k})`);
+      put(plate, { y: 250 + (plateRest - 250) * q });
+      arr.forEach(a => put(a, { y: (plateRest - 250 + 24) * q }));
+    }, m('dr') + .2, 1.6, io);
+    text(p, 'samengedrukt tot steen', (x0 + x1) / 2, 820, m('dr') + 1.8, { size: 30, fill: COL.dim, anchor: 'middle' });
+    rockInfo(p, m, 'Afzettingsgesteenten', NAT.steen, ['Laagjes zand, klei of', 'schelpjes worden op', 'elkaar gedrukt.'], ['zandsteen', 'kalksteen'], m('a'));
+  }],
+
+/* ===== 2.3 metamorf ===== */
+  ['steen3', 'Metamorfe gesteenten', (m, D) => {
+    const p = panel(0);
+    rockChips(p, 2, m('a', .3));
+    const lil = '#b79ad6';
+    const earth = G(p, { o: 0 });
+    mk('rect', { x: 130, y: 190, width: 700, height: 600, rx: 24, fill: '#3a2e27', stroke: NAT.aardeD, 'stroke-width': 4 }, earth);
+    nscatter({ x: 150, y: 210, w: 660, h: 560 }, 40, 4, 9, 41, [], 16).forEach(q => mk('circle', { cx: q.x, cy: q.y, r: q.r, fill: '#4b3a30' }, earth));
+    show(earth, m('a') + .2);
+    const rx = 480, ry = 490;
+    const rockG = G(p, { x: rx, y: ry, o: 0 });
+    const body = mk('rect', { x: -150, y: -85, width: 300, height: 170, rx: 24, fill: '#c9a875', stroke: '#8f6a38', 'stroke-width': 5 }, rockG);
+    const A = G(rockG), B = G(rockG, { o: 0 });
+    [-50, -15, 22, 55].forEach((y, i) => mk('path', { d: `M-135 ${y}Q-60 ${y - 18} 0 ${y + 6}T135 ${y - 4}`, stroke: '#8f6a38', 'stroke-width': 4, fill: 'none' }, A));
+    [-56, -28, 0, 28, 56].forEach(y => mk('path', { d: `M-138 ${y}H138`, stroke: '#5c6068', 'stroke-width': 4, fill: 'none' }, B));
+    nscatter({ x: -130, y: -70, w: 260, h: 140 }, 22, 5, 9, 55, [], 3).forEach(q => mk('path', { d: `M${q.x - q.r} ${q.y}L${q.x} ${q.y - q.r * 1.3}L${q.x + q.r} ${q.y}L${q.x} ${q.y + q.r * 1.3}Z`, fill: 'rgba(255,255,255,.55)' }, B));
+    show(rockG, m('a') + .5, .6);
+    text(p, 'diep in de aarde', 480, 235, m('a') + .8, { size: 30, fill: COL.dim, anchor: 'middle' });
+    const dep = path(p, 'M175 270V715M153 690L175 718L197 690', { stroke: COL.dim, 'stroke-width': 5 }, { d: 0 }); draw(dep, m('a') + .8, 3.4);
+    // pressure from three sides, pushing in on the rock
+    const press = [[rx - 190, ry, 0, 1], [rx + 190, ry, 180, -1], [rx, ry - 150, 90, 0]].map(([x, y, r, dx], i) => {
+      const g = G(p, { x, y, r, o: 0 });
+      path(g, 'M-70 0H0M-22 -22L4 0L-22 22', { stroke: COL.task, 'stroke-width': 9 });
+      show(g, m('dk') + i * .12, .3);
+      prog(q => put(g, dx ? { x: x + dx * Math.sin(q * Math.PI * 8) * 8 } : { y: y + Math.sin(q * Math.PI * 8) * 8 }), m('dk'), 2.6, lin);
+      return g;
+    });
+    const druk = npill(p, 'hoge druk', { x: rx + 150, y: ry - 150, size: 30, color: COL.task, o: 0 }); show(druk, m('dk'), .4);
+    // heat rises from below
+    [-90, 0, 90].forEach((dx, i) => {
+      const w = path(p, 'M0 0C-12 -12 12 -22 0 -32C-12 -42 12 -52 0 -62', { stroke: NAT.magma, 'stroke-width': 7 }, { x: rx + dx, y: ry + 170, o: 0 });
+      show(w, m('tp') + i * .15, .4);
+      prog(q => put(w, { y: ry + 170 - q * 20 + Math.sin(q * 20 + i) * 4 }), m('tp'), 2.8, lin);
+    });
+    const hot = npill(p, 'hoge temperatuur', { x: rx, y: 735, size: 30, color: NAT.magma, o: 0 }); show(hot, m('tp'), .4);
+    // the rock changes
+    const tc = m('tp') + 1.2;
+    tw(body, { c_fill: '#c9c1b3', c_stroke: '#8b8f96' }, tc, 1.8, soft);
+    tw(A, { o: 0 }, tc, 1.2); tw(B, { o: 1 }, tc + .4, 1.4);
+    pulse(rockG, tc + 1.6, 1.12);
+    rockInfo(p, m, 'Metamorfe gesteenten', lil, ['Bestaande gesteenten', 'veranderen diep in de aarde,', 'door druk en hitte.'], ['marmer', 'leisteen'], m('a'));
+  }],
+  ['q2', 'Even controleren', (m) => {
+    const p = panel(0);
+    [['Stollingsgesteenten', NAT.magma, ['Gesmolten gesteente koelt af', 'en wordt hard.']], ['Afzettingsgesteenten', NAT.steen, ['Laagjes zand, klei of schelpjes', 'worden op elkaar gedrukt.']], ['Metamorfe gesteenten', '#b79ad6', ['Bestaande gesteenten veranderen', 'door druk en hitte.']]].forEach(([name, c, ls], i) => {
+      const g = G(p, { x: 90, y: 150 + i * 215, o: 0 });
+      mk('rect', { width: 690, height: 180, rx: 20, fill: '#25362f', stroke: c, 'stroke-width': 3 }, g);
+      mk('rect', { x: 0, width: 16, height: 180, rx: 8, fill: c }, g);
+      T(g, name, { x: 44, y: 60, size: 40, weight: 700, fill: c });
+      ls.forEach((s, j) => T(g, s, { x: 44, y: 106 + j * 36, size: 28, fill: COL.chalk }));
+      tw(g, { o: 1 }, .3 + i * .25, .5);
+    });
+  }, { ask: done => quiz({ x: 830, y: 110, w: 730, cls: 'side', maxH: 700 }, [{
+    id: 'c-gesteenten', prompt: ['Hoe zijn deze gesteenten ontstaan?'],
+    build: grid([
+      { parts: ['Basalt'], ans: ['st'], why: 'Basalt ontstaat uit gesmolten gesteente dat afkoelt: een stollingsgesteente.' },
+      { parts: ['Zandsteen'], ans: ['af'], why: 'Zandsteen ontstaat uit laagjes zand die op elkaar gedrukt worden: een afzettingsgesteente.' },
+      { parts: ['Marmer'], ans: ['me'], why: 'Marmer ontstaat uit kalksteen die diep in de aarde verandert door druk en hitte: een metamorf gesteente.' },
+    ], [['st', 'Stolling', NAT.magma], ['af', 'Afzetting', NAT.steen], ['me', 'Metamorf', '#b79ad6']], { multi: false, text: true }),
+  }], done) }],
+
+/* ===== 2.4 water ===== */
+  ['water', 'Grondwater', (m, D) => {
+    const p = panel(0);
+    const bx = 90, bw = 850, sy = 320;
+    const blk = G(p, { o: 0 });
+    const layer = (y, hh, c) => mk('rect', { x: bx, y, width: bw, height: hh, fill: c }, blk);
+    layer(sy, 50, NAT.aarde); layer(sy + 50, 190, '#b79b6b'); layer(sy + 240, 170, '#7c7468'); layer(sy + 410, 70, '#3a2b23');
+    nscatter({ x: bx + 6, y: sy + 56, w: bw - 12, h: 178 }, 70, 7, 13, 70, [], 5).forEach((q, i) => mk('path', { d: nblob(q.r, q.r * .85, i, .2, 7), fill: ['#d4bd8c', '#a58c5e', '#c8ae7a'][i % 3], transform: `translate(${q.x},${q.y})` }, blk));
+    const gw = mk('rect', { x: bx, y: sy + 140, width: bw, height: 100, fill: NAT.water, opacity: .55 }, blk);
+    mk('path', { d: `M${bx} ${sy + 140}Q${bx + 120} ${sy + 128} ${bx + 240} ${sy + 140}T${bx + 480} ${sy + 140}T${bx + 720} ${sy + 140}T${bx + bw} ${sy + 140}`, stroke: NAT.water, 'stroke-width': 5, fill: 'none' }, blk);
+    const rip = G(blk);
+    for (let i = 0; i < 12; i++) mk('path', { d: `M${bx + 20 + i * 70} ${sy + 160 + (i % 3) * 22}q8 -8 16 0q8 8 16 0`, stroke: '#cfe9ff', 'stroke-width': 2.5, fill: 'none', opacity: .7 }, rip);
+    clockRun(t => put(rip, { x: Math.sin(t * 1.6) * 9, y: Math.sin(t * 1.1) * 2 }), D);
+    // cracks in the rock, filled with water
+    const cracks = ['M300 0L330 40L310 90L350 150L330 170', 'M520 0L500 50L545 100L520 160L560 170', 'M700 0L735 60L700 110L740 170'];
+    cracks.forEach(d => mk('path', { d, transform: `translate(${bx},${sy + 240})`, stroke: '#4aa3e0', 'stroke-width': 6, fill: 'none', 'stroke-linejoin': 'round' }, blk));
+    // a cave, carved out by water
+    const cave = G(blk, { x: bx + 120, y: sy + 330 });
+    mk('path', { d: 'M-90 60C-90 -10 -40 -52 10 -52C70 -52 100 -10 100 60Z', fill: '#1e1a18' }, cave);
+    [-50, -15, 25, 60].forEach((x, i) => mk('path', { d: `M${x - 7} ${-40 + Math.abs(x) * .2}L${x} ${-14 - i * 3}L${x + 7} ${-40 + Math.abs(x) * .2}Z`, fill: '#5a524b' }, cave));
+    for (let t = m('gr') + .8; t < D - 1; t += 1.5) {
+      const dr = ndrop(p, 22, { x: bx + 145, y: sy + 305, o: 0 });
+      tw(dr, { o: 1 }, t, .1); prog(q => put(dr, { y: sy + 305 + 80 * q * q }), t, .6, lin); hide(dr, t + .5, .1);
+    }
+    show(blk, .3, .8);
+    ngrass(p, bx, bx + bw, sy, 9);
+    // cloud and rain
+    const cloud = G(p, { x: 260, y: 150, o: 0 });
+    [[0, 0, 44], [-46, 14, 34], [48, 12, 38], [4, 22, 34]].forEach(([x, y, r]) => mk('circle', { cx: x, cy: y, r, fill: '#aebdc8' }, cloud));
+    show(cloud, .6);
+    const rain = (t0, k) => [-60, -20, 25, 65].forEach((dx, i) => {
+      const d = ndrop(p, 34, { x: 260 + dx, y: 200, o: 0 });
+      const ts = t0 + i * .35;
+      tw(d, { o: 1 }, ts, .15);
+      prog(q => put(d, { y: 200 + (sy + 160 - 200) * q }), ts, 1.5, lin);
+      hide(d, ts + 1.4, .25);
+    });
+    for (let t = m('r'); t < m('u') + 1; t += 2.4) rain(t);
+    // the tree and its roots
+    ntree(p, 130, { x: 580, y: sy });
+    const roots = ['M0 0C-10 40 -30 70 -50 120', 'M0 0C6 50 16 90 30 130', 'M0 0C-26 30 -60 44 -90 54'].map(d => path(p, d, { stroke: '#a9784a', 'stroke-width': 6 }, { x: 580, y: sy, d: 0 }));
+    // a well with a pump
+    const wx = 800;
+    mk('rect', { x: wx - 11, y: sy - 50, width: 22, height: 330, fill: '#9aa5ad', stroke: '#6c767d', 'stroke-width': 3 }, p);
+    mk('rect', { x: wx - 22, y: sy - 80, width: 80, height: 34, rx: 8, fill: '#9aa5ad', stroke: '#6c767d', 'stroke-width': 3 }, p);
+    const wl = mk('rect', { x: wx - 7, y: sy + 230, width: 14, height: 0, fill: NAT.water }, p);
+    mk('path', { d: `M${wx + 60} ${sy - 64}h22v18` , stroke: '#6c767d', 'stroke-width': 8, fill: 'none' }, p);
+    const glass = G(p, { x: wx + 71, y: sy + 10 });
+    mk('path', { d: 'M-24 -40L24 -40L16 0L-16 0Z', fill: 'rgba(255,255,255,.12)', stroke: COL.chalk, 'stroke-width': 3 }, glass);
+    const glw = mk('rect', { x: -19, y: -2, width: 38, height: 0, fill: NAT.water }, glass);
+    tw(wl, { a_y: sy - 34, a_height: 264 }, m('u'), 1.8, io);
+    const dd = ndrop(p, 26, { x: wx + 71, y: sy - 56, o: 0 });
+    tw(dd, { o: 1 }, m('u') + 2, .15); prog(q => put(dd, { y: sy - 56 + 50 * q }), m('u') + 2, .6, lin); hide(dd, m('u') + 2.5, .1);
+    tw(glw, { a_y: -26, a_height: 24 }, m('u') + 2.4, 1.2, out);
+    roots.forEach((r, i) => draw(r, m('pl') + i * .3, 1.2));
+    // labels
+    const lab = (str, x, y, color, tx, ty, mark) => {
+      const l = path(p, `M${x} ${y}L${tx} ${ty}`, { stroke: color, 'stroke-width': 3 }, { d: 0 });
+      const g = npill(p, str, { x, y, size: 28, color, o: 0 });
+      show(g, m(mark)); draw(l, m(mark), .5);
+    };
+    lab('poriën', 410, sy + 80, '#e8d9b0', 450, sy + 140, 'p');
+    lab('barsten en spleten', 560, sy + 300, '#8fd0ff', 460, sy + 395, 's');
+    const g1 = npill(p, 'grondwater', { x: 280, y: sy + 190, size: 30, color: NAT.water, o: 0 }); show(g1, m('gw'));
+    // the roles of groundwater
+    text(p, 'Grondwater speelt een rol bij:', 1000, 330, m('gw') + .4, { size: 34, fill: COL.dim, weight: 600 });
+    [['Drinkwatervoorziening', null, 'u', NAT.water], ['Planten nemen het op', 'met hun wortels', 'pl', NAT.bio], ['Vorming van grotten en', 'andere landschapstypes', 'gr', '#c9b99a']].forEach(([a, b, mark, c], i) => {
+      const y = 430 + i * 130, g = G(p, { x: -20, y, o: 0 });
+      mk('circle', { cx: 1015, cy: -10, r: 13, fill: c }, g);
+      T(g, a, { x: 1050, size: 36, weight: 600 }); if (b) T(g, b, { x: 1050, y: 42, size: 36, weight: 600 });
+      tw(g, { o: 1, x: 0 }, m(mark), .5, out);
+    });
+  }],
+
+/* ===== 2.5 fossiel organisch materiaal ===== */
+  ['fossiel', 'Fossiel organisch materiaal', (m, D) => {
+    const p = panel(0);
+    const LX = 80, RX = 820, BW = 700, BY = 140, BH = 400;
+    const box = (x, c) => { const g = G(p, { o: 0 }); mk('rect', { x, y: BY, width: BW, height: BH, rx: 18, fill: c, stroke: COL.faint, 'stroke-width': 3 }, g); return g; };
+    const bl = box(LX, '#2b4540'), br = box(RX, '#245f8f');
+    show(bl, m('def') + .3); show(br, m('def') + .6);
+    const gY = 460;
+    // left: a forest
+    mk('rect', { x: LX + 4, y: gY, width: BW - 8, height: 76, fill: NAT.aarde }, bl);
+    [[130, 130], [235, 105], [340, 140], [450, 110], [560, 135], [650, 100]].forEach(([x, hh]) => ntree(bl, hh, { x: LX + x, y: gY }));
+    // sediment and coal, which compress later
+    const buried = mk('g', {}, bl);
+    const strata = [['#c6ad7e', gY - 80, 80], ['#b9704a', gY - 150, 70], ['#d8c8a0', gY - 220, 70], ['#9aa08d', gY - 280, 60]];
+    strata.forEach(([c, y, hh], i) => {
+      const r = mk('rect', { x: LX + 4, y: gY, width: BW - 8, height: 0, fill: c }, buried);
+      tw(r, { a_y: y, a_height: hh }, m('kool') + .4 + i * .8, 1, out);
+    });
+    const coal = mk('rect', { x: LX + 4, y: gY - 20, width: BW - 8, height: 24, fill: '#171413' }, buried); put(coal, { o: 0 });
+    tw(coal, { o: 1 }, m('kool') + 4, 1.2);
+    const arrL = [0, 1, 2].map(i => { const a = path(bl, `M${LX + 160 + i * 190} 160V230M${LX + 140 + i * 190} 210L${LX + 160 + i * 190} 233L${LX + 180 + i * 190} 210`, { stroke: COL.task, 'stroke-width': 8 }, { o: 0 }); show(a, m('kool') + 3.4, .3); return a; });
+    prog(q => {
+      const k = 1 - .12 * q;
+      buried.setAttribute('transform', `translate(0,${gY * (1 - k)}) scale(1,${k})`);
+    }, m('kool') + 4, 1.4, io);
+    const tL = text(p, 'oerbos → steenkool', LX + BW / 2, 116, m('kool'), { size: 34, weight: 700, fill: '#c9c4bd', anchor: 'middle' });
+    const pc = npill(p, 'steenkool', { x: LX + 560, y: gY - 8, size: 30, color: '#d0cbc5', o: 0 }); show(pc, m('kool') + 4.6);
+    // right: a sea with plankton, then sediment
+    const seabed = 460;
+    mk('rect', { x: RX + 4, y: seabed, width: BW - 8, height: BH - (seabed - BY) - 4, fill: '#7d6b52' }, br);
+    const fish = G(br, { x: RX + 470, y: 215 });
+    mk('path', { d: 'M-30 0C-10 -16 20 -14 34 0C20 14 -10 16 -30 0ZM34 0L52 -12V12Z', fill: '#bcd2e4' }, fish);
+    mk('circle', { cx: -16, cy: -3, r: 3, fill: '#1d2b27' }, fish);
+    const plk = nscatter({ x: RX + 30, y: BY + 40, w: BW - 60, h: 240 }, 32, 5, 8, 77, [], 10).map((c, i) => ({ ...c, g: (() => { const g = G(br, {}); mk('circle', { r: c.r, fill: '#a6f08c', stroke: '#4f9a52', 'stroke-width': 1.5 }, g); mk('path', { d: `M${-c.r} 0H${c.r}M0 ${-c.r}V${c.r}`, stroke: '#4f9a52', 'stroke-width': 1 }, g); return g; })() }));
+    const tOl = m('olie');
+    clockRun(t => {
+      put(fish, { x: RX + 470 - (t * 14) % 260 + (t > tOl + 1 ? 400 : 0), y: 215 + Math.sin(t) * 12, o: t > tOl + 1 ? 0 : 1 });
+      plk.forEach((c, i) => {
+        const q = Math.max(0, Math.min(1, (t - tOl - i * .045) / 2.2));
+        const sink = q * q * (3 - 2 * q), bob = Math.sin(t * .9 + i) * 7 * (1 - sink);
+        put(c.g, { x: c.x + Math.sin(t * .6 + i * 2) * 9 * (1 - sink), y: c.y + (seabed - 12 - (i % 5) * 4 - c.y) * sink + bob });
+      });
+    }, D);
+    const sed = mk('g', {}, br);
+    [['#c6ad7e', seabed - 80, 80], ['#b9704a', seabed - 150, 70], ['#d8c8a0', seabed - 220, 70], ['#9aa08d', seabed - 280, 60]].forEach(([c, y, hh], i) => {
+      const r = mk('rect', { x: RX + 4, y: seabed, width: BW - 8, height: 0, fill: c }, sed);
+      tw(r, { a_y: y, a_height: hh }, tOl + 2.6 + i * .6, .9, out);
+    });
+    const org = mk('rect', { x: RX + 4, y: seabed - 22, width: BW - 8, height: 26, fill: '#3f4a2a' }, sed); put(org, { o: 0 });
+    tw(org, { o: 1 }, tOl + 2.2, .8);
+    const oilG = G(br, { o: 0 });
+    [0, 1, 2, 3].forEach(i => { const d = ndrop(oilG, 36, { x: RX + 120 + i * 120, y: seabed - 10 }); const c = d.firstChild; c.setAttribute('fill', '#2e2118'); c.setAttribute('stroke', NAT.fossiel); });
+    [0, 1, 2].forEach(i => mk('circle', { cx: RX + 180 + i * 180, cy: seabed - 40 + (i % 2) * 14, r: 13, fill: 'rgba(219,232,239,.75)', stroke: '#fff', 'stroke-width': 2 }, oilG));
+    tw(oilG, { o: 1 }, tOl + 5, 1);
+    text(p, 'zeeorganismen → aardolie en aardgas', RX + BW / 2, 116, tOl, { size: 34, weight: 700, fill: '#d8e8f5', anchor: 'middle' });
+    const po = npill(p, 'aardolie', { x: RX + 200, y: seabed - 95, size: 28, color: NAT.fossiel, o: 0 }), pg = npill(p, 'aardgas', { x: RX + 500, y: seabed - 95, size: 28, color: NAT.lucht, o: 0 });
+    show(po, tOl + 5.6); show(pg, tOl + 6);
+    // time
+    const ax = path(p, 'M100 590H1500M1478 576L1502 590L1478 604', { stroke: COL.dim, 'stroke-width': 4 }, { d: 0 });
+    draw(ax, m('def') + .6, 1);
+    const tl = G(p, { o: 0 });
+    T(tl, 'miljoenen jaren geleden', { x: 100, y: 566, size: 26, fill: COL.dim });
+    T(tl, 'vandaag', { x: 1500, y: 566, size: 26, fill: COL.dim, anchor: 'end' });
+    show(tl, m('def') + .8);
+    const dot = mk('circle', { r: 11, fill: COL.task }, p); put(dot, { x: 100, y: 590, o: 0 });
+    tw(dot, { o: 1 }, m('def') + 1, .3);
+    tw(dot, { x: 1490 }, m('kool'), m('fo') - m('kool') - .3, lin);
+    // fossiel = very old; organisch = from living things
+    const fadeT = m('fo') - .2;
+    tw(tl, { o: 0 }, fadeT, .4); tw(ax, { o: 0 }, fadeT, .4); tw(dot, { o: 0 }, fadeT, .4);
+    const pf = npill(p, 'fossiel = heel oud', { x: 430, y: 590, size: 32, color: NAT.fossiel, o: 0 }); show(pf, m('fo'));
+    const po2 = npill(p, 'organisch = van levende wezens', { x: 1130, y: 590, size: 32, color: NAT.bio, o: 0 }); show(po2, m('or'));
+  }],
+  ['q3', 'Even controleren', () => {}, { ask: done => quiz(BAND, [{
+    id: 'c-fossiel', prompt: ['Waarom is steenkool fossiel organisch materiaal?'],
+    build: choice([['Het is heel oud en komt van planten.'], ['Het is gesmolten gesteente dat hard werd.'], ['Het is water uit de ondergrond.']], 0,
+      'Steenkool is heel oud (fossiel) en komt van planten (organisch materiaal).',
+      [null, 'Dat is een stollingsgesteente. Steenkool ontstond uit oerbossen.', 'Water is geen materiaal van planten of dieren. Steenkool ontstond uit oerbossen.']),
+  }], done) }],
+
+/* ===== 3. natuurlijke hulpbronnen ===== */
+  ['hulp', 'Natuurlijke hulpbronnen', (m, D) => {
+    const p = panel(0);
+    const cx = 800, cy = 470;
+    const hub = npill(p, 'Natuurlijke hulpbron', { x: cx, y: cy, size: 44, color: COL.task, o: 0 });
+    put(hub, { s: .6 }); popIn(hub, .4, .6);
+    const rings = [0, 1, 2].map(() => mk('ellipse', { fill: 'none', stroke: COL.task, 'stroke-width': 3 }, p));
+    rings.forEach(r => put(r, { x: cx, y: cy, o: 0 }));
+    clockRun(t => rings.forEach((r, i) => {
+      const k = (t * .4 + i / 3) % 1, fade = t < .8 ? 0 : t < m('o') ? 1 : Math.max(0, 1 - (t - m('o')) / .8);
+      r.setAttribute('rx', 250 + k * 230); r.setAttribute('ry', 42 + k * 140); put(r, { o: (1 - k) * .55 * fade });
+    }), D);
+    lines(p, ['materiaal of stof die we uit de natuur halen', 'en gebruiken in het dagelijks leven'], cx, 100, 40, m('def'), { size: 32, fill: COL.chalk, anchor: 'middle' }, .4);
+    [['ondergrond', 'In de ondergrond', 330, 280, 'o'], ['water', 'In het water', 1270, 280, 'w'], ['lucht', 'In de lucht', 330, 690, 'l'], ['organismen', 'In levende organismen', 1270, 690, 'v']].forEach(([ic, label, x, y, mark]) => {
+      const sp = path(p, `M${cx + (x - cx) * .3} ${cy + (y - cy) * .38}L${x - (x - cx) * .2} ${y - (y - cy) * .2}`, { stroke: COL.dim, 'stroke-width': 4, 'stroke-dasharray': '4 12' }, { d: 0 });
+      draw(sp, m(mark) - .1, .6);
+      const g = G(p, { x, y, o: 0, s: .6 });
+      mk('circle', { r: 86, fill: '#25362f', stroke: COL.faint, 'stroke-width': 3 }, g);
+      nicon(g, ic, { y: -4 });
+      T(g, label, { y: 128, size: 34, weight: 600, anchor: 'middle' });
+      tw(g, { o: 1, s: 1 }, m(mark), .5, back);
+    });
+  }],
+
+  ['voorb1', 'Water, gesteenten en ertsen', (m, D) => {
+    const p = panel(0);
+    text(p, 'Enkele voorbeelden · 1', 800, 100, .3, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    resCard(p, 80, { icon: 'water', color: NAT.water, name: ['Water'], tag: ['regenwater, oppervlaktewater', 'en grondwater'], use: ['drinkwater', 'landbouw', 'industrie'] }, m('wa'), D);
+    resCard(p, 570, { icon: 'gesteenten', color: NAT.steen, name: ['Gesteenten'], tag: ['kalksteen, graniet,', 'zandsteen'], use: ['bouwmateriaal'] }, m('ge'), D);
+    resCard(p, 1060, { icon: 'ertsen', color: NAT.erts, name: ['Ertsen'], tag: ['gesteenten waaruit', 'metalen worden gehaald'], use: ['ijzererts, kopererts,', 'gouderts'] }, m('er'), D);
+  }],
+  ['voorb2', 'Fossiele brandstoffen', (m, D) => {
+    const p = panel(0);
+    const pl = npill(p, 'Fossiele brandstoffen', { x: 800, y: 100, size: 34, color: NAT.fossiel, o: 0 }); show(pl, .4);
+    resCard(p, 80, { icon: 'steenkool', color: '#cfc9c2', name: ['Steenkool'], tag: ['uit oude plantenresten'], use: ['elektriciteit opwekken', '(steeds minder gebruikt)'] }, m('st'), D);
+    resCard(p, 570, { icon: 'aardolie', color: NAT.fossiel, name: ['Aardolie'], tag: ['uit resten van kleine', 'zeeorganismen'], use: ['benzine', 'plastics', 'smeerstoffen'] }, m('ao'), D);
+    resCard(p, 1060, { icon: 'aardgas', color: '#f5b942', name: ['Aardgas'], tag: ['zit vaak bij aardolie'], use: ['verwarmen', 'elektriciteit maken'] }, m('ag'), D);
+  }],
+  ['voorb3', 'Hout, bodem en energie', (m, D) => {
+    const p = panel(0);
+    text(p, 'Enkele voorbeelden · 3', 800, 100, .3, { size: 32, fill: COL.dim, anchor: 'middle', weight: 600 });
+    resCard(p, 80, { icon: 'hout', color: '#d1a073', name: ['Hout'], tag: ['komt uit bossen'], use: ['bouwmateriaal', 'papier', 'brandstof'] }, m('ho'), D);
+    resCard(p, 570, { icon: 'bodem', color: NAT.bio, name: ['Bodem en', 'vruchtbare grond'], tag: ['nodig voor landbouw'], use: ['voedselproductie'] }, m('bo'), D);
+    resCard(p, 1060, { icon: 'energie', color: NAT.zon, name: ['Wind, zon en', 'waterkracht'], tag: ['hernieuwbare', 'energiebronnen'], use: ['windmolens', 'zonnepanelen', 'stuwdammen'] }, m('en'), D);
+  }],
+  ['q4', 'Even controleren', (m) => {
+    const p = panel(0);
+    const all = [['water', 'Water', NAT.water], ['gesteenten', 'Gesteenten', NAT.steen], ['ertsen', 'Ertsen', NAT.erts], ['steenkool', 'Steenkool', '#cfc9c2'], ['aardolie', 'Aardolie', NAT.fossiel], ['aardgas', 'Aardgas', '#f5b942'], ['hout', 'Hout', '#d1a073'], ['bodem', 'Bodem', NAT.bio], ['energie', 'Wind en zon', NAT.zon]];
+    all.forEach(([ic, name, c], i) => {
+      const g = G(p, { x: 190 + (i % 3) * 240, y: 230 + Math.floor(i / 3) * 210, o: 0, s: .7 });
+      mk('rect', { x: -105, y: -85, width: 210, height: 180, rx: 18, fill: '#25362f', stroke: c, 'stroke-width': 3 }, g);
+      nicon(g, ic, { y: -18, s: .75 });
+      T(g, name, { y: 76, size: 28, weight: 600, fill: c, anchor: 'middle' });
+      tw(g, { o: 1, s: 1 }, .3 + i * .1, .4, back);
+    });
+  }, { ask: done => quiz({ x: 880, y: 110, w: 690, cls: 'side', maxH: 700 }, [{
+    id: 'c-brandstof', prompt: ['Welke hulpbronnen zijn fossiele brandstoffen?'],
+    build: grid([
+      { parts: ['Steenkool'], ans: ['ja'], why: 'Steenkool ontstond uit oude plantenresten: een fossiele brandstof.' },
+      { parts: ['Hout'], ans: ['nee'], why: 'Hout komt uit bossen van nu en is niet miljoenen jaren oud.' },
+      { parts: ['Aardgas'], ans: ['ja'], why: 'Aardgas zit vaak bij aardolie: een fossiele brandstof.' },
+      { parts: ['Wind en zon'], ans: ['nee'], why: 'Wind en zon zijn hernieuwbare energiebronnen.' },
+      { parts: ['Aardolie'], ans: ['ja'], why: 'Aardolie ontstond uit kleine zeeorganismen: een fossiele brandstof.' },
+    ], [['ja', 'Fossiel', NAT.fossiel], ['nee', 'Niet fossiel', NAT.bio]], { multi: false, text: true }),
+  }], done) }],
+
+/* ===== samenvatting en oefeningen ===== */
+  ['wrap', 'Samenvatting', (m) => {
+    const p = panel(0);
+    [['De bodem is een mengsel van gesteentefragmenten, organisch materiaal, water en lucht.', 'w1'], ['De ondergrond bestaat uit gesteenten, water en fossiel organisch materiaal.', 'w2'], ['Natuurlijke hulpbronnen halen we uit de natuur en gebruiken we elke dag.', 'w3']].forEach(([str, mark], i) => {
+      const g = G(p, { x: -16, y: 290 + i * 160, o: 0 });
+      mk('circle', { cx: 150, cy: -12, r: 26, fill: COL.task }, g);
+      T(g, String(i + 1), { x: 150, y: -1, size: 30, fill: COL.board, weight: 700, anchor: 'middle' });
+      const words = str.split(' '), half = Math.ceil(words.length / 2);
+      const two = str.length > 56;
+      const ls = two ? [words.slice(0, half).join(' '), words.slice(half).join(' ')] : [str];
+      ls.forEach((l, j) => T(g, l, { x: 210, y: j * 42, size: 34, weight: 600 }));
+      const ul = path(p, `M210 ${290 + i * 160 + (ls.length - 1) * 42 + 14}H${210 + uiW(ls.reduce((a, b) => a.length > b.length ? a : b), 34) * 1.02}`, { stroke: COL.task, 'stroke-width': 4, opacity: .8 }, { d: 0 });
+      tw(g, { o: 1, x: 0 }, m(mark), .6);
+      draw(ul, m(mark) + .6, i === 2 ? 4.5 : 5.2, lin);
+      pulse(g.children[0], m(mark) + .1, 1.3);
+    });
+  }],
+  ['final1', 'Oefeningen bij het hoofdstuk', () => { panel(0); }, { ask: done => quiz(SCREEN, [
+    { id: 'p-organisch', prompt: ['Waarom is organisch materiaal belangrijk voor de bodem?'],
+      build: choice([['Het maakt de bodem vruchtbaar.'], ['Het zorgt ervoor dat water altijd snel doorloopt.'], ['Het vormt de harde basis van de bodem.']], 0,
+        'Levende organismen en hun resten maken de bodem vruchtbaar.',
+        [null, 'Dat gebeurt in een zandbodem, niet door organisch materiaal.', 'De basis van de bodem zijn de gesteentefragmenten: kleine stukjes steen en zand.']) },
+    { id: 'p-bodemondergrond', prompt: ['Hoort dit bij de bodem of bij de ondergrond?'],
+      build: grid([
+        { parts: ['Wormen en insecten'], ans: ['bo'], why: 'Wormen en insecten leven in de bodem.' },
+        { parts: ['Lucht tussen de deeltjes'], ans: ['bo'], why: 'In de bodem zit lucht tussen de deeltjes, voor wortels en kleine organismen.' },
+        { parts: ['Steenkool, aardolie en aardgas'], ans: ['on'], why: 'Fossiel organisch materiaal zit diep in de ondergrond.' },
+        { parts: ['Gesteenten zoals basalt en marmer'], ans: ['on'], why: 'Gesteenten bouwen de ondergrond op.' },
+      ], [['bo', 'Bodem', NAT.bio], ['on', 'Ondergrond', COL.task]], { multi: false, text: true }) },
+    { id: 'p-grondwater', prompt: ['Waar zit grondwater?'],
+      build: choice([['Alleen in rivieren en zeeën.'], ['In poriën en in barsten en spleten van gesteenten.'], ['In de lucht boven de ondergrond.']], 1,
+        'Grondwater zit in de poriën tussen zand- of kleideeltjes en in de barsten en spleten van gesteenten.',
+        ['Rivieren en zeeën zijn oppervlaktewater. Grondwater zit in de ondergrond.', null, 'Water in de lucht is geen grondwater. Grondwater zit in de ondergrond.']) },
+    { id: 'p-olie', prompt: ['Uit welke hulpbron maken we benzine en plastics?'],
+      build: choice([['Steenkool'], ['Aardgas'], ['Aardolie'], ['Hout']], 2,
+        'Aardolie gebruiken we voor benzine, plastics en smeerstoffen.',
+        ['Steenkool gebruiken we vooral om elektriciteit op te wekken.', 'Aardgas gebruiken we om te verwarmen en elektriciteit te maken.', null, 'Hout gebruiken we als bouwmateriaal, voor papier en als brandstof.']) },
+  ], done, 'Oefeningen bij het hoofdstuk') }],
+  ['finish', 'Klaar', () => { panel(0); }, { ask: finishCard }],
+].map(([id, title, run, extra]) => ({ id, title, run, ...extra }));
+
+/* ---------- shared pieces of this chapter (function declarations: usable by the BEATS above) ---------- */
+function pillAt(p, str, x, y, color, t0) { const g = npill(p, str, { x, y, size: 30, color, o: 0 }); show(g, t0); return g; }
+
+// the three kinds of rock, as a row of tabs on top, the current one lit
+function rockChips(p, k, t0) {
+  [['Stollingsgesteenten', NAT.magma], ['Afzettingsgesteenten', NAT.steen], ['Metamorfe gesteenten', '#b79ad6']].forEach(([name, c], i) => {
+    const g = npill(p, name, { x: 300 + i * 500, y: 90, size: 28, color: c, o: 0 });
+    tw(g, { o: i === k ? 1 : .3 }, Math.max(.3, t0) + i * .2, .5);
+  });
+}
+
+// the right-hand panel of a rock beat: name, how it forms, two examples
+function rockInfo(p, m, name, color, desc, ex, t0) {
+  text(p, name, 930, 270, t0, { size: 50, weight: 700, fill: color });
+  lines(p, desc, 930, 340, 44, t0 + .5, { size: 33 }, .35);
+  text(p, 'Voorbeelden', 930, 520, m('ex'), { size: 30, fill: COL.dim, weight: 600 });
+  ex.forEach((k, i) => {
+    const r = nrock(p, k, 84, { x: 1090 + i * 290, y: 640, s: 0 });
+    tw(r, { s: 1 }, m('ex') + .3 + i * .3, .5, back);
+    text(p, k, 1090 + i * 290, 770, m('ex') + .5 + i * .3, { size: 34, weight: 600, anchor: 'middle' });
+  });
+}
+
+// a card for one natural resource; the tag lines and the uses follow later
+function resCard(p, x, c, t0, D) {
+  const two = c.name.length > 1, dy = two ? 40 : 0;
+  const g = G(p, { x, y: 160, o: 0, s: .92 });
+  mk('rect', { width: 460, height: 560, rx: 22, fill: '#25362f', stroke: c.color, 'stroke-width': 3.5 }, g);
+  const ic = nicon(g, c.icon, { x: 230, y: 104, s: 1.2 });
+  clockRun(t => {
+    const u = t - t0; if (u < 0) return;
+    put(ic, { y: 104 + Math.sin(u * 2.2 + x) * 4, r: c.icon === 'hout' ? u * 25 : Math.sin(u * 1.4 + x) * 4, s: 1.2 + (c.icon === 'aardgas' ? Math.sin(u * 9) * .06 : Math.sin(u * 3 + x) * .03) });
+    if (ic._rot) put(ic._rot, { r: u * 140 });
+  }, D);
+  c.name.forEach((n, i) => T(g, n, { x: 230, y: 222 + i * 40, size: 40, weight: 700, fill: c.color, anchor: 'middle' }));
+  const tag = G(g, { o: 0 }), use = G(g, { o: 0 });
+  c.tag.forEach((s, i) => T(tag, s, { x: 230, y: 266 + dy + i * 30, size: 25, fill: COL.dim, anchor: 'middle' }));
+  const sy = 266 + dy + c.tag.length * 30 + 14;
+  mk('path', { d: `M60 ${sy}H400`, stroke: COL.faint, 'stroke-width': 2 }, use);
+  T(use, 'Gebruik', { x: 40, y: sy + 38, size: 24, fill: COL.task, weight: 700 });
+  c.use.forEach((s, i) => T(use, '• ' + s, { x: 40, y: sy + 78 + i * 34, size: 28 }));
+  tw(g, { o: 1, s: 1 }, t0, .5, back);
+  show(tag, t0 + .7);
+  show(use, t0 + 1.9);
+  return g;
+}
+
+boot();
+</script>
+</body>
+</html>

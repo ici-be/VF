@@ -57,6 +57,12 @@ Les changements du tableau apparaissent au prochain lancement de l'appli.
 Installation de l'envoi (une fois) : voir l'en-tête de `outils/recevoir-mots.gs`, puis
 `python3 outils/cours.py configurer <URL> <clé>`.
 
+## Leçons animées
+
+Certains chapitres ont une **leçon animée et racontée** (en néerlandais de Belgique), faite avec le skill `/papermorph`.
+Elle se lance depuis l'accueil, sous les chapitres de la matière (bouton « Leçon animée »). Les leçons sont dans
+`public/lecons/<livre>/chNN/` et listées dans `src/data/lecons.json` ; le détail pour en créer d'autres est dans `CLAUDE.md`.
+
 ## Matières en français
 
 **Français**, **Religion** et **Mathématiques** (et tout onglet dont le nom commence par « FR ») sont des cours

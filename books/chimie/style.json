@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "tier": 1,
+  "book": {
+    "title": "Chemie: natuurlijke grondstoffen",
+    "slug": "chimie",
+    "language": "nl",
+    "readers": "leerlingen in een Nederlandstalig immersieprogramma (Vlaanderen)",
+    "pilot": "ch01"
+  },
+  "words": [
+    "Voici une leçon de chimie pour un cours d'immersion en néerlandais de Belgique. Fais les voix et sous-titres en nl-be."
+  ],
+  "look": {
+    "palette": {
+      "board": "#1d2b27 (engine default chalkboard)"
+    },
+    "meaning": {
+      "gesteente": "#cdb99a",
+      "water": "#6ab7f0",
+      "organisch/planten": "#8fd68a",
+      "lucht": "#dbe8ef",
+      "fossiel": "#e0955a",
+      "magma": "#f2683c",
+      "bodem": "#7a5a3f"
+    },
+    "fonts": {
+      "text": "system UI"
+    },
+    "notation": "Nederlands (Vlaanderen), decimale komma"
+  },
+  "voice": {
+    "engine": "edge",
+    "voice": "nl-BE-DenaNeural",
+    "rate": "-8%"
+  },
+  "pacing": {
+    "minutes": [
+      7,
+      9
+    ],
+    "checks": "een controlevraag na elk blok, oefeningen aan het eind"
+  },
+  "engine": {
+    "source": "DozenTwelve/Papermorph",
+    "ref": "engine-v2.1",
+    "note": "Dutch UI text patched in by tools/chimie/nl_interface.py; rerun after every engine.py sync"
+  },
+  "components": [
+    {
+      "name": "natuur.js",
+      "file": "site/chimie/lib/natuur.js",
+      "what": "palette, seeded scatter, rocks, icons, pills, brackets"
+    }
+  ],
+  "approved": []
+}

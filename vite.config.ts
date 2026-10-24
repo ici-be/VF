@@ -28,13 +28,21 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // l'image de partage (aperçu des liens) ne sert pas dans l'appli
-        globIgnores: ['social.png'],
+        globIgnores: ['social.png', 'lecons/**'],
+        // les leçons animées sont des pages à part (public/lecons/) : l'appli ne doit pas répondre à leur place
+        navigateFallbackDenylist: [/\/lecons\//],
         runtimeCaching: [
           {
             // le nom de chaque mp3 change avec son texte : une fois en cache, il est bon pour toujours
-            urlPattern: /\/audio\/.*\.mp3$/,
+            urlPattern: /\/audio\/[0-9a-f]{16}\.mp3$/,
             handler: 'CacheFirst',
             options: { cacheName: 'voix', expiration: { maxEntries: 5000 } },
+          },
+          {
+            // les leçons gardent les mêmes noms de fichiers quand on les refait : toujours le réseau d'abord
+            urlPattern: /\/lecons\//,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'lecons', networkTimeoutSeconds: 4 },
           },
           {
             urlPattern: /\/audio\/index\.json$/,
