@@ -35,8 +35,10 @@ lignes pour répondre à la main (selon la longueur de la réponse, une par él�
 
 Un nouvel onglet avec ces colonnes devient automatiquement une nouvelle matière.
 Son icône est choisie d'après son nom (🏛️ Geschiedenis, 🌍 Aardrijkskunde, 🌱 Biologie,
-📐 Wiskunde…, 📚 sinon) ; pour en imposer une, commencer le nom de l'onglet par un
+📐 Wiskunde…, 🧪 Chemie, 📚 sinon) ; pour en imposer une, commencer le nom de l'onglet par un
 emoji, par exemple « 🦖 NW Biologie ».
+Un onglet **Chemie** (ou « NW Chemie ») est un cours d'immersion de plus, avec Marie Curie pour mascotte
+(fiole de radium, test à la flamme).
 Les changements du tableau apparaissent au prochain lancement de l'appli.
 
 ## Ajouter un cours

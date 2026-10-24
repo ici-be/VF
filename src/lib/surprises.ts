@@ -51,7 +51,7 @@ function etincelle(svg: SVGSVGElement, x: number, y: number, taille = 1) {
 }
 
 // la bouche (ou le museau, ou la fente du heaume) de chaque mascotte
-const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53], pythagore: [60, 51.5], moliere: [60, 54] }
+const BOUCHE: Record<Mascotte, [number, number]> = { renard: [60, 60], chevalier: [60, 52], colomb: [60, 54], detective: [60, 53.5], grenouille: [60, 58.5], moine: [60, 53], pythagore: [60, 51.5], moliere: [60, 54], curie: [60, 54] }
 const bouche = (svg: SVGSVGElement) => BOUCHE[svg.dataset.mascotte as Mascotte] ?? [60, 55]
 
 /** Quelques ronds de fumée grise qui montent de (x, y). */
@@ -209,6 +209,7 @@ function gigue(svg: SVGSVGElement, { flambeau = false, delai = 0 } = {}): Promis
   if (m === 'detective') anim(q('.loupe'), aChaquePas(i => `rotate(${i % 2 ? 12 : -16}deg)`), o)
   if (m === 'moine') anim(p.corps, aChaquePas(i => `skewX(${i % 2 ? 4 : -4}deg)`), o)
   if (m === 'pythagore') anim(q('.laurier'), aChaquePas(() => 'translateY(-4px) rotate(4deg)'), { ...o, delay: delai + T * .3 })
+  if (m === 'curie') anim(q('.chignon'), aChaquePas(i => `rotate(${i % 2 ? -8 : 8}deg)`), o)
   if (m === 'moliere') svg.querySelectorAll('.perruque').forEach(g => anim(g, [
     ...aChaquePas(() => 'translateY(-4px)').slice(0, -1),
     { transform: 'translateY(-10px)', offset: fin + .19 }, { transform: 'translate(1px,1px) rotate(-9deg)', offset: fin + .25 },
@@ -543,6 +544,31 @@ export const SURPRISES: Surprise[] = [
     anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-1px,-1.5px)', offset: .15 }, { transform: 'translate(-1px,-1.5px)', offset: .58 }, { transform: 'scaleY(.25)', offset: .7 }, { transform: 'scaleY(.25)', offset: .9 }, { transform: 'none' }], D)
     await anim(p.corps, [{ transform: 'rotate(0)' }, { transform: 'rotate(-4deg)', offset: .15 }, { transform: 'rotate(3deg)', offset: .3 }, { transform: 'rotate(-4deg)', offset: .45 }, { transform: 'rotate(0)', offset: .58 },
       { transform: 'rotate(-14deg) translate(-2px,6px)', offset: .72 }, { transform: 'rotate(-14deg) translate(-2px,6px)', offset: .86 }, { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
+  } },
+
+  // Marie Curie lève sa fiole de radium : elle luit de plus en plus fort, des rayons en jaillissent, la scientifique s'émerveille
+  { id: 'radium', pour: 'curie', async jouer(svg) {
+    const p = parties(svg), D = 3400, halo = svg.querySelector('.fiole .halo')
+    anim(halo, [{ transform: 'scale(1)', opacity: .4 }, ...tour(6, i => ({ transform: `scale(${i % 2 ? 1.5 : 2.2})`, opacity: i % 2 ? .6 : .9 })), { transform: 'scale(1)', opacity: .4 }], { duration: D, easing: 'ease-in-out' })
+    anim(svg.querySelector('.fiole'), [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-8px) rotate(-8deg)', offset: .2 }, { transform: 'translateY(-8px) rotate(-8deg)', offset: .8 }, { transform: 'translateY(0) rotate(0)' }], { duration: D, easing: 'ease-in-out' })
+    tour(8, i => eclair(svg, 37 + Math.cos(i * Math.PI / 4) * 20, 76 + Math.sin(i * Math.PI / 4) * 20, .5, '#b7ffc8', 500 + i * 220))
+    envol(svg, `<text text-anchor="middle" font-size="13" font-weight="800" fill="#2f9a52" stroke="${TRAIT}" stroke-width=".4">Ra</text>`, 37, 52, { dx: -4, dy: -22, duree: 1500, delai: D * .35, echelle: 1.3 })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(-2px,1px)', offset: .15 }, { transform: 'translate(-2px,1px) scale(1.3)', offset: .45 }, { transform: 'translate(-2px,1px) scale(1.3)', offset: .8 }, { transform: 'none' }], D)
+    await anim(p.corps, [{ transform: 'rotate(0)' }, { transform: 'rotate(-3deg)', offset: .2 }, { transform: 'rotate(-3deg)', offset: .8 }, { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
+  } },
+
+  // Marie Curie plonge une pincée de sel dans la flamme du flambeau, qui change de couleur : rouge, jaune, vert, violet (le test à la flamme)
+  { id: 'test-flamme', pour: 'curie', flambeau: true, async jouer(svg) {
+    const p = parties(svg), D = 4000, couleurs = ['#e0403a', '#ffd23f', '#3fc46a', '#9a5fe0']
+    const flamme = p.flamme?.querySelector('path'), coeur = p.flamme?.querySelectorAll('path')[1]
+    const base = flamme?.getAttribute('fill') ?? '#f08c1a'
+    couleurs.forEach((c, i) => {
+      apres(svg, D * (.1 + i * .2), () => { flamme?.setAttribute('fill', c); coeur?.setAttribute('fill', '#fff6c8'); eclat(svg, 92, 28, [c, '#ffffff'], 10, 8) })
+    })
+    apres(svg, D * .92, () => { flamme?.setAttribute('fill', base); coeur?.setAttribute('fill', '#ffd66b') })
+    anim(p.flamme, [{ transform: 'scale(1)' }, ...tour(8, i => ({ transform: `scale(${i % 2 ? 1.5 : 1.15},${i % 2 ? 1.2 : 1.5})` })), { transform: 'scale(1)' }], { duration: D * .92, easing: 'ease-in-out' })
+    anim(p.yeux, [{ transform: 'none' }, { transform: 'translate(2px,-1px)', offset: .1 }, { transform: 'translate(2px,-1px)', offset: .85 }, { transform: 'none' }], D)
+    await anim(p.perso, [{ transform: 'rotate(0)' }, { transform: 'rotate(2deg)', offset: .1 }, { transform: 'rotate(2deg)', offset: .85 }, { transform: 'rotate(0)' }], { duration: D, easing: 'ease-in-out' })
   } },
 
   // ---------- deuxième série (démo du 9 octobre) : surtout avec le feu du flambeau ----------

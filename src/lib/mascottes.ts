@@ -1,9 +1,9 @@
-// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; puis le moine de la Religion, Pythagore des Mathématiques et Molière du Français).
+// Les mascottes des matières (dessins SVG validés dans la démo « Le relais des mascottes » ; puis le moine de la Religion, Pythagore des Mathématiques, Molière du Français et Marie Curie de la Chimie).
 // Chacune tient un flambeau, qu'elle passe à la suivante quand on change de matière.
 
 import { interrompre } from './surprises'
 
-export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine' | 'pythagore' | 'moliere'
+export type Mascotte = 'renard' | 'chevalier' | 'colomb' | 'detective' | 'grenouille' | 'moine' | 'pythagore' | 'moliere' | 'curie'
 
 const TRAIT = '#26303d'
 const t = `stroke="${TRAIT}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"`
@@ -304,6 +304,38 @@ const DESSINS: Record<Mascotte, string> = {
         <path d="M46.5 42 Q45 27 60 26 Q75 27 73.5 42 Q70 34 64 33 Q60 36 56 33 Q50 34 46.5 42 Z" fill="#4a3020" ${t}/>
         <g fill="#5e3d27" ${t} stroke-width="1.3"><circle cx="48" cy="34" r="4"/><circle cx="54" cy="28.5" r="4"/><circle cx="60.5" cy="27" r="4"/><circle cx="67" cy="28.5" r="4"/><circle cx="72.5" cy="34" r="4"/><circle cx="44.5" cy="42" r="3.8"/><circle cx="75.5" cy="42" r="3.8"/></g>
       </g>
+    </g>`,
+
+  // Marie Curie : chignon, robe sombre à col blanc, tablier de laboratoire, une fiole de radium qui luit dans la main
+  curie: `
+    ${ombre}
+    ${jambes('#3a3a46', '#24242c')}
+    <g class="corps">
+      <rect x="56" y="52" width="8" height="15" rx="2" fill="${peau}" ${t}/>
+      <path d="M45 66 Q60 60 75 66 L80 128 Q60 134 40 128 Z" fill="#3a3a46" ${t}/>
+      ${ombrage('M62 62 Q70 63 75 66 L80 128 Q70 131 62 132 Z')}
+      <path d="M49 72 Q60 68 71 72 L73 118 Q60 122 47 118 Z" fill="#f6f3ea" ${t} stroke-width="1.4"/>
+      <path d="M54 82 L66 82 L66 92 L54 92 Z" fill="none" stroke="#c9d1dc" stroke-width="1.1"/>
+      <path d="M52 66 Q60 74 68 66 L66 63 Q60 68 54 63 Z" fill="#f6f3ea" ${t} stroke-width="1.4"/>
+      ${brasGauche('#3a3a46', peau, 37, 90)}
+      <g class="fiole"><g transform="translate(37 90)">
+        <circle class="halo" r="15" cy="-4" fill="#9dffb5" opacity=".4"/>
+        <path d="M-3.5 -20 L3.5 -20 L3.5 -10 L11 6 Q12 9 9 9 L-9 9 Q-12 9 -11 6 L-3.5 -10 Z" fill="#e8f3f6" fill-opacity=".9" ${t}/>
+        <path d="M-6.2 -1 L6.2 -1 L11 6 Q12 9 9 9 L-9 9 Q-12 9 -11 6 Z" fill="#7dff9a"/>
+        <rect x="-4.5" y="-22.5" width="9" height="3" rx="1" fill="#c8d2d8" ${t} stroke-width="1.2"/>
+        <circle cx="-2" cy="3" r="1.1" fill="#fff" opacity=".9"/><circle cx="3" cy="5" r=".8" fill="#fff" opacity=".9"/>
+      </g></g>
+      ${bras('#3a3a46', peau)}
+      <circle class="chignon" cx="60" cy="22" r="10" fill="#8a6a4a" ${t}/>
+      <path d="M53 21 Q60 17 67 21 M54 26 Q60 22 66 26" stroke="#5e4630" stroke-width="1.2" fill="none"/>
+      <ellipse cx="60" cy="44" rx="12" ry="13.5" fill="${peau}" ${t}/>
+      ${ombrage('M62 31 Q72 33 72 44 Q72 56 62 58 Z')}
+      <path d="M47.5 44 Q45 28 60 27 Q75 28 72.5 44 Q70 36 63 34 Q60 38 56 34 Q50 36 47.5 44 Z" fill="#8a6a4a" ${t}/>
+      <path d="M48 46 Q47 54 51 57 Q50 50 51.5 44 Z M72 46 Q73 54 69 57 Q70 50 68.5 44 Z" fill="#8a6a4a"/>
+      <g class="yeux">${oeil(55.5, 45)}${oeil(64.5, 45)}</g>
+      <path d="M53 41 Q55.5 39.5 58 41 M62 41 Q64.5 39.5 67 41" stroke="#5e4630" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M60 46 Q58.5 49 60.5 49.5" stroke="${TRAIT}" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M56.5 53 Q60 55 63.5 53" stroke="${TRAIT}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
     </g>`,
 }
 
