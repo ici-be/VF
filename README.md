@@ -15,7 +15,7 @@ Colonnes reconnues par leur nom (l'ordre n'a pas d'importance) :
 | Français | la traduction (obligatoire) ; variantes séparées par `,` ou `/`, précisions entre parenthèses |
 | Définition | la définition en néerlandais |
 | Exemple | une phrase ; la partie à trouver dans les textes à trous va entre crochets : `Het bevolkingsaantal [neemt af]` |
-| Remarque | le reste : pluriel, synonyme, contraire, forme… |
+| Remarque | le reste : pluriel, synonyme, contraire, forme… Les synonymes écrits « Synoniem: a, b » (ou « Synonyme : a ») sont acceptés comme réponse juste (Écrit, Oral, Définitions), avec le mot du cours rappelé |
 | Chapitre | le chapitre (vide = « Sans chapitre ») |
 | Page | la page du cours : quand un seul chapitre est choisi, l'accueil permet de ne réviser que certaines pages (« Pages 5 à 12 », pour une interro sur une partie du chapitre ; les mots sans page en sont exclus) |
 | Ajouté | la date d'ajout par `/cours` (AAAA-MM-JJ) : les mots de la date la plus récente sont les « Nouveaux » de l'appli |

@@ -124,3 +124,35 @@ describe('énumérations', () => {
     expect(corrigerListe(['Titel', 'x', 'y', 'z'], toles).resultat).toBe('faux')
   })
 })
+
+import { autresReponses, synonymesRemarque } from '../src/lib/seance'
+import { corrigerParmi } from '../src/lib/correction'
+describe('synonymes de la remarque', () => {
+  const mot = (nl: string, det: string, fr: string, remarque = ''): Mot =>
+    ({ id: nl, matiere: 'Aard', chapitre: '2', nl, det, fr, definition: '', exemple: '', remarque })
+  const ruimte = mot('ruimte', 'de', "l'espace", 'Synoniem: gebied. Vb. België')
+  const tous = [ruimte, mot('gebied', 'het', 'la zone, le territoire', 'Synoniem: ruimte'),
+    mot('sociale norm', 'de', 'la norme sociale', 'Pluraal: sociale normen. Synoniem: impliciete regel, ongeschreven regel'),
+    mot('ambon', '', 'Lieu de lecture', 'Synonyme : lutrin'), mot('legende', 'de', 'la légende'), mot('titel', 'de', 'le titre'), mot('schaal', 'de', "l'échelle")]
+  it('lit « Synoniem: » et « Synonyme : »', () => {
+    expect(synonymesRemarque(ruimte)).toEqual(['gebied'])
+    expect(synonymesRemarque(tous[2])).toEqual(['impliciete regel', 'ongeschreven regel'])
+    expect(synonymesRemarque(tous[3])).toEqual(['lutrin'])
+  })
+  it('un synonyme est juste, et signalé', () => {
+    const autres = autresReponses({ mot: ruimte, sens: 'fr-nl' }, tous)
+    expect(autres).toEqual([{ texte: 'gebied', det: 'het' }])
+    const c = corrigerParmi('het gebied', { texte: 'ruimte', det: 'de' }, autres, 'nl')
+    expect(c.resultat).toBe('juste')
+    expect(c.synonyme).toBe('het gebied')
+    expect(corrigerParmi('ruimte', { texte: 'ruimte', det: 'de' }, autres, 'nl').synonyme).toBeUndefined()
+    expect(corrigerParmi('de gebied', { texte: 'ruimte', det: 'de' }, autres, 'nl').resultat).toBe('presque')
+    expect(corrigerParmi('land', { texte: 'ruimte', det: 'de' }, autres, 'nl').resultat).toBe('faux')
+  })
+  it('pas de synonyme néerlandais pour une réponse en français', () => {
+    expect(autresReponses({ mot: ruimte, sens: 'nl-fr' }, tous)).toEqual([])
+  })
+  it('un synonyme n’est jamais un leurre', () => {
+    for (let k = 0; k < 20; k++) expect(leurres({ mot: ruimte, sens: 'fr-nl' }, tous)).not.toContain('het gebied')
+  })
+})

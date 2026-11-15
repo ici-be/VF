@@ -2,7 +2,7 @@
 import type { Mot } from './mots'
 import { exercice, tailleSerie, type ExerciceId, type Reglages } from './reglages'
 import { fragilite } from './progression'
-import { simplifier } from './correction'
+import { simplifier, type Accepte } from './correction'
 import { langueDe } from './apparence'
 
 export interface Carte {
@@ -95,7 +95,7 @@ export function leurres(c: Carte, tous: Mot[], n = 3, hasard = Math.random): str
     for (const m of melanger(g, hasard)) {
       if (res.length >= n) return res
       const t = texte(m), s = simplifier(t)
-      if (vus.has(s) || m.nl === c.mot.nl) continue
+      if (vus.has(s) || m.nl === c.mot.nl || synonymesEntre(c.mot, m)) continue
       vus.add(s)
       res.push(t)
     }
@@ -107,4 +107,36 @@ export function leurres(c: Carte, tous: Mot[], n = 3, hasard = Math.random): str
 export function synonymes(c: Carte, tous: Mot[]): Mot[] {
   const q = simplifier(question(c).texte)
   return tous.filter(m => m.matiere === c.mot.matiere && m.id !== c.mot.id && simplifier(question({ ...c, mot: m }).texte) === q)
+}
+
+/** Les mots que la remarque du tableau donne pour synonymes : « Synoniem: a, b. » ou « Synonyme : a / b ». */
+export function synonymesRemarque(m: Mot): string[] {
+  const res: string[] = []
+  for (const [, liste] of m.remarque.matchAll(/synon(?:iem|yme)s?\s*:\s*([^.;\n]*)/gi))
+    for (const x of liste.split(/[,/]/)) if (x.trim()) res.push(x.trim())
+  return res
+}
+
+/** Deux mots que la remarque de l'un donne pour synonymes de l'autre (jamais l'un comme leurre de l'autre). */
+function synonymesEntre(a: Mot, b: Mot): boolean {
+  const dans = (x: Mot, y: Mot) => synonymesRemarque(x).some(s => simplifier(s.replace(/^(de|het) /i, '')) === simplifier(y.nl))
+  return dans(a, b) || dans(b, a)
+}
+
+/**
+ * Les autres réponses justes pour une carte : les mots du tableau qui ont la même question,
+ * et, quand on répond par le mot, les synonymes de sa remarque (avec leur article s'ils sont
+ * aussi dans le tableau).
+ */
+export function autresReponses(c: Carte, tous: Mot[]): Accepte[] {
+  const parMot = (x: Mot): Accepte => (c.sens === 'fr-nl' ? { texte: x.nl, det: x.det } : { texte: x.fr, det: '' })
+  const res = synonymes(c, tous).map(parMot)
+  if (c.sens === 'fr-nl') {
+    for (const s of synonymesRemarque(c.mot)) {
+      const sansDet = s.replace(/^(de|het) /i, '')
+      const connu = tous.find(x => x.matiere === c.mot.matiere && simplifier(x.nl) === simplifier(sansDet))
+      res.push({ texte: sansDet, det: connu?.det ?? (s.match(/^(de|het) /i)?.[1].toLowerCase() || '') })
+    }
+  }
+  return res
 }

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { corriger, type Correction, type Resultat } from '../../lib/correction'
+import { corrigerParmi, type Correction, type Resultat } from '../../lib/correction'
 import { ecouteDisponible, ecouter, ErreurEcoute, type Ecoute } from '../../lib/ecoute'
 import type { Mot } from '../../lib/mots'
-import { question, reponse, synonymes } from '../../lib/seance'
+import { autresReponses, question, reponse, type Carte } from '../../lib/seance'
 import { parler } from '../../lib/voix'
 import type { PropsExercice } from '../Seance'
 import { attendre, Infos, Langue, Verdict } from './commun'
@@ -47,7 +47,7 @@ export function Oral({ carte, tous, pause, suivant, annoncer }: PropsExercice) {
     e.resultat.then(entendu => {
       if (annule) return
       if (!entendu.length) { setEtape({ nom: 'rien' }); return }
-      const { texte, c } = meilleure(entendu, [carte.mot, ...synonymes(carte, tous)], rep.langue)
+      const { texte, c } = meilleure(entendu, carte, tous, rep.langue)
       setEssais(n => n + 1)
       setEtape({ nom: 'resultat', entendu: texte, c })
       annoncer(c.resultat)
@@ -62,7 +62,8 @@ export function Oral({ carte, tous, pause, suivant, annoncer }: PropsExercice) {
   }, [etape, pause])
 
   // réponse juste : on enchaîne une fois la bonne réponse lue
-  const juste = etape.nom === 'resultat' && etape.c.resultat === 'juste'
+  // (sauf un synonyme : on s'arrête pour qu'elle lise le mot du cours)
+  const juste = etape.nom === 'resultat' && etape.c.resultat === 'juste' && !etape.c.synonyme
   useEffect(() => {
     if (!juste || pause) return
     let annule = false
@@ -121,7 +122,7 @@ export function Oral({ carte, tous, pause, suivant, annoncer }: PropsExercice) {
           {!juste && (
             <div class="actions">
               <button class="go" onClick={() => finir(etape.c.resultat)}>Suivant ⏎</button>
-              <button class="second" onClick={reessayer}>🎤 Réessayer</button>
+              {etape.c.resultat !== 'juste' && <button class="second" onClick={reessayer}>🎤 Réessayer</button>}
               {etape.c.resultat === 'faux' && etape.entendu && (
                 <button class="second" onClick={() => suivant('presque')} title="La reconnaissance vocale a mal compris une bonne réponse">L’appli m’a mal comprise</button>
               )}
@@ -150,16 +151,18 @@ export function Oral({ carte, tous, pause, suivant, annoncer }: PropsExercice) {
   )
 }
 
-/** La meilleure correction parmi ce que la reconnaissance a compris et les réponses acceptées. */
-function meilleure(entendu: string[], mots: Mot[], langue: 'fr' | 'nl'): { texte: string; c: Correction } {
+/** La meilleure correction parmi ce que la reconnaissance a compris et les réponses acceptées (synonymes compris). */
+function meilleure(entendu: string[], carte: Carte, tous: Mot[], langue: 'fr' | 'nl'): { texte: string; c: Correction } {
+  const m = carte.mot
+  const attendu = carte.sens === 'fr-nl' ? { texte: m.nl, det: m.det } : { texte: m.fr, det: '' }
+  const autres = autresReponses(carte, tous)
   let best = { texte: entendu[0], c: { resultat: 'faux', message: '' } as Correction }
   for (const texte of entendu) {
-    for (const m of mots) {
-      const c = langue === 'nl' ? corriger(texte, m.nl, 'nl', m.det) : corriger(texte, m.fr, 'fr')
-      // à l'oral, accents et lettre de travers viennent de la reconnaissance : seul l'article compte
-      const c2: Correction = c.resultat === 'presque' && c.cause !== 'article' ? { resultat: 'juste', message: '' } : c
-      if (RANG[c2.resultat] < RANG[best.c.resultat]) best = { texte, c: c2 }
-    }
+    const c = corrigerParmi(texte, attendu, autres, langue)
+    // à l'oral, accents et lettre de travers viennent de la reconnaissance : seul l'article compte
+    const c2: Correction = c.resultat === 'presque' && c.cause !== 'article' ? { resultat: 'juste', message: '', synonyme: c.synonyme } : c
+    // à résultat égal, le mot attendu plutôt qu'un synonyme
+    if (RANG[c2.resultat] < RANG[best.c.resultat] || (c2.resultat === best.c.resultat && best.c.synonyme && !c2.synonyme)) best = { texte, c: c2 }
   }
   return best
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'preact/hooks'
-import { corriger } from '../../lib/correction'
-import { leurres, melanger, nlComplet } from '../../lib/seance'
+import { corrigerParmi } from '../../lib/correction'
+import { autresReponses, leurres, melanger, nlComplet } from '../../lib/seance'
 import { masquer } from '../../lib/trous'
 import type { PropsExercice } from '../Seance'
 import { dire, Langue } from './commun'
@@ -43,7 +43,7 @@ export function Definitions({ carte, tous, reglages, pause, suivant, annoncer }:
       {reglages.repondre === 'choix'
         ? <Choix options={options} bonne={bonne} mot={m} pause={pause} lire={lireMot} suivant={suivant} annoncer={annoncer} />
         : <Saisie langue={langue} attendu={langue === 'fr' ? bonne : `${bonne} (${m.fr})`} mot={m} pause={pause} lire={lireMot} suivant={suivant} annoncer={annoncer}
-            corriger={t => corriger(t, m.nl, langue, m.det, { exigerArticle: reglages.exigerArticle })} />}
+            corriger={t => corrigerParmi(t, { texte: m.nl, det: m.det }, autresReponses({ mot: m, sens: 'fr-nl' }, tous), langue, { exigerArticle: reglages.exigerArticle })} />}
     </>
   )
 }

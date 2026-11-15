@@ -34,8 +34,11 @@ export function Verdict({ c, attendu }: { c: Correction; attendu: string }) {
   return (
     <div class={`verdict ${c.resultat}`} role="status">
       <b>{TITRES[c.resultat]}</b>
+      {c.synonyme && <span>« {c.synonyme} » est un synonyme : {c.resultat === 'juste' ? 'ça compte' : 'c’est le bon sens'} !</span>}
       {c.message && <span>{c.message}</span>}
-      {c.resultat !== 'juste' && <span class="attendu">Réponse : <strong>{attendu}</strong></span>}
+      {c.synonyme
+        ? <span class="attendu">Mais il y a un autre mot pour le dire, celui du cours : <strong>{attendu}</strong>. Retiens les deux !</span>
+        : c.resultat !== 'juste' && <span class="attendu">Réponse : <strong>{attendu}</strong></span>}
     </div>
   )
 }

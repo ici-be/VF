@@ -9,6 +9,8 @@ export interface Correction {
   message: string   // explication courte quand ce n'est pas « juste »
   /** pourquoi « presque » : mauvais article, accents, ou une lettre de travers */
   cause?: 'article' | 'accents' | 'lettre'
+  /** la réponse donnée est un synonyme du mot attendu (juste aussi, mais on rappelle le mot du cours) */
+  synonyme?: string
 }
 
 export interface OptionsCorrection {
@@ -107,6 +109,31 @@ export function corriger(
     if (proche) return { resultat: 'presque', message: `Presque : une lettre à corriger. ${messageArticle}`.trim(), cause: 'lettre' }
   }
   return { resultat: 'faux', message: '' }
+}
+
+const RANG: Record<Resultat, number> = { juste: 0, presque: 1, faux: 2 }
+
+/** Une réponse acceptée : le mot et son article (de/het, vide sinon). */
+export interface Accepte { texte: string; det: string }
+
+/**
+ * Corrige parmi le mot attendu et ses synonymes : un synonyme compte autant que le mot
+ * attendu, mais la correction le signale (« synonyme ») pour rappeler le mot du cours.
+ */
+export function corrigerParmi(
+  reponse: string,
+  attendu: Accepte,
+  synonymes: Accepte[],
+  langue: 'fr' | 'nl',
+  options: OptionsCorrection = {},
+): Correction {
+  let best = corriger(reponse, attendu.texte, langue, attendu.det, options)
+  for (const a of synonymes) {
+    if (best.resultat === 'juste') break
+    const c = corriger(reponse, a.texte, langue, a.det, options)
+    if (RANG[c.resultat] < RANG[best.resultat]) best = { ...c, synonyme: reponse.trim() }
+  }
+  return best
 }
 
 export interface CorrectionListe {
