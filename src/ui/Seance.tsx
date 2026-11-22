@@ -24,7 +24,7 @@ import { Interrogatif } from './exercices/Interrogatif'
 import { Primitifs } from './exercices/Primitifs'
 import { Questions } from './exercices/Questions'
 import { Getallen } from './exercices/Getallen'
-import { Calcul, Eeuwen, Natures, Voornaamwoorden } from './exercices/Generes'
+import { Aimer, Calcul, Eeuwen, Natures, Voornaamwoorden } from './exercices/Generes'
 import { NomsCote } from './Matieres'
 import { nombre } from '../lib/texte'
 
@@ -207,6 +207,7 @@ export function Seance({ serie, voc, reglages, setReglages, quitter, terminer }:
         {ex.id === 'calcul' && <Calcul key={i} {...props} />}
         {ex.id === 'natures' && <Natures key={i} {...props} />}
         {ex.id === 'voornaamwoorden' && <Voornaamwoorden key={i} {...props} />}
+        {ex.id === 'aimer' && <Aimer key={i} {...props} />}
       </main>
       {aSignaler && carte && (
         <FenetreSignalement mot={carte.mot} exercice={ex.nom} resultat={resultats.get(cleCarte(carte)) ?? annonce.current ?? undefined} fermer={() => setASignaler(false)} />

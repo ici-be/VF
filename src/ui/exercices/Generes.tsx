@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'preact/hooks'
 import { corriger, type Correction, type Resultat } from '../../lib/correction'
 import { cleDe, questionCalcul, questionEeuwen, questionNature, type Nature } from '../../lib/generes'
+import { questionAimer, type QuestionAimer } from '../../lib/aimer'
 import { questionVoornaamwoord } from '../../lib/voornaamwoorden'
 import type { PropsExercice } from '../Seance'
 import { Langue } from './commun'
@@ -71,8 +72,19 @@ export function Natures({ carte, pause, suivant, annoncer }: PropsExercice) {
 }
 
 /** Voornaamwoorden : la phrase à compléter (l'indice entre parenthèses), en choisissant ou en écrivant le mot. */
-export function Voornaamwoorden({ carte, reglages, pause, suivant, annoncer }: PropsExercice) {
-  const q = useMemo(() => questionVoornaamwoord(Number(cleDe(carte.mot))), [])
+export function Voornaamwoorden(props: PropsExercice) {
+  const q = useMemo(() => questionVoornaamwoord(Number(cleDe(props.carte.mot))), [])
+  return <PhraseATrou {...props} q={q} astuce="Vul in met het juiste voornaamwoord." placeholder="Het voornaamwoord" />
+}
+
+/** Aimer : la phrase française au-dessus, la phrase néerlandaise à compléter (houden van, lusten, graag, liever). */
+export function Aimer(props: PropsExercice) {
+  const q = useMemo(() => questionAimer(Number(cleDe(props.carte.mot))), [])
+  return <PhraseATrou {...props} q={q} astuce={q.astuce ?? 'Vertaal: vul de zin aan.'} placeholder="Het ontbrekende woord" />
+}
+
+/** Une phrase néerlandaise à trou, en choisissant ou en écrivant le mot, puis l'explication (Uitleg). */
+function PhraseATrou({ carte, reglages, pause, suivant, annoncer, q, astuce, placeholder }: PropsExercice & { q: QuestionAimer; astuce: string; placeholder: string }) {
   const [repondu, setRepondu] = useState<Resultat | null>(null)
   // en début de phrase, avec une majuscule
   const vorm = (s: string) => (q.avant ? s : s[0].toUpperCase() + s.slice(1))
@@ -89,7 +101,7 @@ export function Voornaamwoorden({ carte, reglages, pause, suivant, annoncer }: P
           <span class={repondu ? `trou-corrige ${repondu}` : 'trou-vnw'}>{repondu ? vorm(q.bonnes[0]) : '…'}</span>
           {q.apres}
         </p>
-        <p class="astuce">Vul in met het juiste voornaamwoord.</p>
+        <p class="astuce">{astuce}</p>
       </div>
       {reglages.repondre === 'choix'
         ? <>
@@ -97,7 +109,7 @@ export function Voornaamwoorden({ carte, reglages, pause, suivant, annoncer }: P
             {repondu && uitleg}
           </>
         : <Saisie langue="nl" attendu={attendu} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant} annoncer={annoncer2}
-            corriger={t => corriger(t, q.bonnes.join(' / '), 'nl')} placeholder="Het voornaamwoord" apres={() => uitleg} />}
+            corriger={t => corriger(t, q.bonnes.join(' / '), 'nl')} placeholder={placeholder} apres={() => uitleg} />}
     </>
   )
 }

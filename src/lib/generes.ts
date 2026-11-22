@@ -4,9 +4,11 @@
 // - Calcul mental (Mathématiques) : priorité des opérations, de gauche à droite, exposants, parenthèses, distributivité
 //   (dans les deux sens), calcul astucieux, coder, décoder, propriétés, vocabulaire des opérations ;
 // - Natures des mots (Français) : dans une phrase, la nature du mot mis en évidence ;
-// - Voornaamwoorden (Nederlands) : la phrase à compléter par le bon voornaamwoord (src/lib/voornaamwoorden.ts).
+// - Voornaamwoorden (Nederlands) : la phrase à compléter par le bon voornaamwoord (src/lib/voornaamwoorden.ts) ;
+// - Aimer (Nederlands) : traduire « aimer » : houden van, lusten, graag, liever (src/lib/aimer.ts).
 import donneesNatures from '../data/natures.json'
 import type { Matiere, Mot, Vocabulaire } from './mots'
+import { AIMER } from './aimer'
 import { VOORNAAMWOORDEN } from './voornaamwoorden'
 
 type Hasard = () => number
@@ -301,6 +303,8 @@ const CHAPITRES = [
     cartes: (Object.keys(NATURES) as Nature[]).map(n => ({ cle: n, nl: NATURES[n].nom, fr: NATURES[n].nom })) },
   { matiere: /^nederlands$/i, chapitre: 'Voornaamwoorden (oefening)', genere: 'voornaamwoorden' as const,
     cartes: VOORNAAMWOORDEN.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
+  { matiere: /^nederlands$/i, chapitre: 'Aimer (oefening)', genere: 'aimer' as const,
+    cartes: AIMER.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
 ]
 /** La notion d'une carte fabriquée (l'indice du tijdvak ou du calcul, la nature). */
 export const cleDe = (m: Mot) => m.id.split('|').pop()!
