@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Les images des mots-images : une illustration par mot difficile, générée par Gemini.
 
-    python3 outils/images.py configurer CLE [--modele gemini-2.5-flash-image]   # une fois
-    python3 outils/images.py generer scenes.tsv [--dossier public/images/mots] [--refaire] [--essai]
+    python3 outils/images.py generer scenes.tsv [--dossier public/images/mots] [--refaire] [--essai] [--paralleles 4]
+    python3 outils/images.py configurer CLE [--modele gemini-2.5-flash-image]   # seulement pour passer par l'API
+
+Par défaut, les images passent par le CLI Antigravity (`agy`, l'abonnement Gemini de ce portable) :
+pas de clé ni de coût par image. Si une clé API a été configurée, l'API est utilisée à la place.
 
 scenes.tsv : un TSV avec une ligne de titres, colonnes « Néerlandais » (le mot, tel qu'il est dans le
 tableau) et « Scène » (la scène à dessiner, en anglais, écrite par Claude d'après le pont du mot).
@@ -15,6 +18,9 @@ import base64
 import csv
 import io
 import json
+import subprocess
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
 import re
 import sys
 import unicodedata
@@ -35,12 +41,6 @@ STYLE = (
 )
 
 
-def config() -> dict:
-    if not CONFIG.exists():
-        sys.exit(f'Pas encore configuré : python3 {sys.argv[0]} configurer CLE')
-    return json.loads(CONFIG.read_text())
-
-
 def configurer(args):
     CONFIG.parent.mkdir(parents=True, exist_ok=True)
     CONFIG.write_text(json.dumps({'cle': args.cle, 'modele': args.modele}) + '\n')
@@ -55,7 +55,31 @@ def nom_fichier(mot: str) -> str:
     return re.sub(r'[^a-z0-9]+', '-', m).strip('-')
 
 
-def generer_une(scene: str, c: dict) -> bytes:
+class Quota(RuntimeError):
+    pass
+
+
+def generer_agy(scene: str) -> bytes:
+    """Une image par le CLI agy : il l'enregistre en PNG dans un dossier temporaire, qu'on relit."""
+    with tempfile.TemporaryDirectory(prefix='images-') as d:
+        sortie = Path(d) / 'image.png'
+        consigne = (
+            f'Use your image generation tool to create exactly one image and save it as a PNG file at {sortie}. '
+            'Do nothing else and reply only with the saved path. The image is LANDSCAPE (wider than tall, 4:3).\n\n'
+            f'Image: {scene}\n\n{STYLE}'
+        )
+        r = subprocess.run(['agy', '-p', consigne, '--add-dir', d, '--mode', 'accept-edits', '--print-timeout', '400s'],
+                           cwd=d, capture_output=True, text=True, timeout=460)
+        if not sortie.exists():
+            if 'RESOURCE_EXHAUSTED' in r.stdout + r.stderr or '429' in r.stdout:
+                raise Quota('quota d\'images de l\'abonnement atteint (environ 10 images par tranche de 5 h) : relancer plus tard, les images faites sont gardées')
+            raise RuntimeError(f'agy n\'a pas produit d\'image : {(r.stdout + r.stderr).strip()[-400:]}')
+        return sortie.read_bytes()
+
+
+def generer_une(scene: str, c: dict | None) -> bytes:
+    if c is None:
+        return generer_agy(scene)
     corps = {
         'contents': [{'parts': [{'text': f'{scene}\n\n{STYLE}'}]}],
         'generationConfig': {'responseModalities': ['IMAGE'], 'imageConfig': {'aspectRatio': '4:3'}},
@@ -88,8 +112,8 @@ def generer(args):
     lignes = list(csv.DictReader(open(args.tsv, encoding='utf-8'), delimiter='\t'))
     dossier = Path(args.dossier)
     dossier.mkdir(parents=True, exist_ok=True)
-    c = None if args.essai else config()
-    faites = 0
+    c = json.loads(CONFIG.read_text()) if CONFIG.exists() else None
+    a_faire = []
     for l in lignes:
         mot, scene = (l.get('Néerlandais') or '').strip(), (l.get('Scène') or '').strip()
         if not mot or not scene:
@@ -101,14 +125,30 @@ def generer(args):
         if args.essai:
             print(f'· {mot} → {dest.name}\n  {scene}')
             continue
+        a_faire.append((mot, scene, dest))
+
+    quota = []
+
+    def une(t):
+        mot, scene, dest = t
+        if quota:
+            return False
         try:
             en_webp(generer_une(scene, c), dest)
-            faites += 1
-            print(f'✓ {mot} → {dest}')
-        except RuntimeError as e:
-            print(f'✗ {mot} : {e}', file=sys.stderr)
+            print(f'✓ {mot} → {dest}', flush=True)
+            return True
+        except Quota as e:
+            if not quota:
+                print(f'✗ {e}', file=sys.stderr, flush=True)
+            quota.append(1)
+            return False
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            print(f'✗ {mot} : {e}', file=sys.stderr, flush=True)
+            return False
+    with ThreadPoolExecutor(max(1, args.paralleles)) as ex:
+        faites = sum(ex.map(une, a_faire))
     if not args.essai:
-        print(f'{faites} image(s) faite(s).')
+        print(f'{faites} image(s) faite(s) sur {len(a_faire)}.')
 
 
 def main():
@@ -118,6 +158,7 @@ def main():
     a.set_defaults(f=configurer)
     a = s.add_parser('generer'); a.add_argument('tsv'); a.add_argument('--dossier', default=str(DOSSIER))
     a.add_argument('--refaire', action='store_true'); a.add_argument('--essai', action='store_true')
+    a.add_argument('--paralleles', type=int, default=3)
     a.set_defaults(f=generer)
     args = p.parse_args()
     args.f(args)
