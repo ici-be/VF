@@ -952,3 +952,22 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .erreurs-suivi .quoi { flex: 1; min-width: 12em; }
 .erreurs-suivi .ou { color: var(--muted); font-size: .85rem; }
 .lien-transfert { width: 100%; box-sizing: border-box; font: .8rem var(--body); padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
+
+/* ---------- Woordvolgorde : les zinsdelen à remettre dans l'ordre ---------- */
+.wv-zin { width: 100%; min-height: 3.4em; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; padding: 10px 6px; border-bottom: 2.5px dashed var(--line); }
+.wv-zin.juste { border-bottom: 2.5px solid var(--ok); }
+.wv-zin.faux { border-bottom: 2.5px solid var(--ko); }
+.wv-zin.faux .wv-stuk { text-decoration: line-through; text-decoration-color: var(--ko); }
+.wv-leeg { color: var(--muted); font-size: .95rem; }
+.wv-punt { font: 600 1.2rem var(--body); margin-left: -4px; }
+.wv-pool { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.wv-stuk { border: 2px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; padding: 9px 13px; font: 600 1.08rem var(--body); display: inline-flex; gap: 8px; align-items: center; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+.wv-zin .wv-stuk { border-color: var(--blue); background: var(--blue-bg); }
+.wv-zin .wv-stuk:disabled { opacity: 1; cursor: default; }
+.wv-stuk .k { width: 22px; height: 22px; border-radius: 5px; background: var(--panel-2); display: grid; place-items: center; font-size: .78rem; font-weight: 700; color: var(--muted); }
+@media (hover: none) and (pointer: coarse) { .wv-stuk .k { display: none; } }
+@media (hover: hover) { .wv-pool .wv-stuk:hover { border-color: var(--blue); } }
+/* la phrase en couleurs, comme dans le cours : PV en rouge, onderwerp en vert, 2de deel van de werkwoordgroep en orange */
+.wv-kleur .wv-pv { color: var(--ko); font-weight: 700; text-decoration: underline 2px; text-underline-offset: .2em; }
+.wv-kleur .wv-ond { color: var(--ok); font-weight: 700; text-decoration: underline 2px; text-underline-offset: .2em; }
+.wv-kleur .wv-slot { color: var(--accent); font-weight: 700; }

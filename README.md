@@ -124,6 +124,12 @@ n'apparaît que si elle est choisie :
   écrite), coder, décoder, propriétés (choix parmi 4) ;
 - **Natures des mots** (Français) : la nature du mot souligné dans une phrase, et le test du cours
   (les phrases sont dans `src/data/natures.json`).
+- **Woordvolgorde** (Nederlands, ch. 10) : remettre les zinsdelen dans l'ordre en les touchant (ou au clavier :
+  1 à 9, Retour arrière, Entrée). Plusieurs ordres sont acceptés quand le néerlandais le permet (« Morgen ontmoet ik
+  Jan », « Ik ontmoet Jan morgen ») ; une erreur donne la règle du cours (inversie, PV en 2e place, TeMPo, « naar »
+  jamais en tête, 2de deel achteraan). Neuf cartes : PV et onderwerp, inversie, TeMPo, werkwoordgroep, vragen,
+  aanvullen (exercice I), vertalen (exercice II), welke zin is juist? (want, maar, ja, neen) et les phrases du livre
+  (p. 31-36) ; `src/lib/woordvolgorde.ts`.
 
 ## Vérifier et nettoyer le tableau
 
