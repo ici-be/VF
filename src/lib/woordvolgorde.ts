@@ -465,7 +465,7 @@ function kaartVertalen(h: Hasard): QuestionWv {
   const s = k < .2 ? verzin(h, { vraag: true }) : verzin(h, { modal: k < .4, scheidbaar: k > .85 })
   if (k < .2) s.vraag = 'janee'
   const z = bouw(s)
-  return puzzel(z, h, 'Vertaal: zet de zinsdelen in de goede volgorde.', s.vraag ? tw('Een ja-neevraag: PV + onderwerp + de rest.', 'Une question oui/non : verbe conjugué + sujet + le reste.') : en(UITLEG_SCHEMA, UITLEG_INVERSIE), z.fr)
+  return puzzel(z, h, s.vraag ? 'Vertaal de vraag: zet de zinsdelen in de goede volgorde.' : 'Vertaal: zet de zinsdelen in de goede volgorde.', s.vraag ? tw('Een ja-neevraag: PV + onderwerp + de rest.', 'Une question oui/non : verbe conjugué + sujet + le reste.') : en(UITLEG_SCHEMA, UITLEG_INVERSIE), z.fr)
 }
 
 // ------------------------------------------------------------ welke zin is juist ? (les règles p. 32)
@@ -586,7 +586,9 @@ function kaartBoek(h: Hasard): QuestionWv {
   }
   const b = un(BOEK, h)
   const z = lees(b.n, b.vraag)
-  const astuce = b.boven && b.bron === 'oefening II' ? 'Vertaal: zet de zinsdelen in de goede volgorde.'
+  // une question : on le dit, comme le « ? » de l'exercice III du livre
+  const astuce = b.boven && b.bron === 'oefening II' ? `Vertaal${z.vraag ? ' de vraag' : ''}: zet de zinsdelen in de goede volgorde.`
+    : z.vraag ? 'Maak een vraag: zet de zinsdelen in de goede volgorde.'
     : b.boven ? 'Vul de zin aan met de bepalingen tussen haakjes.'
     : z.begin !== undefined ? `Begin de zin met « ${z.delen[z.begin].t} ».` : 'Zet de zinsdelen in de goede volgorde.'
   const uitleg = z.vraag

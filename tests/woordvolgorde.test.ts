@@ -71,3 +71,12 @@ describe('Woordvolgorde', () => {
     })
   })
 })
+
+describe('Woordvolgorde : les questions', () => {
+  it('la consigne dit que c’est une question', () => {
+    for (let s = 1; s < 300; s++) WOORDVOLGORDE.forEach((_, i) => {
+      const q = questionWoordvolgorde(i, graine(s * 17 + i))
+      if (q.soort === 'puzzel' && q.zin.vraag) expect(q.astuce).toMatch(/vraag/)
+    })
+  })
+})

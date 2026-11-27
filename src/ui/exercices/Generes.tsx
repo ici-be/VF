@@ -217,14 +217,15 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
         <Langue l="nl" />
         {q.boven && <p class="astuce boven">{q.boven}</p>}
         <div class={`wv-zin ${oordeel ? (juist ? 'juste' : 'faux') : ''}`} aria-label="Ta phrase">
-          {gekozen.length === 0 && !oordeel && <span class="wv-leeg">Touche les morceaux dans le bon ordre</span>}
+          {gekozen.length === 0 && !oordeel && <span class="wv-leeg">{zin.vraag ? 'Une question : touche' : 'Touche'} les morceaux dans le bon ordre</span>}
           {opgegeven && gekozen.length === 0 && <span class="wv-leeg">—</span>}
           {gekozen.map((i, k) => (
             <button class="wv-stuk" onClick={() => terug(i)} disabled={!!oordeel} title="Enlever">
               {k === 0 ? zin.delen[i].t[0].toUpperCase() + zin.delen[i].t.slice(1) : zin.delen[i].t}
             </button>
           ))}
-          {vol && <span class="wv-punt">{zin.vraag ? '?' : '.'}</span>}
+          {/* le point ou le « ? » dès le départ : on sait si c'est une question */}
+          <span class={`wv-punt ${vol ? '' : 'wacht'}`} title={zin.vraag ? 'Une question' : undefined}>{zin.vraag ? '?' : '.'}</span>
         </div>
         <p class="astuce">{q.astuce}</p>
       </div>
