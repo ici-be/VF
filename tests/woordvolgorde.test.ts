@@ -30,12 +30,12 @@ describe('Woordvolgorde', () => {
   })
   it('les fautes, avec la règle du cours', () => {
     const n = 'ik=o / ga=p / vandaag=t / naar school=P'
-    expect(juist(n, 'Vandaag ik ga naar school.').waarom).toMatch(/inversie/)
-    expect(juist(n, 'Naar school ga ik vandaag.').waarom).toMatch(/naar/)
-    expect(juist('ik=o / studeer=p / vandaag=t / goed=bw / op school=P', 'Vandaag op school studeer ik goed.').waarom).toMatch(/Maximaal één/)
-    expect(juist('Arthur=o / gaat=p / met de bus=M / naar Walibi=P', 'Arthur gaat naar Walibi met de bus.').waarom).toMatch(/TeMPo/)
-    expect(juist('Arthur=o / moet=p / met de trein=M / naar Londen=P / gaan=s', 'Arthur moet gaan met de trein naar Londen.').waarom).toMatch(/achteraan/)
-    expect(juist('kom=p / je=o / morgen=t / mee=s', 'Je kom morgen mee?', true).waarom).toMatch(/ja-neevraag/)
+    expect(juist(n, 'Vandaag ik ga naar school.').waarom.nl).toMatch(/inversie/)
+    expect(juist(n, 'Naar school ga ik vandaag.').waarom.nl).toMatch(/naar/)
+    expect(juist('ik=o / studeer=p / vandaag=t / goed=bw / op school=P', 'Vandaag op school studeer ik goed.').waarom.nl).toMatch(/Maximaal één/)
+    expect(juist('Arthur=o / gaat=p / met de bus=M / naar Walibi=P', 'Arthur gaat naar Walibi met de bus.').waarom.nl).toMatch(/TeMPo/)
+    expect(juist('Arthur=o / moet=p / met de trein=M / naar Londen=P / gaan=s', 'Arthur moet gaan met de trein naar Londen.').waarom.nl).toMatch(/achteraan/)
+    expect(juist('kom=p / je=o / morgen=t / mee=s', 'Je kom morgen mee?', true).waarom.nl).toMatch(/ja-neevraag/)
     expect(juist('ik=o / geef=p / mijn mama=mv / een cadeautje=lo', 'Ik geef een cadeautje mijn mama.').juist).toBe(false)
   })
   it('les phrases du livre : la solution est juste, et le livre aussi', () => {
@@ -47,9 +47,16 @@ describe('Woordvolgorde', () => {
   it('chaque carte : des questions propres, la solution juste, le mélange faux', () => {
     for (let s = 1; s < 300; s++) WOORDVOLGORDE.forEach((_, i) => {
       const q = questionWoordvolgorde(i, graine(s * 13 + i))
-      const textes = q.soort === 'puzzel' ? [q.uitleg, ...q.zin.delen.map(d => d.t)] : [q.uitleg, ...q.options]
+      // l'explication en néerlandais et en français
+      expect(q.uitleg.nl.length).toBeGreaterThan(10)
+      expect(q.uitleg.fr.length).toBeGreaterThan(10)
+      const textes = q.soort === 'puzzel' ? [q.uitleg.nl, ...q.zin.delen.map(d => d.t)] : [q.uitleg.nl, ...q.options]
       for (const t of textes) expect(t).not.toMatch(/undefined|NaN|\s{2}| [.,?]$/)
       if (q.soort === 'puzzel') {
+        // une erreur s'explique dans les deux langues
+        const o = controleer(q.zin, q.schud)
+        expect(o.waarom.nl).not.toBe('')
+        expect(o.waarom.fr).not.toBe('')
         // le français : une espace avant « ? », pas avant le point
         for (const t of [q.boven ?? '', q.zin.fr ?? '']) expect(t).not.toMatch(/undefined|\s{2}| [.,]|\S\?/)
         expect(controleer(q.zin, oplossing(q.zin)).juist, zinTekst(q.zin, oplossing(q.zin))).toBe(true)

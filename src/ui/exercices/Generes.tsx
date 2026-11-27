@@ -3,9 +3,9 @@ import { corriger, type Correction, type Resultat } from '../../lib/correction'
 import { cleDe, questionCalcul, questionEeuwen, questionNature, type Nature } from '../../lib/generes'
 import { questionAimer, type QuestionAimer } from '../../lib/aimer'
 import { questionVoornaamwoord } from '../../lib/voornaamwoorden'
-import { controleer, oplossing, questionWoordvolgorde, zinTekst, type Oordeel, type Zin } from '../../lib/woordvolgorde'
+import { controleer, oplossing, questionWoordvolgorde, zinTekst, type Oordeel, type Tweetalig, type Zin } from '../../lib/woordvolgorde'
 import type { PropsExercice } from '../Seance'
-import { attendre, Langue, Verdict } from './commun'
+import { attendre, Langue } from './commun'
 import { Actions, Choix, Saisie } from './Reponses'
 
 // Les exercices fabriqués par l'appli (src/lib/generes.ts) : une question nouvelle à chaque carte,
@@ -132,6 +132,11 @@ function ZinKleur({ zin, volgorde }: { zin: Zin; volgorde: number[] }) {
   )
 }
 
+/** Une explication en néerlandais, puis en français. */
+function TweeTalen({ t }: { t: Tweetalig }) {
+  return <>{t.nl && <span lang="nl">{t.nl}</span>}{t.fr && <span lang="fr" class="uitleg-fr">{t.fr}</span>}</>
+}
+
 /** Woordvolgorde : les zinsdelen à remettre dans l'ordre (en les touchant), ou une question à choix (PV, onderwerp, welke zin is juist?). */
 export function Woordvolgorde(props: PropsExercice) {
   const q = useMemo(() => questionWoordvolgorde(Number(cleDe(props.carte.mot))), [])
@@ -147,7 +152,7 @@ export function Woordvolgorde(props: PropsExercice) {
       </div>
       <Choix options={q.options} bonne={q.bonne} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant}
         annoncer={r => { setRepondu(r); annoncer(r) }} longues={q.longues} />
-      {repondu && <div class="info explication"><b>Uitleg</b><span>{q.uitleg}</span></div>}
+      {repondu && <div class="info explication"><b>Uitleg</b><TweeTalen t={q.uitleg} /></div>}
     </>
   )
 }
@@ -174,7 +179,7 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
   const valider = (abandon = false) => {
     if (oordeel) { suivant(juist ? 'juste' : 'faux'); return }
     if (!abandon && huidig.current.length < zin.delen.length) return
-    const o: Oordeel = abandon ? { juist: false, waarom: '' } : controleer(zin, huidig.current)
+    const o: Oordeel = abandon ? { juist: false, waarom: { nl: '', fr: '' } } : controleer(zin, huidig.current)
     if (abandon) setOpgegeven(true)
     setOordeel(o)
     annoncer(o.juist ? 'juste' : 'faux')
@@ -202,7 +207,7 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
     return () => removeEventListener('keydown', touche)
   })
 
-  const correction: Correction | null = oordeel && { resultat: juist ? 'juste' : 'faux', message: oordeel.waarom }
+  const correction: Correction | null = oordeel && { resultat: juist ? 'juste' : 'faux', message: '' }
   return (
     <>
       <div class="carte">
@@ -227,8 +232,14 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
           ))}
         </div>
       )}
-      {correction && <Verdict c={correction} attendu={zinTekst(zin, goed)} />}
-      {oordeel && <div class="info explication"><b>Uitleg</b><span><ZinKleur zin={zin} volgorde={goed} /></span><span>{q.uitleg}</span></div>}
+      {oordeel && (
+        <div class={`verdict ${juist ? 'juste' : 'faux'}`} role="status">
+          <b>{juist ? 'Juste !' : 'Raté'}</b>
+          <TweeTalen t={oordeel.waarom} />
+          {!juist && <span class="attendu">Réponse : <strong>{zinTekst(zin, goed)}</strong></span>}
+        </div>
+      )}
+      {oordeel && <div class="info explication"><b>Uitleg</b><span><ZinKleur zin={zin} volgorde={goed} /></span><TweeTalen t={q.uitleg} /></div>}
       <Actions correction={correction} vide={!vol} valider={valider} />
     </>
   )

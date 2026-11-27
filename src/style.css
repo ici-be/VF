@@ -971,3 +971,5 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 .wv-kleur .wv-pv { color: var(--ko); font-weight: 700; text-decoration: underline 2px; text-underline-offset: .2em; }
 .wv-kleur .wv-ond { color: var(--ok); font-weight: 700; text-decoration: underline 2px; text-underline-offset: .2em; }
 .wv-kleur .wv-slot { color: var(--accent); font-weight: 700; }
+/* l'explication en français, sous le néerlandais */
+.uitleg-fr { font-style: italic; opacity: .85; }

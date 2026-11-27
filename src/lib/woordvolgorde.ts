@@ -27,8 +27,9 @@ export interface Deel {
   hi: number
   /** peut se mettre en tête de phrase (avec inversie) */
   voor: boolean
-  /** pour l'explication : tijd, plaats, manier, begeleiding, lijdend voorwerp… */
+  /** pour l'explication : tijd, plaats, manier, begeleiding, lijdend voorwerp… et en français */
   naam: string
+  naamFr: string
   /** sa place dans l'ordre montré comme solution, quand ce n'est pas lo */
   kern?: number
 }
@@ -44,32 +45,32 @@ export interface Zin {
 
 // ------------------------------------------------------------ les sortes de zinsdelen
 const ZONES = {
-  vnw: { lo: 1, hi: 1, voor: false, naam: 'voornaamwoord' },
-  t: { lo: 1.5, hi: 2.5, voor: true, naam: 'tijd' },
-  lv: { lo: 1.8, hi: 2.6, voor: false, naam: 'lijdend voorwerp' },
-  bw: { lo: 2, hi: 2, voor: false, naam: 'bepaling zonder voorzetsel' },
-  bw2: { lo: 2, hi: 3.5, voor: false, naam: 'bepaling zonder voorzetsel' },
-  hier: { lo: 2, hi: 3.5, voor: true, naam: 'plaats' },
-  mv: { lo: 2.2, hi: 2.2, voor: false, naam: 'meewerkend voorwerp' },
-  lo: { lo: 2.6, hi: 2.6, voor: false, naam: 'lijdend voorwerp' },
-  niet: { lo: 2.9, hi: 2.9, voor: false, naam: 'niet' },
-  T: { lo: 3, hi: 3, voor: true, naam: 'tijd' },
-  B: { lo: 4, hi: 4, voor: true, naam: 'begeleiding' },
-  M: { lo: 5, hi: 5, voor: true, naam: 'manier' },
-  P: { lo: 6, hi: 6, voor: true, naam: 'plaats' },
-  x: { lo: 8, hi: 8, voor: false, naam: 'werkwoordgroep' },
-  s: { lo: 9, hi: 9, voor: false, naam: '2de deel van de werkwoordgroep' },
+  vnw: { lo: 1, hi: 1, voor: false, naam: 'voornaamwoord', naamFr: 'pronom' },
+  t: { lo: 1.5, hi: 2.5, voor: true, naam: 'tijd', naamFr: 'temps' },
+  lv: { lo: 1.8, hi: 2.6, voor: false, naam: 'lijdend voorwerp', naamFr: 'COD' },
+  bw: { lo: 2, hi: 2, voor: false, naam: 'bepaling zonder voorzetsel', naamFr: 'complément sans préposition' },
+  bw2: { lo: 2, hi: 3.5, voor: false, naam: 'bepaling zonder voorzetsel', naamFr: 'complément sans préposition' },
+  hier: { lo: 2, hi: 3.5, voor: true, naam: 'plaats', naamFr: 'lieu' },
+  mv: { lo: 2.2, hi: 2.2, voor: false, naam: 'meewerkend voorwerp', naamFr: 'COI' },
+  lo: { lo: 2.6, hi: 2.6, voor: false, naam: 'lijdend voorwerp', naamFr: 'COD' },
+  niet: { lo: 2.9, hi: 2.9, voor: false, naam: 'niet', naamFr: 'niet' },
+  T: { lo: 3, hi: 3, voor: true, naam: 'tijd', naamFr: 'temps' },
+  B: { lo: 4, hi: 4, voor: true, naam: 'begeleiding', naamFr: 'accompagnement' },
+  M: { lo: 5, hi: 5, voor: true, naam: 'manier', naamFr: 'manière' },
+  P: { lo: 6, hi: 6, voor: true, naam: 'plaats', naamFr: 'lieu' },
+  x: { lo: 8, hi: 8, voor: false, naam: 'werkwoordgroep', naamFr: 'groupe verbal' },
+  s: { lo: 9, hi: 9, voor: false, naam: '2de deel van de werkwoordgroep', naamFr: '2e partie du groupe verbal' },
 } as const
 type Zone = keyof typeof ZONES
 
 function bep(t: string, z: Zone): Deel {
   const k = ZONES[z]
   const naar = z === 'P' && /^naar\b/.test(t)
-  return { t, rol: z === 's' ? 'slot' : 'bep', lo: k.lo, hi: k.hi, voor: k.voor && !naar, naam: k.naam }
+  return { t, rol: z === 's' ? 'slot' : 'bep', lo: k.lo, hi: k.hi, voor: k.voor && !naar, naam: k.naam, naamFr: k.naamFr }
 }
-const ond = (t: string): Deel => ({ t, rol: 'ond', lo: 0, hi: 0, voor: false, naam: 'onderwerp' })
-const pv = (t: string): Deel => ({ t, rol: 'pv', lo: 0, hi: 0, voor: false, naam: 'persoonsvorm' })
-const vw = (t: string): Deel => ({ t, rol: 'vw', lo: 0, hi: 0, voor: false, naam: 'vraagwoord' })
+const ond = (t: string): Deel => ({ t, rol: 'ond', lo: 0, hi: 0, voor: false, naam: 'onderwerp', naamFr: 'sujet' })
+const pv = (t: string): Deel => ({ t, rol: 'pv', lo: 0, hi: 0, voor: false, naam: 'persoonsvorm', naamFr: 'verbe conjugué' })
+const vw = (t: string): Deel => ({ t, rol: 'vw', lo: 0, hi: 0, voor: false, naam: 'vraagwoord', naamFr: 'mot interrogatif' })
 
 /** « ik=o / ontmoet=p / Jan=lv / morgen=t / op school=P » ; « ^ » devant le zinsdeel imposé en tête. */
 export function lees(notatie: string, vraag = false, fr?: string): Zin {
@@ -90,8 +91,15 @@ export function lees(notatie: string, vraag = false, fr?: string): Zin {
 }
 
 // ------------------------------------------------------------ juste ou pas ?
-export interface Oordeel { juist: boolean; waarom: string }
+/** une explication, en néerlandais (comme le cours) et en français */
+export interface Tweetalig { nl: string; fr: string }
+const tw = (nl: string, fr: string): Tweetalig => ({ nl, fr })
+/** deux explications à la suite */
+const en = (a: Tweetalig, b: Tweetalig): Tweetalig => tw(`${a.nl} ${b.nl}`.trim(), `${a.fr} ${b.fr}`.trim())
+const LEEG = tw('', '')
+export interface Oordeel { juist: boolean; waarom: Tweetalig }
 const q = (d: Deel) => `« ${d.t} »`
+const fout = (nl: string, fr: string): Oordeel => ({ juist: false, waarom: tw(nl, fr) })
 
 /** Le milieu de la phrase : aucun zinsdeel devant un autre qui doit le précéder. */
 function midden(rest: Deel[]): Oordeel {
@@ -99,17 +107,20 @@ function midden(rest: Deel[]): Oordeel {
     const a = rest[i], b = rest[j]
     if (a.lo <= b.hi) continue
     if (a.rol === 'ond' || a.rol === 'pv' || b.rol === 'ond' || b.rol === 'pv' || a.rol === 'vw' || b.rol === 'vw')
-      return { juist: false, waarom: 'De persoonsvorm en het onderwerp staan vooraan.' }
-    if (a.rol === 'slot') return { juist: false, waarom: `Het 2de deel van de werkwoordgroep (${q(a)}) staat helemaal achteraan.` }
-    if (b.rol === 'slot') return { juist: false, waarom: `Het 2de deel van de werkwoordgroep (${q(b)}) staat helemaal achteraan.` }
-    if (b.lo === 8) return { juist: false, waarom: `${hoofd(q(b))} hoort bij het werkwoord: het staat achteraan.` }
-    if (b.naam === 'voornaamwoord') return { juist: false, waarom: `Voornaamwoorden zoals ${q(b)} staan vlak na de PV en het onderwerp.` }
-    if (a.lo >= 3 && b.hi < 3) return { juist: false, waarom: `Bepalingen zonder voorzetsel (${q(b)}) komen vóór bepalingen met voorzetsel (${q(a)}).` }
-    if (a.lo >= 3 && b.lo >= 3) return { juist: false, waarom: `TeMPo: tijd – (begeleiding) – manier – plaats. ${hoofd(q(b))} (${b.naam}) komt vóór ${q(a)} (${a.naam}).` }
-    if (b.naam === 'meewerkend voorwerp') return { juist: false, waarom: `Het meewerkend voorwerp (${q(b)}) komt vóór het lijdend voorwerp (${q(a)}).` }
-    return { juist: false, waarom: `${hoofd(q(b))} komt vóór ${q(a)}.` }
+      return fout('De persoonsvorm en het onderwerp staan vooraan.', 'Le verbe conjugué (PV) et le sujet sont au début de la phrase.')
+    if (a.rol === 'slot') return fout(`Het 2de deel van de werkwoordgroep (${q(a)}) staat helemaal achteraan.`, `La 2e partie du groupe verbal (${q(a)}) se met tout à la fin.`)
+    if (b.rol === 'slot') return fout(`Het 2de deel van de werkwoordgroep (${q(b)}) staat helemaal achteraan.`, `La 2e partie du groupe verbal (${q(b)}) se met tout à la fin.`)
+    if (b.lo === 8) return fout(`${hoofd(q(b))} hoort bij het werkwoord: het staat achteraan.`, `${hoofd(q(b))} va avec le verbe : il se met à la fin.`)
+    if (b.naam === 'voornaamwoord') return fout(`Voornaamwoorden zoals ${q(b)} staan vlak na de PV en het onderwerp.`, `Les pronoms comme ${q(b)} se mettent juste après le verbe conjugué et le sujet.`)
+    if (a.lo >= 3 && b.hi < 3) return fout(`Bepalingen zonder voorzetsel (${q(b)}) komen vóór bepalingen met voorzetsel (${q(a)}).`,
+      `Les compléments sans préposition (${q(b)}) viennent avant les compléments avec préposition (${q(a)}).`)
+    if (a.lo >= 3 && b.lo >= 3) return fout(`TeMPo: tijd – (begeleiding) – manier – plaats. ${hoofd(q(b))} (${b.naam}) komt vóór ${q(a)} (${a.naam}).`,
+      `TeMPo : temps – (accompagnement) – manière – lieu. ${hoofd(q(b))} (${b.naamFr}) vient avant ${q(a)} (${a.naamFr}).`)
+    if (b.naam === 'meewerkend voorwerp') return fout(`Het meewerkend voorwerp (${q(b)}) komt vóór het lijdend voorwerp (${q(a)}).`,
+      `Le COI (${q(b)}) vient avant le COD (${q(a)}).`)
+    return fout(`${hoofd(q(b))} komt vóór ${q(a)}.`, `${hoofd(q(b))} vient avant ${q(a)}.`)
   }
-  return { juist: true, waarom: '' }
+  return { juist: true, waarom: LEEG }
 }
 
 /** L'ordre choisi (les indices des zinsdelen) est-il juste ? Avec la règle du cours qui ne l'est pas. */
@@ -117,32 +128,39 @@ export function controleer(z: Zin, volgorde: number[]): Oordeel {
   const d = volgorde.map(i => z.delen[i])
   const pvd = z.delen.find(x => x.rol === 'pv')!, ondd = z.delen.find(x => x.rol === 'ond')!
   const vwd = z.delen.find(x => x.rol === 'vw')
-  if (z.begin !== undefined && volgorde[0] !== z.begin) return { juist: false, waarom: `Begin de zin met ${q(z.delen[z.begin])}.` }
+  if (z.begin !== undefined && volgorde[0] !== z.begin) return fout(`Begin de zin met ${q(z.delen[z.begin])}.`, `Commence la phrase par ${q(z.delen[z.begin])}.`)
   if (vwd) {
-    if (d[0] !== vwd) return { juist: false, waarom: `Een vraag met een vraagwoord begint met het vraagwoord (${q(vwd)}).` }
-    if (d[1] !== pvd || d[2] !== ondd) return { juist: false, waarom: `Na het vraagwoord: eerst de PV, dan het onderwerp (${q(pvd)} + ${q(ondd)}).` }
+    if (d[0] !== vwd) return fout(`Een vraag met een vraagwoord begint met het vraagwoord (${q(vwd)}).`, `Une question avec un mot interrogatif commence par ce mot (${q(vwd)}).`)
+    if (d[1] !== pvd || d[2] !== ondd) return fout(`Na het vraagwoord: eerst de PV, dan het onderwerp (${q(pvd)} + ${q(ondd)}).`,
+      `Après le mot interrogatif : d’abord le verbe conjugué, puis le sujet (${q(pvd)} + ${q(ondd)}).`)
     return midden(d.slice(3))
   }
   if (z.vraag) {
-    if (d[0] !== pvd || d[1] !== ondd) return { juist: false, waarom: `Een ja-neevraag begint met de PV, dan het onderwerp: ${hoofd(pvd.t)} ${ondd.t} …?` }
+    if (d[0] !== pvd || d[1] !== ondd) return fout(`Een ja-neevraag begint met de PV, dan het onderwerp: ${hoofd(pvd.t)} ${ondd.t} …?`,
+      `Une question oui/non commence par le verbe conjugué, puis le sujet : ${hoofd(pvd.t)} ${ondd.t} … ?`)
     return midden(d.slice(2))
   }
-  if (d[0] === pvd) return { juist: false, waarom: `Dit is geen vraag: de PV (${q(pvd)}) staat op de tweede plaats.` }
+  if (d[0] === pvd) return fout(`Dit is geen vraag: de PV (${q(pvd)}) staat op de tweede plaats.`, `Ce n’est pas une question : le verbe conjugué (${q(pvd)}) est en 2e place.`)
   if (d[0] === ondd) {
-    if (d[1] !== pvd) return { juist: false, waarom: `De PV (${q(pvd)}) staat altijd op de tweede plaats, meteen na het onderwerp.` }
+    if (d[1] !== pvd) return fout(`De PV (${q(pvd)}) staat altijd op de tweede plaats, meteen na het onderwerp.`,
+      `Le verbe conjugué (${q(pvd)}) est toujours en 2e place, juste après le sujet.`)
     return midden(d.slice(2))
   }
   const eerste = d[0]
   if (d[1] !== pvd) {
-    if (d[1] === ondd) return { juist: false, waarom: `Je begint met ${q(eerste)}: dan inversie! Eerst de PV, dan het onderwerp: ${q(eerste)} ${pvd.t} ${ondd.t} …` }
-    return { juist: false, waarom: `Maximaal één bepaling vóór de PV: de PV (${q(pvd)}) staat altijd op de tweede plaats.` }
+    if (d[1] === ondd) return fout(`Je begint met ${q(eerste)}: dan inversie! Eerst de PV, dan het onderwerp: ${q(eerste)} ${pvd.t} ${ondd.t} …`,
+      `Tu commences par ${q(eerste)} : alors inversion ! D’abord le verbe conjugué, puis le sujet : ${q(eerste)} ${pvd.t} ${ondd.t} …`)
+    return fout(`Maximaal één bepaling vóór de PV: de PV (${q(pvd)}) staat altijd op de tweede plaats.`,
+      `Un seul complément maximum avant le verbe conjugué : le verbe conjugué (${q(pvd)}) est toujours en 2e place.`)
   }
   if (!eerste.voor) {
-    if (/^naar\b/.test(eerste.t)) return { juist: false, waarom: `Een bepaling van plaats met « naar » staat nooit op de eerste plaats.` }
-    if (eerste.rol === 'slot') return { juist: false, waarom: `Het 2de deel van de werkwoordgroep (${q(eerste)}) staat achteraan, niet vooraan.` }
-    return { juist: false, waarom: `Begin met het onderwerp, of met één bepaling van tijd, plaats, manier of begeleiding — niet met ${q(eerste)}.` }
+    if (/^naar\b/.test(eerste.t)) return fout('Een bepaling van plaats met « naar » staat nooit op de eerste plaats.', 'Un complément de lieu avec « naar » ne se met jamais en première place.')
+    if (eerste.rol === 'slot') return fout(`Het 2de deel van de werkwoordgroep (${q(eerste)}) staat achteraan, niet vooraan.`, `La 2e partie du groupe verbal (${q(eerste)}) se met à la fin, pas au début.`)
+    return fout(`Begin met het onderwerp, of met één bepaling van tijd, plaats, manier of begeleiding — niet met ${q(eerste)}.`,
+      `Commence par le sujet, ou par un complément de temps, de lieu, de manière ou d’accompagnement — pas par ${q(eerste)}.`)
   }
-  if (d[2] !== ondd) return { juist: false, waarom: `Je begint met ${q(eerste)}: inversie! Na de PV komt meteen het onderwerp (${q(ondd)}).` }
+  if (d[2] !== ondd) return fout(`Je begint met ${q(eerste)}: inversie! Na de PV komt meteen het onderwerp (${q(ondd)}).`,
+    `Tu commences par ${q(eerste)} : inversion ! Après le verbe conjugué vient tout de suite le sujet (${q(ondd)}).`)
   return midden(d.slice(3))
 }
 
@@ -329,13 +347,16 @@ function verzin(h: Hasard, opties: { scheidbaar?: boolean; modal?: boolean; vraa
 
 // ------------------------------------------------------------ les questions
 export type QuestionWv =
-  | { soort: 'puzzel'; zin: Zin; schud: number[]; boven?: string; astuce: string; uitleg: string }
-  | { soort: 'keuze'; zin?: Zin; volgorde?: number[]; vraag: string; options: string[]; bonne: string; uitleg: string; longues?: boolean }
+  | { soort: 'puzzel'; zin: Zin; schud: number[]; boven?: string; astuce: string; uitleg: Tweetalig }
+  | { soort: 'keuze'; zin?: Zin; volgorde?: number[]; vraag: string; options: string[]; bonne: string; uitleg: Tweetalig; longues?: boolean }
 
-const UITLEG_SCHEMA = 'Onderwerp + PV + bepalingen zonder voorzetsel + bepalingen met voorzetsel (TeMPo) + 2de deel van de werkwoordgroep.'
-const UITLEG_INVERSIE = 'Begin je met een bepaling, dan doe je een inversie: de PV blijft op de tweede plaats, het onderwerp komt erna. Geen komma!'
+const UITLEG_SCHEMA = tw('Onderwerp + PV + bepalingen zonder voorzetsel + bepalingen met voorzetsel (TeMPo) + 2de deel van de werkwoordgroep.',
+  'Sujet + verbe conjugué + compléments sans préposition + compléments avec préposition (TeMPo) + 2e partie du groupe verbal.')
+const UITLEG_INVERSIE = tw('Begin je met een bepaling, dan doe je een inversie: de PV blijft op de tweede plaats, het onderwerp komt erna. Geen komma!',
+  'Si tu commences par un complément, tu fais une inversion : le verbe conjugué reste en 2e place, le sujet vient après. Pas de virgule !')
+const UITLEG_TEMPO = tw('TeMPo: Tijd – Manier – Plaats (begeleiding vóór manier).', 'TeMPo : Temps – Manière – Lieu (l’accompagnement avant la manière).')
 
-function puzzel(zin: Zin, h: Hasard, astuce: string, uitleg: string, boven?: string): QuestionWv {
+function puzzel(zin: Zin, h: Hasard, astuce: string, uitleg: Tweetalig, boven?: string): QuestionWv {
   return { soort: 'puzzel', zin, schud: schudden(zin, h), boven, astuce, uitleg }
 }
 
@@ -354,11 +375,14 @@ function pvOnd(z: Zin, volgorde: number[], h: Hasard): QuestionWv {
   const options = melange([juist.t, ...[...new Set(anderen.map(d => d.t))].filter(t => t !== juist.t).slice(0, 3)], h)
   const pvd = z.delen.find(d => d.rol === 'pv')!, ondd = z.delen.find(d => d.rol === 'ond')!
   const eerste = z.delen[volgorde[0]]
-  const inversie = !z.vraag && eerste.rol === 'bep' ? ` De zin begint met « ${eerste.t} »: inversie, het onderwerp staat na de PV.` : ''
+  const inversie = !z.vraag && eerste.rol === 'bep'
+    ? tw(`De zin begint met « ${eerste.t} »: inversie, het onderwerp staat na de PV.`, `La phrase commence par « ${eerste.t} » : inversion, le sujet est après le verbe conjugué.`) : LEEG
   const slot = z.delen.find(d => d.rol === 'slot')
   const uitleg = zoek === 'pv'
-    ? `Maak er een ja-neevraag van: « ${janee(z)} » De PV is het eerste woord: ${pvd.t}.${slot ? ` « ${slot.t} » is geen PV: het is het 2de deel van de werkwoordgroep.` : ''}`
-    : `Vraag « wie of wat ${pvd.t} …? » → ${ondd.t}.${inversie}`
+    ? en(tw(`Maak er een ja-neevraag van: « ${janee(z)} » De PV is het eerste woord: ${pvd.t}.`,
+        `Fais-en une question oui/non : « ${janee(z)} » Le verbe conjugué (PV) est le premier mot : ${pvd.t}.`),
+      slot ? tw(`« ${slot.t} » is geen PV: het is het 2de deel van de werkwoordgroep.`, `« ${slot.t} » n’est pas le verbe conjugué : c’est la 2e partie du groupe verbal.`) : LEEG)
+    : en(tw(`Vraag « wie of wat ${pvd.t} …? » → ${ondd.t}.`, `Demande « qui ou quoi ${pvd.t} … ? » → ${ondd.t}.`), inversie)
   return { soort: 'keuze', zin: z, volgorde, vraag: zoek === 'pv' ? 'Wat is de persoonsvorm (PV)?' : 'Wat is het onderwerp?', options, bonne: juist.t, uitleg }
 }
 
@@ -387,7 +411,7 @@ function kaartTempo(h: Hasard): QuestionWv {
   for (;;) {
     const z = bouw(verzin(h, { tempo: true, min: 5 }))
     if (z.delen.filter(d => d.lo >= 3 && d.lo <= 6).length < 2) continue
-    return puzzel(z, h, 'Zet de zinsdelen in de goede volgorde.', `TeMPo: Tijd – Manier – Plaats (begeleiding vóór manier). ${UITLEG_SCHEMA}`)
+    return puzzel(z, h, 'Zet de zinsdelen in de goede volgorde.', en(UITLEG_TEMPO, UITLEG_SCHEMA))
   }
 }
 
@@ -397,7 +421,11 @@ function kaartWerkwoordgroep(h: Hasard): QuestionWv {
   const z = bouw(s)
   const slot = z.delen.find(d => d.rol === 'slot')!
   return puzzel(z, h, 'Zet de zinsdelen in de goede volgorde.',
-    `${scheidbaar ? `« ${s.act.inf} » is een scheidbaar werkwoord: het deel « ${slot.t} »` : `De infinitief « ${slot.t} »`} is het 2de deel van de werkwoordgroep: helemaal achteraan.`)
+    scheidbaar
+      ? tw(`« ${s.act.inf} » is een scheidbaar werkwoord: het deel « ${slot.t} » is het 2de deel van de werkwoordgroep: helemaal achteraan.`,
+        `« ${s.act.inf} » est un verbe à particule séparable : « ${slot.t} » est la 2e partie du groupe verbal, tout à la fin.`)
+      : tw(`De infinitief « ${slot.t} » is het 2de deel van de werkwoordgroep: helemaal achteraan.`,
+        `L’infinitif « ${slot.t} » est la 2e partie du groupe verbal : tout à la fin.`))
 }
 
 function kaartVragen(h: Hasard): QuestionWv {
@@ -411,10 +439,10 @@ function kaartVragen(h: Hasard): QuestionWv {
     s.vraag = un(mogelijk, h)
     const z = bouw(s)
     if (z.delen.length < 4) continue
-    const je = s.o.nl === 'je' ? ' Met « je » na de PV valt de t weg: ga je, kom je.' : ''
-    const uitleg = s.vraag === 'janee'
-      ? `Een ja-neevraag begint met de PV, dan komt het onderwerp.${je}`
-      : `Een vraagwoord (« ${s.vraag} ») staat vooraan, dan de PV, dan het onderwerp.${je}`
+    const je = s.o.nl === 'je' ? tw('Met « je » na de PV valt de t weg: ga je, kom je.', 'Avec « je » après le verbe conjugué, le t tombe : ga je, kom je.') : LEEG
+    const uitleg = en(s.vraag === 'janee'
+      ? tw('Een ja-neevraag begint met de PV, dan komt het onderwerp.', 'Une question oui/non commence par le verbe conjugué, puis vient le sujet.')
+      : tw(`Een vraagwoord (« ${s.vraag} ») staat vooraan, dan de PV, dan het onderwerp.`, `Le mot interrogatif (« ${s.vraag} ») est en tête, puis le verbe conjugué, puis le sujet.`), je)
     return puzzel(z, h, 'Maak een vraag: zet de zinsdelen in de goede volgorde.', uitleg)
   }
 }
@@ -437,7 +465,7 @@ function kaartVertalen(h: Hasard): QuestionWv {
   const s = k < .2 ? verzin(h, { vraag: true }) : verzin(h, { modal: k < .4, scheidbaar: k > .85 })
   if (k < .2) s.vraag = 'janee'
   const z = bouw(s)
-  return puzzel(z, h, 'Vertaal: zet de zinsdelen in de goede volgorde.', s.vraag ? 'Een ja-neevraag: PV + onderwerp + de rest.' : `${UITLEG_SCHEMA} ${UITLEG_INVERSIE}`, z.fr)
+  return puzzel(z, h, 'Vertaal: zet de zinsdelen in de goede volgorde.', s.vraag ? tw('Een ja-neevraag: PV + onderwerp + de rest.', 'Une question oui/non : verbe conjugué + sujet + le reste.') : en(UITLEG_SCHEMA, UITLEG_INVERSIE), z.fr)
 }
 
 // ------------------------------------------------------------ welke zin is juist ? (les règles p. 32)
@@ -471,19 +499,20 @@ const JANEE: { w: string; b: Deelzin }[] = [
 
 function kaartRegels(h: Hasard): QuestionWv {
   const soort = un(['voegwoord', 'voegwoord', 'janee', 'zinsbouw', 'zinsbouw'] as const, h)
-  let bonne: string, fout: string[], uitleg: string
+  let bonne: string, fouten: string[], uitleg: Tweetalig
   if (soort === 'voegwoord') {
     const { vw: w, a, b } = un(VOEGWOORDEN, h)
     const komma = w === 'want' || w === 'maar' ? ',' : ''
     bonne = `${a}${komma} ${w} ${b.o} ${b.v} ${b.r}.`
-    fout = [`${a}${komma} ${w} ${b.v} ${b.o} ${b.r}.`, `${a}${komma} ${w} ${b.o} ${b.r} ${b.v}.`,
+    fouten = [`${a}${komma} ${w} ${b.v} ${b.o} ${b.r}.`, `${a}${komma} ${w} ${b.o} ${b.r} ${b.v}.`,
       komma ? `${a} ${w} ${b.o} ${b.v} ${b.r}.` : `${a}, ${w} ${b.v} ${b.o} ${b.r}.`]
-    uitleg = `Na « ${w} » is er geen inversie: onderwerp + PV (${w} ${b.o} ${b.v}). Je schrijft een komma vóór « want » en « maar ».`
+    uitleg = tw(`Na « ${w} » is er geen inversie: onderwerp + PV (${w} ${b.o} ${b.v}). Je schrijft een komma vóór « want » en « maar ».`,
+      `Après « ${w} », pas d’inversion : sujet + verbe conjugué (${w} ${b.o} ${b.v}). On met une virgule devant « want » et « maar ».`)
   } else if (soort === 'janee') {
     const { w, b } = un(JANEE, h)
     bonne = `${w}, ${b.o} ${b.v} ${b.r}.`
-    fout = [`${w} ${b.o} ${b.v} ${b.r}.`, `${w}, ${b.v} ${b.o} ${b.r}.`, `${w} ${b.v} ${b.o} ${b.r}.`]
-    uitleg = `Na « ja » en « neen » schrijf je een komma, en er is geen inversie: ${bonne}`
+    fouten = [`${w} ${b.o} ${b.v} ${b.r}.`, `${w}, ${b.v} ${b.o} ${b.r}.`, `${w} ${b.v} ${b.o} ${b.r}.`]
+    uitleg = tw(`Na « ja » en « neen » schrijf je een komma, en er is geen inversie: ${bonne}`, `Après « ja » et « neen », on met une virgule, et pas d’inversion : ${bonne}`)
   } else {
     // une phrase avec une bepaling de temps et « naar … »
     let s: Spec
@@ -495,15 +524,16 @@ function kaartRegels(h: Hasard): QuestionWv {
     const rest = (zonder: string[]) => [m, p].filter(x => x && !zonder.includes(x)).join(' ')
     const zin = (x: string) => hoofd(x.replace(/\s+/g, ' ').trim()) + '.'
     bonne = h() < .5 ? zin(`${t} ${d('pv')} ${d('ond')} ${rest([])}`) : zin(`${d('ond')} ${d('pv')} ${t} ${rest([])}`)
-    fout = melange([
+    fouten = melange([
       zin(`${p} ${d('pv')} ${d('ond')} ${t} ${rest([p])}`),
       zin(`${t} ${p} ${d('pv')} ${d('ond')} ${rest([p])}`),
       zin(`${t} ${d('ond')} ${d('pv')} ${rest([])}`),
       zin(`${t}, ${d('pv')} ${d('ond')} ${rest([])}`),
     ], h).slice(0, 3)
-    uitleg = `Na één bepaling vooraan: inversie (PV + onderwerp), zonder komma. Maximaal één bepaling vóór de PV, en een bepaling met « naar » staat nooit vooraan.`
+    uitleg = tw('Na één bepaling vooraan: inversie (PV + onderwerp), zonder komma. Maximaal één bepaling vóór de PV, en een bepaling met « naar » staat nooit vooraan.',
+      'Après un complément en tête : inversion (verbe conjugué + sujet), sans virgule. Un seul complément maximum avant le verbe conjugué, et un complément avec « naar » n’est jamais en tête.')
   }
-  return { soort: 'keuze', vraag: 'Welke zin is juist?', options: melange([...new Set([bonne, ...fout])], h), bonne, uitleg, longues: true }
+  return { soort: 'keuze', vraag: 'Welke zin is juist?', options: melange([...new Set([bonne, ...fouten])], h), bonne, uitleg, longues: true }
 }
 
 // ------------------------------------------------------------ les phrases du cours
@@ -559,7 +589,10 @@ function kaartBoek(h: Hasard): QuestionWv {
   const astuce = b.boven && b.bron === 'oefening II' ? 'Vertaal: zet de zinsdelen in de goede volgorde.'
     : b.boven ? 'Vul de zin aan met de bepalingen tussen haakjes.'
     : z.begin !== undefined ? `Begin de zin met « ${z.delen[z.begin].t} ».` : 'Zet de zinsdelen in de goede volgorde.'
-  return puzzel(z, h, astuce, `${z.vraag ? 'Een vraag: PV + onderwerp (na een vraagwoord: vraagwoord + PV + onderwerp).' : `${UITLEG_SCHEMA} ${UITLEG_INVERSIE}`} (Grammatica Oefenboek, ${b.bron})`, b.boven)
+  const uitleg = z.vraag
+    ? tw('Een vraag: PV + onderwerp (na een vraagwoord: vraagwoord + PV + onderwerp).', 'Une question : verbe conjugué + sujet (avec un mot interrogatif : mot interrogatif + verbe conjugué + sujet).')
+    : en(UITLEG_SCHEMA, UITLEG_INVERSIE)
+  return puzzel(z, h, astuce, en(uitleg, tw(`(Grammatica Oefenboek, ${b.bron})`, '')), b.boven)
 }
 
 export const WOORDVOLGORDE = [
