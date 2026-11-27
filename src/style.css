@@ -974,3 +974,8 @@ canvas.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; point
 /* l'explication en français, sous le néerlandais */
 .uitleg-fr { font-style: italic; opacity: .85; }
 .wv-punt.wacht { color: var(--muted); margin-left: 0; }
+/* « Begin de zin met … » : la consigne en grand, et le morceau par lequel commencer entouré en orange */
+.wv-opdracht { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 1.15rem; color: var(--fg); }
+.wv-opdracht strong { color: var(--accent); }
+.wv-opdracht .uitleg-fr { font-size: .95rem; }
+.wv-pool .wv-stuk.wv-begin { border-color: var(--accent); background: var(--accent-bg, var(--panel)); }

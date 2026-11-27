@@ -171,6 +171,8 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
   const [oordeel, setOordeel] = useState<Oordeel | null>(null)
   const [opgegeven, setOpgegeven] = useState(false)
   const over = q.schud.filter(i => !gekozen.includes(i))
+  /** le zinsdeel imposé en tête (« Begin de zin met … ») */
+  const begin = zin.begin !== undefined ? zin.delen[zin.begin].t : undefined
   const vol = gekozen.length === zin.delen.length
   const juist = !!oordeel?.juist
   // la solution montrée : celle qui commence comme la réponse, si ce début est possible
@@ -216,8 +218,15 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
       <div class="carte">
         <Langue l="nl" />
         {q.boven && <p class="astuce boven">{q.boven}</p>}
+        {/* « Begin de zin met … » : en grand, en néerlandais et en français, pour ne pas la manquer */}
+        {begin && (
+          <p class="wv-opdracht">
+            <span lang="nl">Begin de zin met <strong>« {begin} »</strong></span>
+            <span lang="fr" class="uitleg-fr">Commence la phrase par « {begin} »</span>
+          </p>
+        )}
         <div class={`wv-zin ${oordeel ? (juist ? 'juste' : 'faux') : ''}`} aria-label="Ta phrase">
-          {gekozen.length === 0 && !oordeel && <span class="wv-leeg">{zin.vraag ? 'Une question : touche' : 'Touche'} les morceaux dans le bon ordre</span>}
+          {gekozen.length === 0 && !oordeel && <span class="wv-leeg">{begin ? `Touche d’abord « ${begin} »` : `${zin.vraag ? 'Une question : touche' : 'Touche'} les morceaux dans le bon ordre`}</span>}
           {opgegeven && gekozen.length === 0 && <span class="wv-leeg">—</span>}
           {gekozen.map((i, k) => (
             <button class="wv-stuk" onClick={() => terug(i)} disabled={!!oordeel} title="Enlever">
@@ -227,12 +236,12 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
           {/* le point ou le « ? » dès le départ : on sait si c'est une question */}
           <span class={`wv-punt ${vol ? '' : 'wacht'}`} title={zin.vraag ? 'Une question' : undefined}>{zin.vraag ? '?' : '.'}</span>
         </div>
-        <p class="astuce">{q.astuce}</p>
+        {!begin && <p class="astuce">{q.astuce}</p>}
       </div>
       {!oordeel && (
         <div class="wv-pool">
           {over.map((i, k) => (
-            <button class="wv-stuk" onClick={() => kies(i)}><span class="k">{k + 1}</span>{zin.delen[i].t}</button>
+            <button class={`wv-stuk ${i === zin.begin ? 'wv-begin' : ''}`} onClick={() => kies(i)}><span class="k">{k + 1}</span>{zin.delen[i].t}</button>
           ))}
         </div>
       )}
