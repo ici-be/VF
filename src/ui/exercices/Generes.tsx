@@ -132,6 +132,9 @@ function ZinKleur({ zin, volgorde }: { zin: Zin; volgorde: number[] }) {
   )
 }
 
+/** Le temps de lire l'explication (néerlandais et français) avant de passer tout seul à la suite : 3 à 9 secondes. */
+const tempsDeLecture = (t: Tweetalig) => Math.min(9000, Math.max(3000, 1500 + (t.nl.length + t.fr.length) * 25))
+
 /** Une explication en néerlandais, puis en français. */
 function TweeTalen({ t }: { t: Tweetalig }) {
   return <>{t.nl && <span lang="nl">{t.nl}</span>}{t.fr && <span lang="fr" class="uitleg-fr">{t.fr}</span>}</>
@@ -150,7 +153,7 @@ export function Woordvolgorde(props: PropsExercice) {
         {q.zin && <p class="phrase">{repondu ? <ZinKleur zin={q.zin} volgorde={q.volgorde!} /> : zinTekst(q.zin, q.volgorde!)}</p>}
         <p class={q.zin ? 'astuce' : 'mot petit'}>{q.vraag}</p>
       </div>
-      <Choix options={q.options} bonne={q.bonne} mot={carte.mot} pause={pause} lire={sansVoix} suivant={suivant}
+      <Choix options={q.options} bonne={q.bonne} mot={carte.mot} pause={pause} lire={() => attendre(tempsDeLecture(q.uitleg))} suivant={suivant}
         annoncer={r => { setRepondu(r); annoncer(r) }} longues={q.longues} />
       {repondu && <div class="info explication"><b>Uitleg</b><TweeTalen t={q.uitleg} /></div>}
     </>
@@ -185,11 +188,11 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
     annoncer(o.juist ? 'juste' : 'faux')
   }
 
-  // juste : on enchaîne tout seul, après un temps pour voir la phrase en couleurs
+  // juste : on enchaîne tout seul, le temps de lire la phrase en couleurs et l'Uitleg (Entrée ou « Suivant » pour aller plus vite)
   useEffect(() => {
     if (!juist || pause) return
     let annule = false
-    attendre(1800).then(() => { if (!annule) suivant('juste') })
+    attendre(tempsDeLecture(q.uitleg)).then(() => { if (!annule) suivant('juste') })
     return () => { annule = true }
   }, [juist, pause])
 
