@@ -1,3 +1,4 @@
+import { BRONNEN_KAARTEN } from '../src/lib/bronnen'
 import { describe, expect, it } from 'vitest'
 import { CALCULS, NATURES, TIJDVAKKEN, eeuw, eeuwVan, jarenVan, questionCalcul, questionEeuwen, questionNature, rangtelwoord, avecExercicesGeneres, type Nature } from '../src/lib/generes'
 import type { Vocabulaire } from '../src/lib/mots'
@@ -52,8 +53,9 @@ describe('Natures des mots', () => {
     const voc: Vocabulaire = { misAJour: 0, matieres: [{ nom: 'HW Geschiedenis', chapitres: ['1'], mots: [] }, { nom: 'Français', chapitres: [], mots: [] }] }
     const v = avecExercicesGeneres(avecExercicesGeneres(voc))
     expect(v.matieres[0].chapitres).toEqual(['1'])
-    expect(v.matieres[0].mots).toHaveLength(TIJDVAKKEN.length)
-    expect(v.matieres[0].mots.every(m => m.genere === 'eeuwen')).toBe(true)
+    expect(v.matieres[0].mots.filter(m => m.genere === 'eeuwen')).toHaveLength(TIJDVAKKEN.length)
+    expect(v.matieres[0].mots.filter(m => m.genere === 'bronnen')).toHaveLength(BRONNEN_KAARTEN.length)
+    expect(v.matieres[0].mots).toHaveLength(TIJDVAKKEN.length + BRONNEN_KAARTEN.length)
     expect(v.matieres[1].mots).toHaveLength(8)
   })
 })

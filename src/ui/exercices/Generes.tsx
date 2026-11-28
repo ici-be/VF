@@ -4,6 +4,7 @@ import { cleDe, questionCalcul, questionEeuwen, questionNature, type Nature } fr
 import { questionAimer, type QuestionAimer } from '../../lib/aimer'
 import { questionVoornaamwoord } from '../../lib/voornaamwoorden'
 import { controleer, oplossing, questionWoordvolgorde, zinTekst, type Oordeel, type Tweetalig, type Zin } from '../../lib/woordvolgorde'
+import { questionBron } from '../../lib/bronnen'
 import type { PropsExercice } from '../Seance'
 import { attendre, Langue } from './commun'
 import { Actions, Choix, Saisie } from './Reponses'
@@ -254,6 +255,94 @@ function Puzzel({ pause, suivant, annoncer, q }: PropsExercice & { q: Puzzelvraa
       )}
       {oordeel && <div class="info explication"><b>Uitleg</b><span><ZinKleur zin={zin} volgorde={goed} /></span><TweeTalen t={q.uitleg} /></div>}
       <Actions correction={correction} vide={!vol} valider={valider} />
+    </>
+  )
+}
+
+/** Bronnen (Ad fontes!) : la source, puis deux questions à la suite, comme dans le cours : la sorte de source, puis « Waarom? Leg uit! ».
+ *  Juste aux deux : on passe tout seul, le temps de lire l'Uitleg ; une erreur : la bonne réponse, et on continue quand même. */
+export function Bronnen({ carte, pause, suivant, annoncer }: PropsExercice) {
+  const q = useMemo(() => questionBron(Number(cleDe(carte.mot))), [])
+  const [stap, setStap] = useState(0)
+  /** l'option choisie à chaque étape */
+  const [keuzes, setKeuzes] = useState<number[]>([])
+  const goed = (s: number, k: number) => q.stappen[s].bonnes.includes(q.stappen[s].options[k])
+  const beantwoord = keuzes.length > stap
+  const klaar = keuzes.length === q.stappen.length
+  const allesGoed = klaar && keuzes.every((k, s) => goed(s, k))
+
+  const kies = (k: number) => {
+    if (pause || beantwoord) return
+    const nieuw = [...keuzes, k]
+    setKeuzes(nieuw)
+    if (nieuw.length === q.stappen.length) annoncer(nieuw.every((x, s) => goed(s, x)) ? 'juste' : 'faux')
+  }
+  const verder = () => {
+    if (!beantwoord) return
+    if (klaar) suivant(allesGoed ? 'juste' : 'faux')
+    else setStap(stap + 1)
+  }
+
+  // juste : l'étape suivante après un instant ; à la fin, le temps de lire l'Uitleg
+  useEffect(() => {
+    if (pause || !beantwoord || !goed(stap, keuzes[stap]) || (klaar && !allesGoed)) return
+    let annule = false
+    attendre(klaar ? tempsDeLecture(q.uitleg) : 900).then(() => { if (!annule) verder() })
+    return () => { annule = true }
+  }, [keuzes, stap, pause])
+
+  useEffect(() => {
+    const touche = (e: KeyboardEvent) => {
+      if (pause) return
+      const n = Number(e.key)
+      if (n >= 1 && n <= q.stappen[stap].options.length) kies(n - 1)
+      else if (e.key === 'Enter' && beantwoord) { e.preventDefault(); verder() }
+    }
+    addEventListener('keydown', touche)
+    return () => removeEventListener('keydown', touche)
+  })
+
+  const huidige = q.stappen[stap]
+  const keuze = keuzes[stap]
+  return (
+    <>
+      <div class="carte">
+        <Langue l="nl" />
+        {q.context && <p class="astuce bron-context">📅 <TweeTalen t={q.context} /></p>}
+        <div class="bron-kaart">
+          {q.bron.p && <span class="bron-p">Boek p. {q.bron.p}</span>}
+          <p class="phrase" lang="nl">{q.bron.nl}</p>
+          <p class="uitleg-fr" lang="fr">{q.bron.fr}</p>
+        </div>
+        {/* les étapes déjà faites : ce qu'on a répondu, et la bonne réponse si c'était faux */}
+        {q.stappen.slice(0, stap).map((s, i) => (
+          <p class={`bron-stap ${goed(i, keuzes[i]) ? 'juste' : 'faux'}`}>
+            {goed(i, keuzes[i]) ? '✓' : '✗'} <span class={goed(i, keuzes[i]) ? '' : 'barre'}>{s.options[keuzes[i]]}</span>
+            {!goed(i, keuzes[i]) && <> → <strong>{s.bonnes[0]}</strong></>}
+          </p>
+        ))}
+        <p class="bron-vraag"><span lang="nl">{huidige.vraag.nl}</span><span lang="fr" class="uitleg-fr">{huidige.vraag.fr}</span></p>
+      </div>
+      <div class={`choix ${huidige.options.some(o => o.length > 24) ? 'longues' : ''}`}>
+        {huidige.options.map((o, k) => (
+          <button key={`${stap}-${k}`}
+            class={!beantwoord ? '' : huidige.bonnes.includes(o) ? 'bon' : k === keuze ? 'mauvais' : ''}
+            onClick={() => kies(k)} disabled={beantwoord && !huidige.bonnes.includes(o) && k !== keuze}>
+            <span class="k">{k + 1}</span><span>{o}</span>
+          </button>
+        ))}
+      </div>
+      {!beantwoord && <p class="astuce touches">Touches <kbd>1</kbd> à <kbd>{huidige.options.length}</kbd></p>}
+      {klaar && (
+        <div class={`verdict ${allesGoed ? 'juste' : 'faux'}`} role="status">
+          <b>{allesGoed ? 'Juste !' : 'Raté'}</b>
+          {!allesGoed && <span>{keuzes.filter((k, s) => goed(s, k)).length} / {q.stappen.length} : la sorte de source et la justification doivent être justes.</span>}
+        </div>
+      )}
+      {klaar && <div class="info explication"><b>Uitleg</b><TweeTalen t={q.uitleg} /></div>}
+      {beantwoord && (!goed(stap, keuze) || klaar) && (
+        <button class="go" autoFocus onClick={verder}>{klaar ? 'Suivant ⏎' : 'Waarom? ⏎'}</button>
+      )}
     </>
   )
 }

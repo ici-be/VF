@@ -6,12 +6,14 @@
 // - Natures des mots (Français) : dans une phrase, la nature du mot mis en évidence ;
 // - Voornaamwoorden (Nederlands) : la phrase à compléter par le bon voornaamwoord (src/lib/voornaamwoorden.ts) ;
 // - Aimer (Nederlands) : traduire « aimer » : houden van, lusten, graag, liever (src/lib/aimer.ts) ;
-// - Woordvolgorde (Nederlands) : remettre les zinsdelen dans l'ordre, PV et onderwerp, règles (src/lib/woordvolgorde.ts).
+// - Woordvolgorde (Nederlands) : remettre les zinsdelen dans l'ordre, PV et onderwerp, règles (src/lib/woordvolgorde.ts) ;
+// - Bronnen (Geschiedenis, « Ad fontes! ») : la sorte de source, puis la justification (src/lib/bronnen.ts).
 import donneesNatures from '../data/natures.json'
 import type { Matiere, Mot, Vocabulaire } from './mots'
 import { AIMER } from './aimer'
 import { VOORNAAMWOORDEN } from './voornaamwoorden'
 import { WOORDVOLGORDE } from './woordvolgorde'
+import { BRONNEN_KAARTEN } from './bronnen'
 
 type Hasard = () => number
 const entre = (a: number, b: number, h: Hasard) => a + Math.floor(h() * (b - a + 1))
@@ -309,6 +311,8 @@ const CHAPITRES = [
     cartes: AIMER.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
   { matiere: /^nederlands$/i, chapitre: 'Woordvolgorde (oefening)', genere: 'woordvolgorde' as const,
     cartes: WOORDVOLGORDE.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
+  { matiere: /geschiedenis|histoire/i, chapitre: 'Ad fontes! (oefening)', genere: 'bronnen' as const,
+    cartes: BRONNEN_KAARTEN.map((v, i) => ({ cle: String(i), nl: v.nl, fr: v.fr })) },
 ]
 /** La notion d'une carte fabriquée (l'indice du tijdvak ou du calcul, la nature). */
 export const cleDe = (m: Mot) => m.id.split('|').pop()!

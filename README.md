@@ -130,6 +130,11 @@ n'apparaît que si elle est choisie :
   jamais en tête, 2de deel achteraan). Neuf cartes : PV et onderwerp, inversie, TeMPo, werkwoordgroep, vragen,
   aanvullen (exercice I), vertalen (exercice II), welke zin is juist? (want, maar, ja, neen) et les phrases du livre
   (p. 31-36) ; `src/lib/woordvolgorde.ts`.
+- **Bronnen** (Geschiedenis, ch. 2 « Ad fontes! », p. 39-53) : une source à classer, puis la justification à choisir
+  (« Waarom? Leg uit! ») ; il faut les deux justes. Huit cartes : geschreven of ongeschreven, publiek of privé, officieel
+  of niet-officieel, welke ongeschreven bron (archeologisch, beeld, iconografisch, audiovisueel, mondeling), « wees
+  volledig », primair / secundair / historisch werk (sources du cours, puis sources aux dates toujours nouvelles) et les
+  sources du livre telles que corrigées dans le cahier ; `src/lib/bronnen.ts`.
 
 ## Vérifier et nettoyer le tableau
 
